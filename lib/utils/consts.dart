@@ -1,0 +1,1 @@
+const String fatalError = "Oops, something went wrong. Please try again later.";
