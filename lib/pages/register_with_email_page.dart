@@ -146,7 +146,7 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                 decoration: InputDecoration(
                                   labelText: 'Name',
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
+                                    borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
                                 validator: (value) =>
@@ -161,7 +161,7 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                 decoration: InputDecoration(
                                   labelText: 'Email',
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
+                                    borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
                                 validator: (value) {
@@ -176,13 +176,14 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
+                                onFieldSubmitted: (value) => handleSubmit(context),
                                 enabled: !_isLoading,
                                 controller: _passwordController,
                                 obscureText: _hidePassword,
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
+                                    borderRadius: BorderRadius.circular(99.0),
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
