@@ -1,4 +1,3 @@
-import 'package:factual/pages/login_with_email_page.dart';
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,14 +40,9 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      
-      if (!context.mounted) return;
 
-      _formKey.currentState!.reset();
-      _nameController.clear();
-      _emailController.clear();
-      _passwordController.clear();
-      _hidePassword = true;
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -73,15 +67,16 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _hidePassword = true;
+        });
       }
     }
   }
 
   void handleRedirectLogin(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginWithEmail()),
-    );
+    Navigator.of(context).pop();
   }
 
   @override
@@ -231,7 +226,6 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              const BackButton(),
                             ],
                           ),
                         ),

@@ -10,55 +10,31 @@ class AuthService {
 
   User? get currentUser => _auth.currentUser;
 
-  // Future<void> signUpWithEmail({
-  //   required String name,
-  //   required String email,
-  //   required String password,
-  // }) async {
-  //   try {
-  //     UserCredential userCredential = await _auth
-  //         .createUserWithEmailAndPassword(email: email, password: password);
-  //     final uid = userCredential.user?.uid;
-
-  //     if (uid == null) throw Exception('User UID is null');
-
-  //     await _firestore.collection('users').doc(uid).set({
-  //       'name': name,
-  //       'email': email,
-  //       'createdAt': FieldValue.serverTimestamp(),
-  //     });
-  //   } on FirebaseAuthException catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
-  Future<User?> signUpWithEmail({
+  Future<void> signUpWithEmail({
     required String name,
     required String email,
     required String password,
   }) async {
-    final UserCredential cred = await _auth.createUserWithEmailAndPassword(
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+    final uid = userCredential.user?.uid;
 
-    await cred.user!.updateDisplayName(name);
-    await cred.user!.reload();
-    return cred.user;
+    if (uid == null) throw Exception('User UID is null');
+
+    await _firestore.collection('users').doc(uid).set({
+      'name': name,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
   Future<void> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    try {
-      print('AuthService: Attempting to sign in with email');
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      print('AuthService: Sign in successful');
-    } on FirebaseAuthException {
-      print('AuthService: Sign in failed');
-      rethrow;
-    }
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   Future<void> signOut() async {

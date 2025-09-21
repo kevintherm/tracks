@@ -20,13 +20,12 @@ class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
     });
   }
 
-  void handleRegisterEmail(context) {
-    Navigator.of(context).pushAndRemoveUntil(
+  void handleRegisterEmail() {
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) =>
             _isRegister ? RegisterWithEmailPage() : LoginWithEmail(),
       ),
-      (route) => false,  // Remove all previous routes
     );
   }
 
@@ -95,7 +94,7 @@ class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
                       Expanded(
                         child: Card(
                           child: InkWell(
-                            onTap: () => handleRegisterEmail(context),
+                            onTap: () => handleRegisterEmail(),
                             borderRadius: BorderRadius.circular(8.0),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -180,8 +179,6 @@ class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
                   ),
 
                   const SizedBox(height: 16),
-
-                  BackButton(),
                 ],
               ),
             ),

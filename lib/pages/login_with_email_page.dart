@@ -91,9 +91,8 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
   }
 
   void handleRedirectRegister(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => RegisterWithEmailPage()),
-      (route) => false, // Remove all previous routes
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RegisterWithEmailPage()),
     );
   }
 
@@ -238,9 +237,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                         ),
                       ),
             
-                      const SizedBox(height: 16),
-            
-                      BackButton(),
+                      const SizedBox(height: 16),            
                     ],
                   ),
                 ),
