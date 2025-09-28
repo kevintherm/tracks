@@ -1,90 +1,91 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:pocketbase/pocketbase.dart';
+
 import 'package:factual/models/app_user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+String _getPocketBaseUrl() {
+  if (Platform.isAndroid) {
+    return 'http://10.0.2.2:8090';
+  }
+  return 'http://127.0.0.1:8090';
+}
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final PocketBase _pb;
+  late final Stream<Map<String, dynamic>?> authStateChanges;
 
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  AuthService({String? baseUrl}) : _pb = PocketBase(baseUrl ?? _getPocketBaseUrl()) {
+    final controller = StreamController<Map<String, dynamic>?>.broadcast();
 
-  User? get currentUser => _auth.currentUser;
+    // Emit the current user state on listen
+    controller.onListen = () {
+      controller.add(currentUser);
+    };
+
+    // Emit subsequent changes
+    _pb.authStore.onChange.listen((event) {
+      controller.add(event.record?.toJson());
+    });
+
+    authStateChanges = controller.stream;
+  }
+
+  Map<String, dynamic>? get currentUser => _pb.authStore.record?.toJson();
 
   Future<void> signUpWithEmail({required String name, required String email, required String password}) async {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    final uid = userCredential.user?.uid;
-
-    if (uid == null) throw Exception('User UID is null');
-
-    await _firestore.collection('users').doc(uid).set({
-      'name': name,
+    final body = {
       'email': email,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+      'password': password,
+      'passwordConfirm': password,
+      'name': name,
+    };
+
+    await _pb.collection('users').create(body: body);
   }
 
   Future<void> signInWithEmail({required String email, required String password}) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password);
+    await _pb.collection('users').authWithPassword(email, password);
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    _pb.authStore.clear();
   }
 
   Future<AppUser?> fetchUserData() async {
-    final user = currentUser;
-    if (user == null) return null;
+    final record = _pb.authStore.record;
+    if (record == null) return null;
 
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) return null;
+    final data = record.toJson();
+    final uid = data['id'] as String? ?? '';
 
-    return AppUser.fromMap(userDoc.data() as Map<String, dynamic>, user.uid);
+    return AppUser.fromMap(data, uid);
   }
 
   Future<void> updateProfile({required String name}) async {
-    final user = currentUser;
-    if (user == null) throw Exception('No user is currently signed in.');
+    final record = _pb.authStore.record;
+    if (record == null) throw Exception('No user is currently signed in.');
 
-    // Update name in Firestore
-    await _firestore.collection('users').doc(user.uid).update({
-      'name': name,
-    });
+    await _pb.collection('users').update(record.id, body: {'name': name});
   }
 
   Future<void> updateEmail({required String email, required String password}) async {
-    final user = currentUser;
-    if (user == null) throw Exception('No user is currently signed in.');
+    final record = _pb.authStore.record;
+    if (record == null) throw Exception('No user is currently signed in.');
 
-    // Reauthenticate the user
-    await reauthenticateUser(email: user.email!, password: password);
+    // Reauthenticate by signing in again
+    await signInWithEmail(email: record.toJson()['email'] as String? ?? '', password: password);
 
-    // Update email in Firebase Authentication
-    if (user.email != email) {
-      await user.verifyBeforeUpdateEmail(email);
-    }
-
-    // Update email in Firestore
-    await _firestore.collection('users').doc(user.uid).update({
-      'email': email,
-    });
-  }
-
-  Future<void> reauthenticateUser({required String email, required String password}) async {
-    final user = currentUser;
-    if (user == null) throw Exception('No user is currently signed in.');
-
-    final credential = EmailAuthProvider.credential(email: email, password: password);
-    await user.reauthenticateWithCredential(credential);
+    await _pb.collection('users').update(record.id, body: {'email': email});
   }
 
   Future<void> updatePassword({required String currentPassword, required String newPassword}) async {
-    final user = currentUser;
-    if (user == null) throw Exception('No user is currently signed in.');
+    final record = _pb.authStore.record;
+    if (record == null) throw Exception('No user is currently signed in.');
 
-    // Reauthenticate the user
-    await reauthenticateUser(email: user.email!, password: currentPassword);
+    // Reauthenticate
+    await signInWithEmail(email: record.toJson()['email'] as String? ?? '', password: currentPassword);
 
-    // Update the password in Firebase Authentication
-    await user.updatePassword(newPassword);
+    await _pb.collection('users').update(record.id, body: {'password': newPassword, 'passwordConfirm': newPassword});
   }
 }

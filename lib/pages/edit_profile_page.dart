@@ -4,7 +4,6 @@ import 'package:factual/pages/edit_password_page.dart';
 import 'package:factual/providers/navigation_provider.dart';
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/utils/consts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,7 +23,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   String? profileImagePath; // Added state variable to store image path
 
-  bool get isEmailVerified => authService.currentUser != null && authService.currentUser!.emailVerified;
+  bool get isEmailVerified {
+    final current = authService.currentUser;
+    if (current == null) return false;
+    return (current['emailVerified'] == true) || (current['confirmed'] == true);
+  }
 
   AppUser user = AppUser.empty();
 
@@ -135,20 +138,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       user = user.copyWith(name: name, email: email);
                       hasUnsavedChanges = false;
                     });
-                  } on FirebaseAuthException catch (e) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(e.message ?? fatalError),
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8.0),
-                            topRight: Radius.circular(8.0),
+                    } on Exception catch (e) {
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  } catch (e) {
+                      );
+                    } catch (e) {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(e.toString()),

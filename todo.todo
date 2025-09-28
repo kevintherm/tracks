@@ -1,1 +1,5 @@
+- implement profile picture
+
+# later
+- Move to pocketbase, firebase sucks doesnt have free storage
 - Implement google sign in v7

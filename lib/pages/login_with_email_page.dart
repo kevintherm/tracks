@@ -1,8 +1,6 @@
 import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/pages/register_with_email_page.dart';
 import 'package:factual/services/auth_service.dart';
-import 'package:factual/utils/consts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -55,11 +53,11 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           duration: const Duration(seconds: 5),
         ),
       );
-    } on FirebaseAuthException catch (e) {
+    } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message ?? fatalError),
+          content: Text(e.toString()),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(

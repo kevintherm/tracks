@@ -1,10 +1,8 @@
 import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/services/auth_service.dart';
-import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class EditPasswordPage extends StatefulWidget {
   const EditPasswordPage({super.key});
@@ -62,6 +60,12 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
     authService
         .updatePassword(currentPassword: currentPassword, newPassword: newPassword)
         .then((_) {
+          currentPasswordController.clear();
+          newPasswordController.clear();
+          confirmPasswordController.clear();
+
+          Navigator.pop(context);
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Password updated successfully'),
@@ -74,33 +78,18 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
         })
         .catchError((error) {
           final messenger = ScaffoldMessenger.of(context);
-          if (error is FirebaseAuthException) {
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text(error.message ?? fatalError),
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8.0),
-                    topRight: Radius.circular(8.0),
-                  ),
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(error.toString()),
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
                 ),
               ),
-            );
-          } else {
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text(error.toString()),
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8.0),
-                    topRight: Radius.circular(8.0),
-                  ),
-                ),
-              ),
-            );
-          }
+            ),
+          );
         })
         .whenComplete(() {
           setState(() {
