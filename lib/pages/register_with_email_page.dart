@@ -1,4 +1,5 @@
 import 'package:factual/services/auth_service.dart';
+import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,6 +47,7 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
         const SnackBar(
           content: Text('Registration successful! Welcome abroad!'),
           backgroundColor: Colors.green,
+          duration: snackBarShort,
         ),
       );
     } on Exception catch (e) {
@@ -61,6 +63,7 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
               topRight: Radius.circular(8.0),
             ),
           ),
+          duration: snackBarShort,
         ),
       );
     } finally {

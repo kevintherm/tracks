@@ -1,5 +1,6 @@
 import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/services/auth_service.dart';
+import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -68,6 +69,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
+              duration: snackBarShort,
               content: Text('Password updated successfully'),
               backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(
@@ -80,6 +82,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
           final messenger = ScaffoldMessenger.of(context);
           messenger.showSnackBar(
             SnackBar(
+              duration: snackBarLong,
               content: Text(error.toString()),
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(

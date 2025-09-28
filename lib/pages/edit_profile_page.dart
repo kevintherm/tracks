@@ -186,6 +186,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .then((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
+                duration: snackBarShort,
                 content: Text('Profile updated successfully'),
                 backgroundColor: Colors.green,
                 shape: RoundedRectangleBorder(
@@ -201,6 +202,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
+                duration: snackBarShort,
                 content: Text(error.toString()),
                 backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(

@@ -1,3 +1,5 @@
+- create a pocketbase instance singleton
+- persist auth service
 - implement profile picture
 
 # later

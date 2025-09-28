@@ -1,6 +1,7 @@
 import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/pages/register_with_email_page.dart';
 import 'package:factual/services/auth_service.dart';
+import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -50,7 +51,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
           ),
-          duration: const Duration(seconds: 5),
+          duration: snackBarShort,
         ),
       );
     } on Exception catch (e) {
@@ -66,7 +67,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
               topRight: Radius.circular(8.0),
             ),
           ),
-          duration: const Duration(seconds: 5),
+          duration: snackBarShort,
         ),
       );
     } finally {
