@@ -1,12 +1,15 @@
 import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/models/app_user.dart';
+import 'package:factual/pages/edit_password_page.dart';
 import 'package:factual/providers/navigation_provider.dart';
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -17,6 +20,9 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late AuthService authService;
+  final ImagePicker picker = ImagePicker();
+
+  String? profileImagePath; // Added state variable to store image path
 
   bool get isEmailVerified => authService.currentUser != null && authService.currentUser!.emailVerified;
 
@@ -35,17 +41,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     String email = emailController.text.trim();
 
     if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Name and Email cannot be empty'),
           backgroundColor: Colors.red,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(8.0),
-              topRight: Radius.circular(8.0),
-            ),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
           ),
         ),
       );
@@ -94,24 +95,72 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                         ),
                       );
+                      setState(() {
+                        isLoading = false;
+                      });
                       return;
                     }
 
                     await authService.updateEmail(email: email, password: passwordController.text);
                     messenger.showSnackBar(
-                      SnackBar(content: Text('Email updated successfully'), backgroundColor: Colors.green),
+                      SnackBar(
+                        content: Text('Email updated successfully'),
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
+                          ),
+                        ),
+                      ),
                     );
 
                     if (name != user.name) {
                       await authService.updateProfile(name: name);
                       messenger.showSnackBar(
-                        SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
+                        SnackBar(
+                          content: Text('Profile updated successfully'),
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
+                          ),
+                        ),
                       );
                     }
+
+                    setState(() {
+                      user = user.copyWith(name: name, email: email);
+                      hasUnsavedChanges = false;
+                    });
                   } on FirebaseAuthException catch (e) {
-                    messenger.showSnackBar(SnackBar(content: Text(e.message ?? fatalError), backgroundColor: Colors.red));
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(e.message ?? fatalError),
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                    );
                   } catch (e) {
-                    messenger.showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                    );
                   } finally {
                     setState(() {
                       isLoading = false;
@@ -129,19 +178,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
         isLoading = true;
       });
 
-      authService.updateProfile(name: name).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
-        );
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString()), backgroundColor: Colors.red),
-        );
-      }).whenComplete(() {
-        setState(() {
-          isLoading = false;
-        });
-      });
+      authService
+          .updateProfile(name: name)
+          .then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Profile updated successfully'),
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+                ),
+              ),
+            );
+            setState(() {
+              user = user.copyWith(name: name);
+              hasUnsavedChanges = false;
+            });
+          })
+          .catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error.toString()),
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+                ),
+              ),
+            );
+          })
+          .whenComplete(() {
+            setState(() {
+              isLoading = false;
+            });
+          });
     }
   }
 
@@ -155,60 +224,115 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (!hasUnsavedChanges) return true;
 
     return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Unsaved Changes'),
+            content: Text('You have unsaved changes. Are you sure you want to leave without saving?'),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('Cancel')),
+              TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('Leave')),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  void handleEditProfilePicture(BuildContext context) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Unsaved Changes'),
-        content: Text('You have unsaved changes. Are you sure you want to leave without saving?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel'),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.photo_library),
+                  title: Text('Choose from Gallery'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final XFile? picture = await picker.pickImage(source: ImageSource.gallery);
+                    if (picture != null) {
+                      setState(() {
+                        profileImagePath = picture.path; // Update state with selected image path
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text('Take a Photo'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final XFile? picture = await picker.pickImage(source: ImageSource.camera);
+                    if (picture != null) {
+                      setState(() {
+                        profileImagePath = picture.path; // Update state with selected image path
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Leave'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        );
+      },
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    nameController.addListener(handleUnsavedChanges);
-    emailController.addListener(handleUnsavedChanges);
+
+    // Initialize authService before using it
     WidgetsBinding.instance.addPostFrameCallback((_) {
       authService = Provider.of<AuthService>(context, listen: false);
+
       setState(() {
         isLoading = true;
       });
 
-      try {
-        authService.fetchUserData().then((value) {
-          setState(() {
-            if (value == null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(fatalError), backgroundColor: Colors.red));
-              Navigator.pop(context);
-              isLoading = false;
-              return;
-            }
+      authService
+          .fetchUserData()
+          .then((value) {
+            setState(() {
+              if (value == null) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(fatalError), backgroundColor: Colors.red));
+                Navigator.pop(context);
+                isLoading = false;
+                return;
+              }
 
-            user = value;
-            nameController.text = user.name;
-            emailController.text = user.email;
-            isLoading = false;
+              user = value;
+              nameController.text = user.name;
+              emailController.text = user.email;
+              isLoading = false;
+            });
+          })
+          .catchError((e) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+            Navigator.pop(context);
+            setState(() {
+              isLoading = false;
+            });
           });
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-        Navigator.pop(context);
-        setState(() {
-          isLoading = false;
-        });
-      }
+    });
+
+    // Add listeners to update hasUnsavedChanges
+    nameController.addListener(() {
+      setState(() {
+        hasUnsavedChanges = nameController.text.trim() != user.name || emailController.text.trim() != user.email;
+      });
+    });
+
+    emailController.addListener(() {
+      setState(() {
+        hasUnsavedChanges = nameController.text.trim() != user.name || emailController.text.trim() != user.email;
+      });
     });
   }
 
@@ -223,14 +347,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => confirmUnsavedChanges(context),
+    return PopScope(
+      canPop: !hasUnsavedChanges,
+      onPopInvokedWithResult: (_, _) async {
+        confirmUnsavedChanges(context);
+      },
       child: Scaffold(
         body: SafeArea(
           child: SafeKeyboard(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,25 +381,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                   const SizedBox(height: 16.0),
 
-                  GestureDetector(
-                    onTap: () {
-                      print('fuck you');
-                    },
-                    child: Stack(
-                      children: [
-                        CircleAvatar(backgroundColor: Colors.red[300], radius: 48.0),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(99.0), color: Colors.white),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(Icons.edit, size: 16.0, color: Colors.teal),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => handleEditProfilePicture(context),
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: profileImagePath != null
+                                ? FileImage(File(profileImagePath!)) // Display selected image
+                                : AssetImage('assets/icons/default_avatar.png') as ImageProvider, // Default image
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 15,
+                              backgroundColor: Colors.teal,
+                              child: Icon(Icons.edit, size: 16, color: Colors.white),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
@@ -360,10 +491,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
+                                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                                     ),
                                 ],
                               ),
@@ -373,6 +501,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 32.0),
+
+                  Text('Searching for these?'),
+                  const SizedBox(height: 8.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditPasswordPage()));
+                    },
+                    child: Text('Change Password'),
+                  ),
+                  const SizedBox(height: 4.0),
                 ],
               ),
             ),

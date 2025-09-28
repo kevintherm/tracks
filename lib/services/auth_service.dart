@@ -76,4 +76,15 @@ class AuthService {
     final credential = EmailAuthProvider.credential(email: email, password: password);
     await user.reauthenticateWithCredential(credential);
   }
+
+  Future<void> updatePassword({required String currentPassword, required String newPassword}) async {
+    final user = currentUser;
+    if (user == null) throw Exception('No user is currently signed in.');
+
+    // Reauthenticate the user
+    await reauthenticateUser(email: user.email!, password: currentPassword);
+
+    // Update the password in Firebase Authentication
+    await user.updatePassword(newPassword);
+  }
 }
