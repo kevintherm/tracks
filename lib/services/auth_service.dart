@@ -1,21 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:pocketbase/pocketbase.dart';
 
 import 'package:factual/models/app_user.dart';
-
-String _getPocketBaseUrl() {
-  if (Platform.isAndroid) {
-    return 'http://10.0.2.2:8090';
-  }
-  return 'http://127.0.0.1:8090';
-}
+import 'package:factual/services/pocketbase_service.dart';
 
 class AuthService {
-  final PocketBase _pb;
   late final Stream<Map<String, dynamic>?> authStateChanges;
 
-  AuthService({String? baseUrl}) : _pb = PocketBase(baseUrl ?? _getPocketBaseUrl()) {
+  AuthService() {
     final controller = StreamController<Map<String, dynamic>?>.broadcast();
 
     // Emit the current user state on listen
@@ -31,9 +23,16 @@ class AuthService {
     authStateChanges = controller.stream;
   }
 
+  /// Get the PocketBase client from the singleton service
+  PocketBase get _pb => PocketBaseService.instance.client;
+
   Map<String, dynamic>? get currentUser => _pb.authStore.record?.toJson();
 
-  Future<void> signUpWithEmail({required String name, required String email, required String password}) async {
+  Future<void> signUpWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     final body = {
       'email': email,
       'password': password,
@@ -44,7 +43,10 @@ class AuthService {
     await _pb.collection('users').create(body: body);
   }
 
-  Future<void> signInWithEmail({required String email, required String password}) async {
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
     await _pb.collection('users').authWithPassword(email, password);
   }
 
@@ -69,23 +71,40 @@ class AuthService {
     await _pb.collection('users').update(record.id, body: {'name': name});
   }
 
-  Future<void> updateEmail({required String email, required String password}) async {
+  Future<void> updateEmail({
+    required String email,
+    required String password,
+  }) async {
     final record = _pb.authStore.record;
     if (record == null) throw Exception('No user is currently signed in.');
 
     // Reauthenticate by signing in again
-    await signInWithEmail(email: record.toJson()['email'] as String? ?? '', password: password);
+    await signInWithEmail(
+      email: record.toJson()['email'] as String? ?? '',
+      password: password,
+    );
 
     await _pb.collection('users').update(record.id, body: {'email': email});
   }
 
-  Future<void> updatePassword({required String currentPassword, required String newPassword}) async {
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
     final record = _pb.authStore.record;
     if (record == null) throw Exception('No user is currently signed in.');
 
     // Reauthenticate
-    await signInWithEmail(email: record.toJson()['email'] as String? ?? '', password: currentPassword);
+    await signInWithEmail(
+      email: record.toJson()['email'] as String? ?? '',
+      password: currentPassword,
+    );
 
-    await _pb.collection('users').update(record.id, body: {'password': newPassword, 'passwordConfirm': newPassword});
+    await _pb
+        .collection('users')
+        .update(
+          record.id,
+          body: {'password': newPassword, 'passwordConfirm': newPassword},
+        );
   }
 }

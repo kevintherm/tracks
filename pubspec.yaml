@@ -41,6 +41,7 @@ dependencies:
   pocketbase: ^0.23.0+1
   image_picker: ^1.2.0
   firebase_storage: ^13.0.1
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
