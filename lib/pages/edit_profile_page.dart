@@ -37,6 +37,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
+  ImageProvider _getAvatarImageProvider() {
+    // First check the current user from AuthService (most up-to-date)
+    final currentUser = authService.currentUser;
+    String? userAvatar = currentUser?['avatar'];
+    String? userId = currentUser?['id'];
+    
+    // If not available, fall back to local user object
+    if (userAvatar == null || userAvatar.isEmpty) {
+      userAvatar = user.photoPath;
+      userId = user.uid;
+    }
+    
+    if (userAvatar.isNotEmpty) {
+      // If it's a URL, use NetworkImage
+      if (userAvatar.startsWith('http')) {
+        return NetworkImage(userAvatar);
+      }
+      // If it's a PocketBase file reference, construct the URL
+      else {
+        final pbUrl = 'http://10.0.2.2:8090'; // Your PocketBase URL
+        return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
+      }
+    }
+    
+    // Fall back to default avatar
+    if (defaultAvatar.startsWith('http')) {
+      return NetworkImage(defaultAvatar);
+    } else {
+      return AssetImage(defaultAvatar);
+    }
+  }
+
   void handleSaveChange(BuildContext context) {
     FocusScope.of(context).unfocus();
 
@@ -118,8 +150,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     );
 
-                    if (name != user.name) {
-                      await authService.updateProfile(name: name);
+                    if (name != user.name || profileImagePath != null) {
+                      final file = profileImagePath != null ? File(profileImagePath!) : null;
+                      final bytes = file?.readAsBytesSync();
+
+                      final updatedRecord = await authService.updateProfile(toUpdate: {
+                        'name': name,
+                        if (bytes != null) 'avatar': bytes,
+                        if (file != null) 'avatarName': file.path.split('/').last,
+                      });
+                      
+                      // Update user with new avatar data
+                      final updatedData = updatedRecord.toJson();
+                      user = user.copyWith(
+                        name: name,
+                        photoPath: updatedData['avatar'] ?? user.photoPath,
+                      );
+                      profileImagePath = null;
                       messenger.showSnackBar(
                         SnackBar(
                           content: Text('Profile updated successfully'),
@@ -135,7 +182,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     }
 
                     setState(() {
-                      user = user.copyWith(name: name, email: email);
                       hasUnsavedChanges = false;
                     });
                     } on Exception catch (e) {
@@ -176,52 +222,76 @@ class _EditProfilePageState extends State<EditProfilePage> {
           );
         },
       );
-    } else if (name != user.name) {
-      setState(() {
-        isLoading = true;
-      });
+    } else {
+      // Handle profile changes when email hasn't changed
+      if (name != user.name || profileImagePath != null) {
+        setState(() {
+          isLoading = true;
+        });
 
-      authService
-          .updateProfile(name: name)
-          .then((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                duration: snackBarShort,
-                content: Text('Profile updated successfully'),
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+        final file = profileImagePath != null ? File(profileImagePath!) : null;
+        final bytes = file?.readAsBytesSync();
+        
+        authService
+            .updateProfile(toUpdate: {
+              'name': name,
+              if (bytes != null) 'avatar': bytes,
+              if (file != null) 'avatarName': file.path.split('/').last,
+            })
+            .then((updatedRecord) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: snackBarShort,
+                  content: Text('Profile updated successfully'),
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0)
+                    ),
+                  ),
                 ),
-              ),
-            );
-            setState(() {
-              user = user.copyWith(name: name);
-              hasUnsavedChanges = false;
-            });
-          })
-          .catchError((error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                duration: snackBarShort,
-                content: Text(error.toString()),
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+              );
+              setState(() {
+                // Update user with new data from the server
+                final updatedData = updatedRecord.toJson();
+                user = user.copyWith(
+                  name: name,
+                  photoPath: updatedData['avatar'] ?? user.photoPath,
+                );
+                profileImagePath = null;
+                hasUnsavedChanges = false;
+              });
+            })
+            .catchError((error) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: snackBarShort,
+                  content: Text(error.toString()),
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0)
+                    ),
+                  ),
                 ),
-              ),
-            );
-          })
-          .whenComplete(() {
-            setState(() {
-              isLoading = false;
+              );
+            })
+            .whenComplete(() {
+              setState(() {
+                isLoading = false;
+              });
             });
-          });
+      }
     }
   }
 
   void handleUnsavedChanges() {
     setState(() {
-      hasUnsavedChanges = nameController.text.trim() != user.name || emailController.text.trim() != user.email;
+      hasUnsavedChanges = nameController.text.trim() != user.name || 
+                         emailController.text.trim() != user.email ||
+                         profileImagePath != null;
     });
   }
 
@@ -260,6 +330,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     if (picture != null) {
                       setState(() {
                         profileImagePath = picture.path; // Update state with selected image path
+                        handleUnsavedChanges();
                       });
                     }
                   },
@@ -273,6 +344,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     if (picture != null) {
                       setState(() {
                         profileImagePath = picture.path; // Update state with selected image path
+                        handleUnsavedChanges();
                       });
                     }
                   },
@@ -395,7 +467,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             radius: 50,
                             backgroundImage: profileImagePath != null
                                 ? FileImage(File(profileImagePath!)) // Display selected image
-                                : AssetImage('assets/icons/default_avatar.png') as ImageProvider, // Default image
+                                : _getAvatarImageProvider(),
+                            key: ValueKey(user.photoPath), // Force rebuild when avatar changes
                           ),
                           Positioned(
                             bottom: 0,

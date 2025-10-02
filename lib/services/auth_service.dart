@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:factual/models/app_user.dart';
 import 'package:factual/services/pocketbase_service.dart';
@@ -27,6 +28,15 @@ class AuthService {
   PocketBase get _pb => PocketBaseService.instance.client;
 
   Map<String, dynamic>? get currentUser => _pb.authStore.record?.toJson();
+
+  set currentUser(dynamic record) {
+    if (record == null) {
+      _pb.authStore.clear();
+    } else {
+      // If record is a RecordModel, use its token if available, else pass null
+      _pb.authStore.save(_pb.authStore.token, record);
+    }
+  }
 
   Future<void> signUpWithEmail({
     required String name,
@@ -64,11 +74,39 @@ class AuthService {
     return AppUser.fromMap(data, uid);
   }
 
-  Future<void> updateProfile({required String name}) async {
+  Future<RecordModel> updateProfile({required Map<String, dynamic> toUpdate}) async {
     final record = _pb.authStore.record;
     if (record == null) throw Exception('No user is currently signed in.');
 
-    await _pb.collection('users').update(record.id, body: {'name': name});
+    const allowed = ['name', 'avatar', 'avatarName'];
+
+    final body = <String, dynamic>{};
+    final files = <http.MultipartFile>[];
+
+    // Process each field
+    toUpdate.forEach((key, value) {
+      if (!allowed.contains(key)) return;
+      
+      if (key == 'avatar' && value is List<int>) {
+        // This is avatar file bytes
+        final fileName = toUpdate['avatarName'] as String? ?? 'avatar.jpg';
+        files.add(http.MultipartFile.fromBytes(
+          'avatar',
+          value,
+          filename: fileName,
+        ));
+      } else if (key != 'avatarName') {
+        // Regular field
+        body[key] = value;
+      }
+    });
+
+    final updatedRecord = await _pb.collection('users').update(record.id, body: body, files: files);
+    
+    // Update the auth store with the new record
+    _pb.authStore.save(_pb.authStore.token, updatedRecord);
+    
+    return updatedRecord;
   }
 
   Future<void> updateEmail({
@@ -93,10 +131,11 @@ class AuthService {
   }) async {
     final record = _pb.authStore.record;
     if (record == null) throw Exception('No user is currently signed in.');
+    final email = record.toJson()['email'] as String? ?? '';
 
     // Reauthenticate
     await signInWithEmail(
-      email: record.toJson()['email'] as String? ?? '',
+      email: email,
       password: currentPassword,
     );
 
@@ -109,5 +148,11 @@ class AuthService {
     await _pb
         .collection('users')
         .update(record.id, body: body);
+        
+    // Re-authenticate with new password to get a fresh token
+    await signInWithEmail(
+      email: email,
+      password: newPassword,
+    );
   }
 }

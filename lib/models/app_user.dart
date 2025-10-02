@@ -7,7 +7,12 @@ class AppUser {
   AppUser({required this.uid, required this.photoPath, required this.name, required this.email});
 
   factory AppUser.fromMap(Map<String, dynamic> data, String uid) {
-    return AppUser(uid: uid, photoPath: data['photoPath'] ?? '', name: data['name'] ?? '', email: data['email'] ?? '');
+    return AppUser(
+      uid: uid, 
+      photoPath: data['avatar'] ?? data['photoPath'] ?? '', 
+      name: data['name'] ?? '', 
+      email: data['email'] ?? ''
+    );
   }
 
   static AppUser empty() {

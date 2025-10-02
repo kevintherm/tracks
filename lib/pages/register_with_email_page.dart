@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
