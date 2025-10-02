@@ -5,6 +5,7 @@ import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 
 class LoginWithEmail extends StatefulWidget {
@@ -54,11 +55,11 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           duration: snackBarShort,
         ),
       );
-    } catch (e) {
+    } on ClientException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(fatalError),
+          content: Text(errorMessage(e)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(

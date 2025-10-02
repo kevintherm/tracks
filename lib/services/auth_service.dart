@@ -43,11 +43,11 @@ class AuthService {
     await _pb.collection('users').create(body: body);
   }
 
-  Future<void> signInWithEmail({
+  Future<RecordAuth> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    await _pb.collection('users').authWithPassword(email, password);
+    return await _pb.collection('users').authWithPassword(email, password);
   }
 
   Future<void> signOut() async {
@@ -100,11 +100,14 @@ class AuthService {
       password: currentPassword,
     );
 
+    final body = {
+      'oldPassword': currentPassword,
+      'password': newPassword, 
+      'passwordConfirm': newPassword
+    };
+
     await _pb
         .collection('users')
-        .update(
-          record.id,
-          body: {'password': newPassword, 'passwordConfirm': newPassword},
-        );
+        .update(record.id, body: body);
   }
 }

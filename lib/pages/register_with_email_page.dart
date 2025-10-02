@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 
 class RegisterWithEmailPage extends StatefulWidget {
@@ -22,6 +25,7 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final Map<String, String?> _errors = {};
 
   Future<void> handleSubmit(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
@@ -45,16 +49,30 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registration successful! Welcome abroad!'),
+          content: Text('Registration success, please login with your new credentials.'),
           backgroundColor: Colors.green,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8.0),
+              topRight: Radius.circular(8.0),
+            ),
+          ),
           duration: snackBarShort,
         ),
       );
-    } on Exception catch (e) {
+    } on ClientException catch (e) {
+
+      final errors = e.response['data'] ?? {};
+      errors.forEach((key, value) {
+        setState(() {
+          _errors[key] = value['message'];
+        });
+      });
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
+          content: Text(errorMessage(e)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(
@@ -150,10 +168,17 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
+                                  onChanged: (value) {
+                                    if (_errors['name'] != null) {
+                                      setState(() {
+                                        _errors['name'] = null;
+                                      });
+                                    }
+                                  },
                                 validator: (value) =>
                                     value == null || value.isEmpty
                                     ? 'Please enter your name'
-                                    : null,
+                                    : _errors['name'],
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
@@ -165,6 +190,13 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
+                                  onChanged: (value) {
+                                    if (_errors['email'] != null) {
+                                      setState(() {
+                                        _errors['email'] = null;
+                                      });
+                                    }
+                                  },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter your email';
@@ -172,12 +204,13 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                   if (!value.contains('@')) {
                                     return 'Email is invalid';
                                   }
-                                  return null;
+                                  return _errors['email'];
                                 },
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                onFieldSubmitted: (value) => handleSubmit(context),
+                                onFieldSubmitted: (value) =>
+                                    handleSubmit(context),
                                 enabled: !_isLoading,
                                 controller: _passwordController,
                                 obscureText: _hidePassword,
@@ -199,10 +232,17 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     },
                                   ),
                                 ),
+                                  onChanged: (value) {
+                                    if (_errors['password'] != null) {
+                                      setState(() {
+                                        _errors['password'] = null;
+                                      });
+                                    }
+                                  },
                                 validator: (value) =>
                                     value == null || value.isEmpty
                                     ? 'Please enter your password'
-                                    : null,
+                                    : _errors['password'],
                               ),
                               const SizedBox(height: 16),
                               FilledButton(
