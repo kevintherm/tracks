@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   int get _selectedIndex => navigationProvider.selectedIndex;
 
-  final List<Widget> pages = [const HomeFragment(), ProfileFragment()];
+  final List<Widget> pages = [HomeFragment(), ProfileFragment()];
   final _navigationItems = [
     NavigationDestination(label: 'Home', icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home)),
     NavigationDestination(

@@ -1,25 +1,112 @@
+import 'package:factual/pages/claim_page.dart';
 import 'package:factual/services/auth_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:factual/services/pocketbase_service.dart';
+import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomeFragment extends StatelessWidget {
-  const HomeFragment({super.key});
+  HomeFragment({super.key});
+
+  final ImagePicker picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     final user = context.read<AuthService>().currentUser;
     final firstName = user?['name'].toString().split(' ')[0] ?? '';
 
+    final pb = PocketBaseService.instance;
+
+    void createClaim(XFile image) async {
+      try {
+        final imageBytes = await image.readAsBytes();
+
+        await pb.client
+            .collection('user_claims')
+            .create(
+              body: {'user_id': pb.authStore.record?.id},
+              files: [
+                http.MultipartFile.fromBytes(
+                  'input_image',
+                  imageBytes,
+                  filename: image.name,
+                ),
+              ],
+            );
+      } on ClientException catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              duration: snackBarShort,
+              content: Text(errorMessage(e)),
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    }
+
     final quickAccess = [
       {
         'icon': Iconsax.image_outline,
         'subtitle': 'Check from',
         'title': 'Image',
-        'action': (context) {},
+        'action': (context) async {
+          final scm = ScaffoldMessenger.of(context);
+          final navigator = Navigator.of(context);
+
+          try {
+            final XFile? picture = await picker.pickImage(
+              source: ImageSource.gallery,
+            );
+
+            if (picture != null) {
+              createClaim(picture);
+
+              navigator.push(MaterialPageRoute(builder: (context) => ClaimPage(initImage: picture,)));
+
+              scm.showSnackBar(
+                SnackBar(
+                  duration: snackBarShort,
+                  content: Text('Creating claim...'),
+                  // backgroundColor: Colors.,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
+                    ),
+                  ),
+                ),
+              );
+            }
+          } catch (e) {
+            scm.showSnackBar(
+              SnackBar(
+                duration: snackBarShort,
+                content: Text(fatalError),
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8.0),
+                    topRight: Radius.circular(8.0),
+                  ),
+                ),
+              ),
+            );
+          }
+        },
       },
       {
         'icon': Iconsax.camera_outline,

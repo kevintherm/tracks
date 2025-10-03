@@ -239,6 +239,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               if (file != null) 'avatarName': file.path.split('/').last,
             })
             .then((updatedRecord) {
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   duration: snackBarShort,
@@ -264,6 +265,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               });
             })
             .catchError((error) {
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   duration: snackBarShort,
@@ -444,6 +446,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       BackButton(
                         onPressed: () async {
                           if (await confirmUnsavedChanges(context)) {
+                            if (!context.mounted) return;
                             Provider.of<NavigationProvider>(context, listen: false).setSelectedIndex(1);
                             Navigator.pop(context);
                           }
