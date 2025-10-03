@@ -7,11 +7,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart';
 
-class ProfileFragment extends StatelessWidget {
-  ProfileFragment({super.key});
+class ProfileFragment extends StatefulWidget {
+  const ProfileFragment({super.key});
 
+  @override
+  State<ProfileFragment> createState() => _ProfileFragmentState();
+}
+
+class _ProfileFragmentState extends State<ProfileFragment> {
   final Map<String, dynamic> accountSection = {
-    'title': 'General',
+    'title': 'Account',
     'items': [
       {
         'icon': Icons.person,
@@ -34,6 +39,19 @@ class ProfileFragment extends StatelessWidget {
         },
       },
     ],
+  };
+
+  final Map<String, dynamic> preferencesSection = {
+    'title': 'General',
+    'items': [
+      {
+        'icon': Icons.dark_mode,
+        'label': 'Dark Mode',
+        'action': (context) {
+          // Navigator.push(context, )
+        }
+      }
+    ]
   };
 
   Future<void> signOut(BuildContext context) async {
@@ -111,7 +129,7 @@ class ProfileFragment extends StatelessWidget {
               ],
             ),
           ),
-
+    
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black12, width: 1),
@@ -137,7 +155,7 @@ class ProfileFragment extends StatelessWidget {
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       final item = accountSection['items'][index];
-
+    
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(16.0),
                         child: Material(
@@ -161,9 +179,61 @@ class ProfileFragment extends StatelessWidget {
               ),
             ),
           ),
-
+    
           const SizedBox(height: 16),
-
+    
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black12, width: 1),
+              borderRadius: BorderRadius.circular(16.0),
+              color: Colors.white,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    preferencesSection['title'],
+                    style: GoogleFonts.inter(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
+                  ListView.builder(
+                    itemCount: preferencesSection['items'].length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final item = preferencesSection['items'][index];
+    
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Material(
+                          color: Theme.of(context).cardColor,
+                          child: ListTile(
+                            leading: Icon(
+                              item['icon'],
+                              color: Colors.grey[700],
+                            ),
+                            title: Text(
+                              item['label'],
+                              style: GoogleFonts.inter(fontSize: 16.0),
+                            ),
+                            onTap: () => item['action'](context),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+    
+          const SizedBox(height: 16),
+    
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -202,9 +272,9 @@ class ProfileFragment extends StatelessWidget {
               child: Text('Sign Out'),
             ),
           ),
-
+    
           Spacer(),
-
+    
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

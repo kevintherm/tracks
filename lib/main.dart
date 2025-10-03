@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
         scaffoldBackgroundColor: Colors.grey[100],
         cardColor: Colors.white,
+        cardTheme: CardThemeData(color: Colors.white)
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
