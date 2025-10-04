@@ -23,14 +23,14 @@ class HomeFragment extends StatelessWidget {
 
     final pb = PocketBaseService.instance;
 
-    void createClaim(XFile image) async {
+    Future<RecordModel?> createClaim(XFile image) async {
       try {
         final imageBytes = await image.readAsBytes();
 
-        await pb.client
-            .collection('user_claims')
+        return await pb.client
+            .collection('claims')
             .create(
-              body: {'user_id': pb.authStore.record?.id},
+              body: {'users': pb.authStore.record?.id},
               files: [
                 http.MultipartFile.fromBytes(
                   'input_image',
@@ -39,22 +39,8 @@ class HomeFragment extends StatelessWidget {
                 ),
               ],
             );
-      } on ClientException catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              duration: snackBarShort,
-              content: Text(errorMessage(e)),
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8.0),
-                  topRight: Radius.circular(8.0),
-                ),
-              ),
-            ),
-          );
-        }
+      } on ClientException {
+        rethrow;
       }
     }
 
@@ -73,23 +59,33 @@ class HomeFragment extends StatelessWidget {
             );
 
             if (picture != null) {
-              createClaim(picture);
+              // scm.showSnackBar(
+              //   SnackBar(
+              //     duration: snackBarShort,
+              //     content: Text('Creating claim...'),
+              //     backgroundColor: Colors.grey[600],
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.only(
+              //         topLeft: Radius.circular(8.0),
+              //         topRight: Radius.circular(8.0),
+              //       ),
+              //     ),
+              //   ),
+              // );
 
-              navigator.push(MaterialPageRoute(builder: (context) => ClaimPage(initImage: picture,)));
-
-              scm.showSnackBar(
-                SnackBar(
-                  duration: snackBarShort,
-                  content: Text('Creating claim...'),
-                  // backgroundColor: Colors.,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8.0),
-                      topRight: Radius.circular(8.0),
+              final userClaim = await createClaim(picture);
+              if (userClaim != null) {
+                navigator.push(
+                  MaterialPageRoute(
+                    builder: (context) => ClaimPage(
+                      userClaimImage: picture,
+                      userClaim: userClaim,
                     ),
                   ),
-                ),
-              );
+                );
+              } else {
+                throw Exception("Failed creating claim.");
+              }
             }
           } catch (e) {
             scm.showSnackBar(

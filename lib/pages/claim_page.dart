@@ -1,13 +1,38 @@
+import 'dart:developer';
+
 import 'package:factual/components/chat_bubble.dart';
+import 'package:factual/services/pocketbase_service.dart';
+import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class ClaimPage extends StatefulWidget {
-  final XFile initImage;
+import 'package:pocketbase/pocketbase.dart';
 
-  const ClaimPage({super.key, required this.initImage});
+enum MessageType { text, clickable }
+
+class Message {
+  final MessageType type;
+  final String body;
+  final dynamic icon;
+  final void Function()? onClick;
+
+  Message({required this.type, required this.body, this.onClick, this.icon});
+
+  @override
+  String toString() => 'Message(type: $type, body: $body)';
+}
+
+class ClaimPage extends StatefulWidget {
+  final RecordModel userClaim;
+  final XFile userClaimImage;
+
+  const ClaimPage({
+    super.key,
+    required this.userClaim,
+    required this.userClaimImage,
+  });
 
   @override
   State<ClaimPage> createState() => _ClaimPageState();
@@ -15,75 +40,179 @@ class ClaimPage extends StatefulWidget {
 
 class _ClaimPageState extends State<ClaimPage> {
   late XFile image;
+  late RecordModel userClaim;
 
+  final pb = PocketBaseService.instance;
+  
   bool _isLoading = true;
 
   @override
   void initState() {
-    super.initState();
-    image = widget.initImage;
-  }
+    userClaim = widget.userClaim;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
 
-  /**
-   * @TODO
-   * 1. request claims from backend
-   * 2. show resulted option
-   * 3. if option = 1, run the synthesize right away
-   * 4. show the result
-   */
+      // log('process-${userClaim}');
 
-  final optionsWidget = [
-    ChatBubble(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(2),
-            child: Icon(Icons.question_mark_outlined, size: 16),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              'Found more than 1 items that can be checked, please select item to fact check.',
-            ),
-          ),
-        ],
-      ),
-    ),
+      pb.client.realtime.subscribe('process-${userClaim.getStringValue('id')}', (e) {
+        if (context.mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
 
-    const SizedBox(height: 8),
+        final scm = ScaffoldMessenger.of(context);
+        final navigator = Navigator.of(context);
 
-    ListView.builder(
-      itemCount: 3,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            widthFactor: 1,
-            child: ChatBubble(
-              onTap: () {},
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(2),
-                    child: Icon(Icons.arrow_circle_right_outlined, size: 16),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(child: Text('Lorem ipsum dolor sit amet.')),
-                ],
+        final data = e.jsonData();
+
+        if (!data['status']) {
+          scm.showSnackBar(
+            SnackBar(
+              duration: snackBarShort,
+              content: Text('Failed to create a new claim.'),
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
+                ),
               ),
             ),
+          );
+
+          navigator.pop();
+          return;
+        }
+      });
+    });
+
+    image = widget.userClaimImage;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    pb.client.realtime.unsubscribe('process-${userClaim.getStringValue('id')}');
+    super.dispose();
+  }
+
+  List<Widget> getResponses() {
+    final List<Message> messages = [];
+
+    // final imageDesc = userClaim['image_description'];
+    final extractedTexts = userClaim.getListValue<String>('extracted_texts');
+    final hasSignOfAltered = userClaim.getBoolValue('has_sign_of_altered');
+    final hasSignOfAiGenerated = userClaim.getBoolValue('has_sign_of_ai_generated');
+    final reason = userClaim.getStringValue('reason');
+
+    // messages.add(Message(body: imageDesc, type: MessageType.text));
+
+    if (extractedTexts.length > 1) {
+      messages.add(
+        Message(
+          type: MessageType.text,
+          icon: Icons.error_outline,
+          body:
+              "More than 1 text were found, please select which one to check.",
+        ),
+      );
+
+      for (var text in extractedTexts) {
+        messages.add(
+          Message(
+            type: MessageType.clickable,
+            icon: Icons.arrow_circle_right_outlined,
+            body: text,
+            onClick: () {
+              // implement click to send event to server
+            },
           ),
         );
-      },
-    ),
-  ];
+      }
+    } else if (extractedTexts.length == 1) {
+      messages.add(
+        Message(
+          type: MessageType.text,
+          icon: Icons.question_mark_outlined,
+          body: "Is this the topic you'd like to check?",
+        ),
+      );
+
+      messages.add(Message(type: MessageType.text, body: extractedTexts[0]));
+
+      for (var text in ["Yes", "No"]) {
+        messages.add(
+          Message(
+            type: MessageType.clickable,
+            icon: Icons.arrow_circle_right_outlined,
+            body: text,
+            onClick: () {
+              // implement click to send event to server
+            },
+          ),
+        );
+      }
+    } else {
+      // No text were found
+      messages.add(
+        Message(
+          type: MessageType.text,
+          body: "The image did not contains any text.",
+        ),
+      );
+
+      final buffer = StringBuffer('Looks like this image ');
+
+      if (hasSignOfAiGenerated) {
+        buffer.write('shows signs of AI-generated content.');
+      } else if (hasSignOfAltered) {
+        buffer.write('seems to have been digitally altered.');
+      } else {
+        buffer.write('doesn’t show any signs of AI generation or editing.');
+      }
+
+      final message = MessageType.text;
+      final body = buffer.toString();
+
+      messages.add(Message(type: message, body: body));
+      messages.add(Message(type: MessageType.text, body: reason));
+    }
+
+    final List<Widget> widgets = [];
+
+    log(messages.toString());
+
+    for (var msg in messages) {
+      if (msg.body == "") continue;
+      widgets.addAll([
+        ChatBubble(
+          onTap: msg.onClick,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (msg.type != MessageType.text) ...[
+                Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(msg.icon, size: 16),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Flexible(
+                child: Text(
+                  msg.body,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+      ]);
+    }
+
+    return widgets;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +283,10 @@ class _ClaimPageState extends State<ClaimPage> {
                               ),
                             ),
                           )
-                        : SizedBox.shrink(),
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: getResponses(),
+                          ),
                   ],
                 ),
               ),

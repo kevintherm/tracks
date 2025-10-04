@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:factual/services/secure_auth_store.dart';
@@ -38,6 +39,7 @@ class PocketBaseService {
   static String _getPocketBaseUrl() {
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:8090';
+      // return 'http://192.168.1.169:8090';
     }
     return 'http://127.0.0.1:8090';
   }
