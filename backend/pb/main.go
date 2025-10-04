@@ -96,11 +96,6 @@ func main() {
 	app.OnRecordAfterCreateSuccess("claims").BindFunc(func(e *core.RecordEvent) error {
 		record := e.Record
 
-		errs := app.ExpandRecord(record, []string{"users"}, nil)
-		if len(errs) > 0 {
-			log.Fatal("failed to expand: ", errs)
-		}
-
 		// Run in background, send notify on success/fail
 		go func(rec *core.Record) {
 			extracted := ExtractString(app, *rec)

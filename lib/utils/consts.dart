@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:pocketbase/pocketbase.dart';
 
 const String env = "local";
@@ -11,6 +13,7 @@ const Duration snackBarMedium = env == "local" ? Duration(seconds: 5) : Duration
 const Duration snackBarLong = env == "local" ? Duration(seconds: 5) : Duration(seconds: 5);
 
 String errorMessage(ClientException e) {
+  log(e.toString());
   if (env == 'production') return fatalError;
 
   return e.response['message'] ?? fatalError;

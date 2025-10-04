@@ -42,48 +42,59 @@ class _ClaimPageState extends State<ClaimPage> {
   late XFile image;
   late RecordModel userClaim;
 
-  final pb = PocketBaseService.instance;
-  
+  final _pb = PocketBaseService.instance;
+
   bool _isLoading = true;
 
   @override
   void initState() {
-    userClaim = widget.userClaim;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scm = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
 
-      // log('process-${userClaim}');
+      try {
+        userClaim = widget.userClaim;
 
-      pb.client.realtime.subscribe('process-${userClaim.getStringValue('id')}', (e) {
-        if (context.mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+        _pb.client.realtime.subscribe(
+          'process-${userClaim.getStringValue('id')}',
+          (e) async {
+            final data = e.jsonData();
+            try {
+              userClaim = await _pb.client
+                  .collection('claims')
+                  .getOne(userClaim.id);
+            } on ClientException {
+              rethrow;
+            }
 
-        final scm = ScaffoldMessenger.of(context);
-        final navigator = Navigator.of(context);
+            if (context.mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
 
-        final data = e.jsonData();
-
-        if (!data['status']) {
-          scm.showSnackBar(
-            SnackBar(
-              duration: snackBarShort,
-              content: Text('Failed to create a new claim.'),
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8.0),
-                  topRight: Radius.circular(8.0),
-                ),
+            if (!data['status']) {
+              throw Exception("Processing failed");
+            }
+          },
+        );
+      } catch (e) {
+        scm.showSnackBar(
+          SnackBar(
+            duration: snackBarShort,
+            content: Text('Failed to create a new claim.'),
+            backgroundColor: Colors.red,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
               ),
             ),
-          );
+          ),
+        );
 
-          navigator.pop();
-          return;
-        }
-      });
+        navigator.pop();
+      }
     });
 
     image = widget.userClaimImage;
@@ -92,7 +103,9 @@ class _ClaimPageState extends State<ClaimPage> {
 
   @override
   void dispose() {
-    pb.client.realtime.unsubscribe('process-${userClaim.getStringValue('id')}');
+    _pb.client.realtime.unsubscribe(
+      'process-${userClaim.getStringValue('id')}',
+    );
     super.dispose();
   }
 
@@ -102,7 +115,9 @@ class _ClaimPageState extends State<ClaimPage> {
     // final imageDesc = userClaim['image_description'];
     final extractedTexts = userClaim.getListValue<String>('extracted_texts');
     final hasSignOfAltered = userClaim.getBoolValue('has_sign_of_altered');
-    final hasSignOfAiGenerated = userClaim.getBoolValue('has_sign_of_ai_generated');
+    final hasSignOfAiGenerated = userClaim.getBoolValue(
+      'has_sign_of_ai_generated',
+    );
     final reason = userClaim.getStringValue('reason');
 
     // messages.add(Message(body: imageDesc, type: MessageType.text));
@@ -183,7 +198,7 @@ class _ClaimPageState extends State<ClaimPage> {
     log(messages.toString());
 
     for (var msg in messages) {
-      if (msg.body == "") continue;
+      if (msg.body.isEmpty || msg.body == "") continue;
       widgets.addAll([
         ChatBubble(
           onTap: msg.onClick,

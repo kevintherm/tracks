@@ -1,6 +1,7 @@
 import 'package:factual/pages/edit_password_page.dart';
 import 'package:factual/pages/edit_profile_page.dart';
 import 'package:factual/services/auth_service.dart';
+import 'package:factual/services/pocketbase_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -79,7 +80,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
       // If it's a PocketBase file reference, construct the URL
       else {
         final userId = user['id'] as String? ?? '';
-        final pbUrl = 'http://10.0.2.2:8090'; // Your PocketBase URL
+        final pbUrl = PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
         return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
       }
     }

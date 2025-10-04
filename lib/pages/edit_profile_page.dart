@@ -3,6 +3,7 @@ import 'package:factual/models/app_user.dart';
 import 'package:factual/pages/edit_password_page.dart';
 import 'package:factual/providers/navigation_provider.dart';
 import 'package:factual/services/auth_service.dart';
+import 'package:factual/services/pocketbase_service.dart';
 import 'package:factual/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,7 +57,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
       // If it's a PocketBase file reference, construct the URL
       else {
-        final pbUrl = 'http://10.0.2.2:8090'; // Your PocketBase URL
+        final pbUrl = PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
         return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
       }
     }
@@ -362,10 +363,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+    authService = Provider.of<AuthService>(context, listen: false);
 
     // Initialize authService before using it
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      authService = Provider.of<AuthService>(context, listen: false);
 
       setState(() {
         isLoading = true;

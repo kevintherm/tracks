@@ -1,7 +1,13 @@
-- create a pocketbase instance singleton
-- persist auth service
-- implement profile picture
+# important
+- adjust prompt too look for a screenshot, ignore ui elements and texts to not be considered as a topic that needs to be checked except for caption either in the app description or in the image directly
+- disable input while engaging image picker
 
 # later
-- Move to pocketbase, firebase sucks doesnt have free storage ✅
-- Implement google sign in v7
+- cycle the home screen text
+
+# done
+- implement profile picture
+- persist auth service
+- create a pocketbase instance singleton
+- Implement google sign in
+- Move to pocketbase, firebase sucks doesnt have free storage

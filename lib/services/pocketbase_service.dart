@@ -23,7 +23,7 @@ class PocketBaseService {
   /// This should be called once at app startup
   static Future<void> initialize({String? baseUrl}) async {
     _authStore = SecureAuthStore();
-    _pb = PocketBase(baseUrl ?? _getPocketBaseUrl(), authStore: _authStore);
+    _pb = PocketBase(baseUrl ?? getPocketBaseUrl(), authStore: _authStore);
 
     // Initialize the auth store to load persisted data
     await _authStore.initialize();
@@ -36,10 +36,10 @@ class PocketBaseService {
   SecureAuthStore get authStore => _authStore;
 
   /// Determine the appropriate PocketBase URL based on platform
-  static String _getPocketBaseUrl() {
+static String getPocketBaseUrl() {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8090';
-      // return 'http://192.168.1.169:8090';
+      // return 'http://10.0.2.2:8090';
+      return 'http://192.168.1.172:8090';
     }
     return 'http://127.0.0.1:8090';
   }
