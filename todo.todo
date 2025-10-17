@@ -1,5 +1,5 @@
 # important
-- adjust prompt too look for a screenshot, ignore ui elements and texts to not be considered as a topic that needs to be checked except for caption either in the app description or in the image directly
+- gives article url to gemini let the ai scrape the page
 - disable input while engaging image picker
 
 # later

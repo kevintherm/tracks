@@ -1,6 +1,4 @@
-import 'package:factual/components/safe_keyboard.dart';
 import 'package:factual/pages/claim_page.dart';
-import 'package:factual/pages/edit_password_page.dart';
 import 'package:factual/services/auth_service.dart';
 import 'package:factual/services/pocketbase_service.dart';
 import 'package:factual/utils/consts.dart';
@@ -39,7 +37,7 @@ class _HomeFragmentState extends State<HomeFragment> {
             body: {'user': _pb.authStore.record?.id},
             files: [
               http.MultipartFile.fromBytes(
-                'input_image',
+                'source_image',
                 imageBytes,
                 filename: image.name,
               ),
@@ -50,61 +48,9 @@ class _HomeFragmentState extends State<HomeFragment> {
     }
   }
 
-  Future<RecordModel?> createClaimFromUrl(String url) async {
-    try {
-      return await _pb.client
-          .collection('claims')
-          .create(body: {'user': _pb.authStore.record?.id, 'input_url': url});
-    } on ClientException {
-      rethrow;
-    }
-  }
+  Future<void> handleCreateClaimUrl() async {}
 
-  Future<void> handleCreateClaimUrl() async {
-    // try {
-    //   final url = _textController.text.trim();
-    //   final userClaim = await createClaimFromUrl(url);
-
-    //   if (userClaim != null && mounted) {
-    //     Navigator.pop(context); // Close bottom sheet
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => ClaimPage(
-    //           userClaim: userClaim,
-    //           userClaimImage: XFile(''), // Since this is URL-based claim
-    //         ),
-    //       ),
-    //     );
-    //   } else {
-    //     throw Exception("Failed creating claim.");
-    //   }
-    // } on ClientException catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(
-    //         duration: snackBarShort,
-    //         content: Text(e.toString()),
-    //         backgroundColor: Colors.red,
-    //         shape: RoundedRectangleBorder(
-    //           borderRadius: BorderRadius.only(
-    //             topLeft: Radius.circular(8.0),
-    //             topRight: Radius.circular(8.0),
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
-  }
-
-  void _showUrlInputDialog(BuildContext context) {
+  void _handleCreateFromUrl(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -231,6 +177,19 @@ class _HomeFragmentState extends State<HomeFragment> {
             );
 
             if (picture != null) {
+              scm.showSnackBar(
+                SnackBar(
+                  duration: snackBarShort,
+                  content: Text("Creating new claim..."),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
+                    ),
+                  ),
+                ),
+              );
+
               final userClaim = await createClaim(picture);
               if (userClaim != null) {
                 navigator.push(
@@ -311,7 +270,7 @@ class _HomeFragmentState extends State<HomeFragment> {
         'icon': Iconsax.link_21_outline,
         'subtitle': 'Check web page',
         'title': 'URL',
-        'action': (context) => _showUrlInputDialog(context),
+        'action': (context) => _handleCreateFromUrl(context),
       },
       {
         'icon': Iconsax.search_normal_outline,
@@ -405,7 +364,8 @@ class _HomeFragmentState extends State<HomeFragment> {
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Icon(
                                     item['icon'] as IconData?,

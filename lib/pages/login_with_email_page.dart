@@ -59,7 +59,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(errorMessage(e)),
+          content: Text(errorClient(e)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(

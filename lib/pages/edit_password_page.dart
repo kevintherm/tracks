@@ -73,7 +73,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
       messenger.showSnackBar(
         SnackBar(
           duration: snackBarLong,
-          content: Text(errorMessage(error)),
+          content: Text(errorClient(error)),
           backgroundColor: Colors.red,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(

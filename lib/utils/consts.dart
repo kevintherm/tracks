@@ -12,9 +12,15 @@ const Duration snackBarShort = env == "local" ? Duration(seconds: 5) : Duration(
 const Duration snackBarMedium = env == "local" ? Duration(seconds: 5) : Duration(seconds: 2);
 const Duration snackBarLong = env == "local" ? Duration(seconds: 5) : Duration(seconds: 5);
 
-String errorMessage(ClientException e) {
+String errorClient(ClientException e) {
   log(e.toString());
   if (env == 'production') return fatalError;
 
   return e.response['message'] ?? fatalError;
+}
+
+String errorFatal(Exception e) {
+  log(e.toString());
+  
+  return fatalError;
 }

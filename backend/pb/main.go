@@ -6,7 +6,10 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/pocketbase/pocketbase"
@@ -16,30 +19,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/genai"
 )
-
-const PromptExtractOrCheckImage = `
-Describe the image loosely with maximum of 12 words, then
-
-extract all strings from the given image. **Only return strings that form complete topics or sentences**. Exclude arbitrary words, single characters, or fragmented phrases.
-
-**IF NO TEXT IS EXTRACTED,** analyze the image and report whether it shows signs of being **artificially generated or digitally altered**.
-
-For the reason, keep it simple and straight to the point. Use natural, casual language and avoid sounding too formal. Do not use hyphens or em dashes. Just mention the key signs that the image is AI-generated or altered. For example:
-The image looks too clean to be real and has no artifacts.
-The lighting looks unnatural, like it was digitally made.
-You can see clear signs of editing, like swapped text or major labels.
-
-IF the image is widely known for something then state that. FOR EXAMPLE:
-This is a meme containing nicholas cage saying outrageous stuff.
-`
-
-type ExtractedImageInfo struct {
-	ImageDescription  string
-	SignOfAiGenerated bool
-	SignOfEdited      bool
-	Reason            string
-	TextFromImages    []string
-}
 
 func StringPtr(s string) *string {
 	return &s
@@ -83,7 +62,7 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
@@ -94,164 +73,213 @@ func main() {
 	})
 
 	app.OnRecordAfterCreateSuccess("claims").BindFunc(func(e *core.RecordEvent) error {
-		record := e.Record
+		claimRecord := e.Record
 
-		// Run in background, send notify on success/fail
-		go func(rec *core.Record) {
-			extracted := ExtractString(app, *rec)
+		go ProcessClaim(app, claimRecord)
 
-			rec.Set("image_description", extracted.ImageDescription)
-			rec.Set("extracted_text", extracted.TextFromImages)
-			rec.Set("has_sign_of_altered", extracted.SignOfEdited)
-			rec.Set("has_sign_of_ai_generated", extracted.SignOfAiGenerated)
-			rec.Set("reason", extracted.Reason)
-
-			channelId := "process-" + rec.Id
-
-			log.Println(channelId)
-
-			err = app.Save(rec)
-			if err != nil {
-				err = notify(app, channelId, map[string]any{
-					"message": "Failed to process image.",
-					"status":  false,
-				})
-				if err != nil {
-					return
-				}
-			}
-
-			err = notify(app, channelId, map[string]any{
-				"message": "Process success.",
-				"status":  true,
-			})
-			if err != nil {
-				return
-			}
-		}(record)
-
-		// TO-DO: Implement RAG Evidence Retrieval
-		// Action: For each extracted claim, formulate a targeted search query using a News or Search API.
-		// Output: Retrieve and collect a diverse set of article snippets, URLs, publication dates, and domains.
-		// Database: Insert records into the EvidenceSources table (relation), linking each source (tuple/row) to the current Claim (tuple/row).
-		// *Note for future: use actual search engine api, its pricey as hell
-		// GetSourceEvidence(extracted)
-
-		// // TO-DO: Implement Source Credibility & Bias Check
-		// 	Action: For every unique domain found, check the SourceMetadata table (relation). If metadata is missing, use an LLM or external service to assess its bias and reliability.
-		// 	Database: Update/Insert records into the SourceMetadata table (relation) for new domains.
-
-		// // TO-DO: Implement Synthesis and Conflict Resolution
-		// 	Action: Feed the claims, evidence snippets, and source credibility scores into a dedicated Synthesis LLM session.
-		// 	Output: Generate a neutral summary that highlights consensus and clearly notes conflicting or unreliable information.
-
-		// // TO-DO: Implement Final Verdict Mapping
-		// 	Action: Feed the synthesized summary and the original claim into a final, highly constrained LLM session.
-		// 	Output: Map the result to one of your four categories (True, Likely True, Likely False, False) and generate a numerical confidence score.
-
-		// // TO-DO: Update Database and Return Results
-		// 	Action: Update the initial Claims table (relation) record with the final verdict, confidence score, and summary.
-		// 	Output: Return the final verdict and summary to the user, with an option to display the source list for elaboration.
-
-		return e.Next()
+		return nil
 	})
 
 	if err := app.Start(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
-type SourceMetadata struct {
-	title   string
-	author  *string
-	domain  string
-	snippet string
-	country string
-}
+func ProcessClaim(app core.App, claim *core.Record) {
 
-func GetSourceEvidence(extracted ExtractedImageInfo) {
-	// 5 items per topic
+	var err error
 
-	// list := []SourceMetadata{}
+	processStage := []string{"Context", "Search", "Final"}
+	channelId := "process-" + claim.Id
+	currentStage := 0
 
-	// for _, topic := range extracted.TextFromImages {
+	defer func() {
+		if err != nil {
+			// If an error was set anywhere in the function, notify and log it here.
+			log.Printf("ERROR in ProcessClaim for record %s: %v", claim.Id, err)
+			log.Printf("Current Stage: %d", currentStage)
+			notify(app, channelId, map[string]any{
+				"status":  false,
+				"message": err.Error(),
+				"stage":   processStage[currentStage],
+			})
+		}
+	}()
 
-	// 	req, err := http.NewRequest("GET", "http://127.0.0.1:7070/bing/", nil)
-	// 	if err != nil {
-	// 		log.Println("Error creating request:", err)
-	// 		continue
-	// 	}
-	// 	req.Header.Set("Authorization", "Bearer "+os.Getenv("NEWS_API_KEY"))
+	claimEvidenceCollection, err := app.FindCollectionByNameOrId("claim_evidence")
+	if err != nil {
+		return
+	}
 
-	// 	resp, err := http.DefaultClient.Do(req)
-	// 	if err != nil {
-	// 		log.Println("Error making request:", err)
-	// 		continue
-	// 	}
-	// 	defer resp.Body.Close()
-
-	// 	if resp.StatusCode != http.StatusOK {
-	// 		log.Println("Non-OK HTTP status:", resp.Status)
-	// 		continue
-	// 	}
-
-	// 	body, err := io.ReadAll(resp.Body)
-	// 	if err != nil {
-	// 		log.Println("Error reading response body:", err)
-	// 		continue
-	// 	}
-
-	// 	// You can unmarshal and process the response here as needed
-
-	// 	sourceMetaData := SourceMetadata{
-	// 		title:   "hello",
-	// 		author:  StringPtr("John Doe"),
-	// 		domain:  "domain.net",
-	// 		snippet: "Lorem ipsum dolor sit amet.",
-	// 		country: "NE",
-	// 	}
-
-	// 	list = append(list, sourceMetaData)
+	// claimEvidenceSourcesCollection, err := app.FindCollectionByNameOrId("claim_evidence_sources")
+	// if err != nil {
+	// 	return
 	// }
+
+	fsys, err := app.NewFilesystem()
+	if err != nil {
+		return
+	}
+	defer fsys.Close()
+
+	inputImage := claim.BaseFilesPath() + "/" + claim.GetString("source_image")
+	image, err := fsys.GetReader(inputImage)
+	if err != nil {
+		return
+	}
+	defer image.Close()
+
+	// Read the image content once into memory
+	imageBuffer := new(bytes.Buffer)
+	_, err = io.Copy(imageBuffer, image)
+	if err != nil {
+		return
+	}
+	imageBytes := imageBuffer.Bytes()
+
+	// ==== Start Pipeline ====
+	// === Stage - Context ===
+
+	log.Println("BREAKPOINT 1")
+	jsonContextProfile, err := GenerateImageContextProfile(app, imageBytes)
+	if err != nil {
+		return
+	}
+
+	log.Println("BREAKPOINT 2")
+	claim.Set("json_context_profile", jsonContextProfile)
+
+	log.Println("BREAKPOINT 3")
+	claimTitle, err := GetTitleFromContext(app, jsonContextProfile)
+	if err != nil {
+		return
+	}
+
+	log.Println("BREAKPOINT 4")
+	claim.Set("title", claimTitle)
+
+	// Save the claim with title and context
+	err = app.Save(claim)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("BREAKPOINT 5")
+	notify(app, channelId, map[string]any{
+		"status":  true,
+		"message": "Context analysis complete",
+		"stage":   processStage[currentStage],
+	})
+
+	// === Stage - Search ===
+	currentStage = 1
+
+	log.Println("BREAKPOINT 6")
+	searchTerm, err := GetSearchTerm(app, jsonContextProfile)
+	if err != nil {
+		return
+	}
+
+	log.Println("BREAKPOINT 7")
+	claim.Set("search_term", searchTerm)
+
+	// Save the claim with search term
+	err = app.Save(claim)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("BREAKPOINT 8")
+	notify(app, channelId, map[string]any{
+		"status":  true,
+		"message": "Evidence search complete",
+		"stage":   processStage[currentStage],
+	})
+
+	// === Stage - Final ===
+	currentStage = 2
+
+	log.Println("BREAKPOINT 9")
+	verdict, err := QuickCheck(app, imageBytes)
+	if err != nil {
+		return
+	}
+
+	log.Printf("QuickCheck returned - Verdict: %s, Description: %s", verdict.Verdict, verdict.Description)
+
+	log.Println("BREAKPOINT 10")
+	claimEvidence := core.NewRecord(claimEvidenceCollection)
+	claimEvidence.Set("claim", claim.Id)
+	claimEvidence.Set("verdict", verdict.Verdict)
+	claimEvidence.Set("description", verdict.Description)
+	err = app.Save(claimEvidence)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("BREAKPOINT 11")
+	// Also save verdict to the claim record for easier access
+	claim.Set("verdict", verdict.Verdict)
+	claim.Set("checked", true)
+
+	log.Printf("Saving claim with verdict: %s", verdict.Verdict)
+	log.Printf("Claim ID: %s", claim.Id)
+
+	err = app.Save(claim)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("Claim saved successfully")
+	log.Printf("Verification - claim.verdict: %s", claim.GetString("verdict"))
+
+	log.Println("BREAKPOINT 12")
+	notify(app, channelId, map[string]any{
+		"status":  true,
+		"message": "Final analysis complete",
+		"stage":   processStage[currentStage],
+	})
+
+	// === End Pipeline ===
+
+	log.Printf("Successfully processed claim for record %s", claim.Id)
 }
 
-// TO-DO: Implement Multimodal Claim Extraction
-// Action: Use a Multimodal LLM (like Gemini) or an OCR pipeline followed by NLP to scan the screenshot for text.
-// Output: Extract all explicit, verifiable claims (statements of fact) into a structured list.
-// Database: Insert initial record into the Claims table (relation) with the raw input and time stamp.
-func ExtractString(app core.App, record core.Record) ExtractedImageInfo {
+type ClaimVerdict struct {
+	Verdict     string `json:"verdict"`
+	Description string `json:"description"`
+}
 
+func QuickCheck(app core.App, imageBytes []byte) (*ClaimVerdict, error) {
 	apikey := os.Getenv("GEMINI_API_KEY")
 
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apikey})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil, err
 	}
 
-	fsys, err := app.NewFilesystem()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer fsys.Close()
+	Prompt := `
+		Find out what is happening on the image, then determine if the image is containing truth or misinformation.
+		If you did not know after finding out, then choose 'idk' verdict and give an appropriate description about your finding.
+		The verdict that you can choose are: [true, false, likely-true, likely-false, idk]
+	`
 
-	inputImage := record.BaseFilesPath() + "/" + record.GetString("input_image")
-	r, err := fsys.GetReader(inputImage)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer r.Close()
-
-	content := new(bytes.Buffer)
-	_, err = io.Copy(content, r)
-	if err != nil {
-		log.Fatal(err)
+	// Validate that we have image data
+	if len(imageBytes) == 0 {
+		log.Println("Error: image buffer is empty")
+		return nil, err
 	}
 
 	parts := []*genai.Part{
-		genai.NewPartFromBytes(content.Bytes(), "image/jpeg"),
-		genai.NewPartFromText(PromptExtractOrCheckImage),
+		genai.NewPartFromBytes(imageBytes, "image/jpeg"),
+		genai.NewPartFromText(Prompt),
 	}
 
 	contents := []*genai.Content{
@@ -263,16 +291,79 @@ func ExtractString(app core.App, record core.Record) ExtractedImageInfo {
 		ResponseSchema: &genai.Schema{
 			Type: genai.TypeObject,
 			Properties: map[string]*genai.Schema{
-				"ImageDescription":  {Type: genai.TypeString},
-				"signOfAiGenerated": {Type: genai.TypeBoolean},
-				"signOfEdited":      {Type: genai.TypeBoolean},
-				"Reason":            {Type: genai.TypeString},
-				"textFromImages": {
-					Type:  genai.TypeArray,
-					Items: &genai.Schema{Type: genai.TypeString},
-				},
+				"verdict":     {Type: genai.TypeString},
+				"description": {Type: genai.TypeString},
 			},
-			PropertyOrdering: []string{"signOfAiGenerated", "signOfEdited", "textFromImages"},
+			Required:         []string{"verdict", "description"},
+			PropertyOrdering: []string{"verdict", "description"},
+		},
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingBudget: func(i int32) *int32 { return &i }(0),
+		},
+	}
+
+	response, err := client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		contents,
+		genConfig,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	responseText := response.Text()
+	log.Printf("QuickCheck API Response: %s", responseText)
+
+	// Clean up the response text - remove markdown code blocks if present
+	responseText = strings.TrimSpace(responseText)
+	responseText = strings.TrimPrefix(responseText, "```json")
+	responseText = strings.TrimPrefix(responseText, "```")
+	responseText = strings.TrimSuffix(responseText, "```")
+	responseText = strings.TrimSpace(responseText)
+
+	var result ClaimVerdict
+	if err := json.Unmarshal([]byte(responseText), &result); err != nil {
+		log.Printf("Failed to unmarshal JSON: %v", err)
+		log.Printf("Raw response text: %s", responseText)
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func GenerateClaimVerdict(app core.App, contextProfile string, evidenceSources []map[string]any) (string, error) {
+	apikey := os.Getenv("GEMINI_API_KEY")
+
+	ctx := context.Background()
+
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apikey})
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	Prompt := `
+		Determine if the content is contains truth or misinformation. 
+		I have given you the context profile of the image that I want to fact check, and the sources that I have collected.
+		Feel free to add your own conclusion to determine the final verdict.
+		If you cannot determine the verdict from the sources given, please choose the 'idk' verdict freely.
+		The verdict that you can choose are: [true, false, likely-true, likely-false, idk]
+	`
+
+	parts := []*genai.Part{
+		genai.NewPartFromText(Prompt),
+	}
+
+	contents := []*genai.Content{
+		genai.NewContentFromParts(parts, genai.RoleUser),
+	}
+
+	genConfig := &genai.GenerateContentConfig{
+		ResponseSchema: &genai.Schema{
+			Type: genai.TypeString,
 		},
 		ThinkingConfig: &genai.ThinkingConfig{
 			ThinkingBudget: func(i int32) *int32 { return &i }(0),
@@ -287,14 +378,255 @@ func ExtractString(app core.App, record core.Record) ExtractedImageInfo {
 	)
 
 	if err != nil {
-		log.Fatal(err)
-
+		log.Println(err)
+		return "", err
 	}
 
-	var extractedImageInfo ExtractedImageInfo
-	if err := json.Unmarshal([]byte(result.Text()), &extractedImageInfo); err != nil {
-		log.Fatal(err)
+	return result.Text(), nil
+}
+
+func SearchEvidence(app core.App, searchTerm string) ([]map[string]any, error) {
+
+	searchUrl := "http://127.0.0.1:7000/mega/search?engines=duckduckgo&limit=10&language=EN&text=" + strings.ReplaceAll(searchTerm, `"`, "")
+
+	req, err := http.NewRequest("GET", searchUrl, nil)
+	if err != nil {
+		log.Println("Error creating request:", err)
+		return nil, err
 	}
 
-	return extractedImageInfo
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Error making request:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Println("Non-OK HTTP status:", resp.Status)
+		return nil, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error reading response body:", err)
+		return nil, err
+	}
+
+	var searchResults []map[string]any
+	err = json.Unmarshal(body, &searchResults)
+	if err != nil {
+		log.Println("Error unmarshalling response body:", err)
+		return nil, err
+	}
+
+	evidenceList := []map[string]any{}
+
+	for _, item := range searchResults {
+		if item["ad"] == true {
+			continue
+		}
+
+		reqUrl := "http://127.0.0.1:7000/site?url=" + item["url"].(string)
+
+		req, err := http.NewRequest("GET", reqUrl, nil)
+		if err != nil {
+			log.Println("Error creating request:", err)
+			continue
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Println("Error making request:", err)
+			continue
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Println("Non-OK HTTP status:", resp.Status)
+			continue
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error reading response body:", err)
+			continue
+		}
+
+		var siteInfo map[string]any
+		err = json.Unmarshal(body, &siteInfo)
+		if err != nil {
+			log.Println("Error unmarshalling response body:", err)
+			continue
+		}
+
+		parsedURL, err := url.Parse(item["url"].(string))
+		if err != nil {
+			log.Println("Error:", err)
+			continue
+		}
+
+		domain := parsedURL.Hostname()
+
+		source := map[string]any{
+			"domain":           domain,
+			"full_url":         siteInfo["url"].(string),
+			"source_author":    siteInfo["author"].(string),
+			"source_title":     siteInfo["title"].(string),
+			"source_published": siteInfo["published"].(string),
+		}
+
+		evidenceList = append(evidenceList, source)
+	}
+
+	return evidenceList, nil
+}
+
+func GetSearchTerm(app core.App, contextProfile string) (string, error) {
+	apikey := os.Getenv("GEMINI_API_KEY")
+
+	ctx := context.Background()
+
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apikey})
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	Prompt := `
+	From this given context of an image, I want to determine wether the image is telling the truth or misinformation. 
+	Give me a google search term so that I can search and fact check it myself.
+	Make the search term efficient at what it's doing.
+	If the image contains a direct claim, identify the main claim as clearly and objectively as possible.
+	If the image does not contain a direct claim, determine whether it's trying to imply something, make a joke, be satirical, mock, or refer to a controversial topic. Assume what the image is suggesting.
+	Based on that claim or implied message, give me a Google search term that is efficient for fact-checking — short, clear, and specific.
+	Do not give me your opinion or fact-check the claim yourself — I want to search and verify it myself.
+	If the message is vague or unclear, still give me your best guess at a neutral, helpful search term.
+	ONLY OUTPUT THE SEARCH TERM AND NOTHING ELSE!
+	`
+
+	parts := []*genai.Part{
+		genai.NewPartFromText(Prompt),
+		genai.NewPartFromText(contextProfile),
+	}
+
+	contents := []*genai.Content{
+		genai.NewContentFromParts(parts, genai.RoleUser),
+	}
+
+	genConfig := &genai.GenerateContentConfig{
+		ResponseSchema: &genai.Schema{
+			Type: genai.TypeString,
+		},
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingBudget: func(i int32) *int32 { return &i }(0),
+		},
+	}
+
+	result, err := client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		contents,
+		genConfig,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return result.Text(), nil
+}
+
+func GetTitleFromContext(app core.App, contextProfile string) (string, error) {
+	apikey := os.Getenv("GEMINI_API_KEY")
+
+	ctx := context.Background()
+
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apikey})
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	parts := []*genai.Part{
+		genai.NewPartFromText("From the given context of an image, determine the title for it. Max 4 words."),
+		genai.NewPartFromText(contextProfile),
+	}
+
+	contents := []*genai.Content{
+		genai.NewContentFromParts(parts, genai.RoleUser),
+	}
+
+	genConfig := &genai.GenerateContentConfig{
+		ResponseSchema: &genai.Schema{
+			Type: genai.TypeString,
+		},
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingBudget: func(i int32) *int32 { return &i }(0),
+		},
+	}
+
+	result, err := client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		contents,
+		genConfig,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return result.Text(), nil
+}
+
+func GenerateImageContextProfile(app core.App, imageBytes []byte) (string, error) {
+
+	apikey := os.Getenv("GEMINI_API_KEY")
+
+	ctx := context.Background()
+
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apikey})
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	// Validate that we have image data
+	if len(imageBytes) == 0 {
+		log.Println("Error: image buffer is empty")
+		return "", err
+	}
+
+	parts := []*genai.Part{
+		genai.NewPartFromBytes(imageBytes, "image/jpeg"),
+		genai.NewPartFromText("Generate an ultra detailed 1:1 JSON context profile for this image complete with it's assumming description."),
+	}
+
+	contents := []*genai.Content{
+		genai.NewContentFromParts(parts, genai.RoleUser),
+	}
+
+	genConfig := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingBudget: func(i int32) *int32 { return &i }(0),
+		},
+	}
+
+	result, err := client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		contents,
+		genConfig,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return result.Text(), nil
 }

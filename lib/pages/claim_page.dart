@@ -10,7 +10,7 @@ import 'dart:io';
 
 import 'package:pocketbase/pocketbase.dart';
 
-enum MessageType { text, clickable }
+enum MessageType { text, loading, clickable }
 
 class Message {
   final MessageType type;
@@ -40,11 +40,18 @@ class ClaimPage extends StatefulWidget {
 
 class _ClaimPageState extends State<ClaimPage> {
   late XFile image;
-  late RecordModel userClaim;
+  late RecordModel _userClaim;
 
   final _pb = PocketBaseService.instance;
 
+  String _pageTitle = 'New Claim';
   bool _isLoading = true;
+  String? _error;
+  
+  // Track processing stages
+  final List<String> _completedStages = [];
+  String _currentStage = '';
+  String _currentMessage = 'Processing...';
 
   @override
   void initState() {
@@ -53,18 +60,33 @@ class _ClaimPageState extends State<ClaimPage> {
       final navigator = Navigator.of(context);
 
       try {
-        userClaim = widget.userClaim;
+        _userClaim = widget.userClaim;
 
         _pb.client.realtime.subscribe(
-          'process-${userClaim.getStringValue('id')}',
+          'process-${_userClaim.getStringValue('id')}',
           (e) async {
             final data = e.jsonData();
+
             try {
-              userClaim = await _pb.client
-                  .collection('claims')
-                  .getOne(userClaim.id);
-            } on ClientException {
-              rethrow;
+              
+              _handleProcessNotify(data);
+
+            } on Exception catch (e) {  
+              scm.showSnackBar(
+                SnackBar(
+                  duration: snackBarShort,
+                  content: Text(errorFatal(e)),
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
+                    ),
+                  ),
+                ),
+              );
+              
+              navigator.pop();
             }
 
             if (context.mounted) {
@@ -72,17 +94,13 @@ class _ClaimPageState extends State<ClaimPage> {
                 _isLoading = false;
               });
             }
-
-            if (!data['status']) {
-              throw Exception("Processing failed");
-            }
           },
         );
-      } catch (e) {
+      } on Exception catch (e) {
         scm.showSnackBar(
           SnackBar(
             duration: snackBarShort,
-            content: Text('Failed to create a new claim.'),
+            content: Text(errorFatal(e)),
             backgroundColor: Colors.red,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
@@ -104,98 +122,261 @@ class _ClaimPageState extends State<ClaimPage> {
   @override
   void dispose() {
     _pb.client.realtime.unsubscribe(
-      'process-${userClaim.getStringValue('id')}',
+      'process-${_userClaim.getStringValue('id')}',
     );
     super.dispose();
+  }
+
+  void _handleProcessNotify(data) async {
+    final bool status = data['status'] ?? false;
+    final String message = data['message'] ?? '';
+    final String stage = data['stage'] ?? '';
+
+    log("Process notification - Stage: $stage, Status: $status, Message: $message");
+
+    // Handle error case
+    if (!status) {
+      setState(() {
+        _error = message;
+        _isLoading = false;
+        _currentStage = stage;
+        _currentMessage = message;
+      });
+      throw Exception("Processing failed at stage '$stage': $message");
+    }
+
+    // Handle success case - update stage tracking
+    setState(() {
+      _currentStage = stage;
+      _currentMessage = message;
+      
+      // Add stage to completed stages if not already there
+      if (!_completedStages.contains(stage)) {
+        _completedStages.add(stage);
+      }
+    });
+
+    // Refresh claim data from server
+    try {
+      _userClaim = await _pb.client
+          .collection('claims')
+          .getOne(_userClaim.id, expand: 'claim_evidence(claim)');
+
+      log('Fetched claim data with expand. Expand keys: ${_userClaim.expand.keys}');
+
+      // Update title if available
+      final title = _userClaim.getStringValue('title');
+      if (title.isNotEmpty) {
+        setState(() {
+          _pageTitle = title;
+        });
+      }
+
+      // Check if all stages are complete
+      if (stage == 'Final' || _completedStages.length >= 3) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      log("Error refreshing claim data: $e");
+      // Don't throw here, just log - we still got the notification
+    }
   }
 
   List<Widget> getResponses() {
     final List<Message> messages = [];
 
-    // final imageDesc = userClaim['image_description'];
-    final extractedTexts = userClaim.getListValue<String>('extracted_texts');
-    final hasSignOfAltered = userClaim.getBoolValue('has_sign_of_altered');
-    final hasSignOfAiGenerated = userClaim.getBoolValue(
-      'has_sign_of_ai_generated',
-    );
-    final reason = userClaim.getStringValue('reason');
-
-    // messages.add(Message(body: imageDesc, type: MessageType.text));
-
-    if (extractedTexts.length > 1) {
+    // If there's an error, display it
+    if (_error != null) {
       messages.add(
         Message(
           type: MessageType.text,
           icon: Icons.error_outline,
-          body:
-              "More than 1 text were found, please select which one to check.",
+          body: 'Processing failed: $_error',
         ),
       );
-
-      for (var text in extractedTexts) {
-        messages.add(
-          Message(
-            type: MessageType.clickable,
-            icon: Icons.arrow_circle_right_outlined,
-            body: text,
-            onClick: () {
-              // implement click to send event to server
-            },
-          ),
-        );
-      }
-    } else if (extractedTexts.length == 1) {
-      messages.add(
-        Message(
-          type: MessageType.text,
-          icon: Icons.question_mark_outlined,
-          body: "Is this the topic you'd like to check?",
-        ),
-      );
-
-      messages.add(Message(type: MessageType.text, body: extractedTexts[0]));
-
-      for (var text in ["Yes", "No"]) {
-        messages.add(
-          Message(
-            type: MessageType.clickable,
-            icon: Icons.arrow_circle_right_outlined,
-            body: text,
-            onClick: () {
-              // implement click to send event to server
-            },
-          ),
-        );
-      }
-    } else {
-      // No text were found
-      messages.add(
-        Message(
-          type: MessageType.text,
-          body: "The image did not contains any text.",
-        ),
-      );
-
-      final buffer = StringBuffer('Looks like this image ');
-
-      if (hasSignOfAiGenerated) {
-        buffer.write('shows signs of AI-generated content.');
-      } else if (hasSignOfAltered) {
-        buffer.write('seems to have been digitally altered.');
-      } else {
-        buffer.write('doesn’t show any signs of AI generation or editing.');
-      }
-
-      final message = MessageType.text;
-      final body = buffer.toString();
-
-      messages.add(Message(type: message, body: body));
-      messages.add(Message(type: MessageType.text, body: reason));
+      return _buildMessageWidgets(messages);
     }
 
-    final List<Widget> widgets = [];
+    // Show stage progress while loading
+    if (_isLoading) {
+      // Context stage
+      if (_completedStages.contains('Context')) {
+        messages.add(
+          Message(
+            type: MessageType.text,
+            icon: Icons.check_circle_outline,
+            body: 'Context analysis complete',
+          ),
+        );
+      } else if (_currentStage == 'Context') {
+        messages.add(
+          Message(
+            type: MessageType.loading,
+            body: _currentMessage,
+          ),
+        );
+      }
 
-    log(messages.toString());
+      // Search stage
+      if (_completedStages.contains('Search')) {
+        messages.add(
+          Message(
+            type: MessageType.text,
+            icon: Icons.check_circle_outline,
+            body: 'Evidence search complete',
+          ),
+        );
+      } else if (_currentStage == 'Search') {
+        messages.add(
+          Message(
+            type: MessageType.loading,
+            body: _currentMessage,
+          ),
+        );
+      }
+
+      // Final stage
+      if (_completedStages.contains('Final')) {
+        messages.add(
+          Message(
+            type: MessageType.text,
+            icon: Icons.check_circle_outline,
+            body: 'Final analysis complete',
+          ),
+        );
+      } else if (_currentStage == 'Final') {
+        messages.add(
+          Message(
+            type: MessageType.loading,
+            body: _currentMessage,
+          ),
+        );
+      }
+
+      // If no stage started yet
+      if (_currentStage.isEmpty) {
+        messages.add(
+          Message(
+            type: MessageType.loading,
+            body: 'Starting analysis...',
+          ),
+        );
+      }
+
+      return _buildMessageWidgets(messages);
+    }
+
+    // Processing complete - show final results
+    final searchTerm = _userClaim.getStringValue('search_term');
+    String verdict = _userClaim.getStringValue('verdict');
+    
+    log('=== PROCESSING COMPLETE ===');
+    log('searchTerm: "$searchTerm"');
+    log('verdict from claim: "$verdict"');
+    
+    // Get the description from claim_evidence
+    final claimEvidenceList = _userClaim.expand['claim_evidence(claim)'];
+    log('claimEvidenceList: $claimEvidenceList');
+    log('claimEvidenceList is null: ${claimEvidenceList == null}');
+    log('claimEvidenceList isEmpty: ${claimEvidenceList?.isEmpty ?? true}');
+    
+    String? description;
+    if (claimEvidenceList != null && claimEvidenceList.isNotEmpty) {
+      description = claimEvidenceList.first.getStringValue('description');
+      log('description: "$description"');
+      
+      // If verdict is empty on the claim, try to get it from claim_evidence
+      if (verdict.isEmpty) {
+        verdict = claimEvidenceList.first.getStringValue('verdict');
+        log('verdict from claim_evidence: "$verdict"');
+      }
+    }
+    
+    log('Final verdict to use: "$verdict"');
+    log('verdict.isNotEmpty: ${verdict.isNotEmpty}');
+
+    messages.add(
+      Message(
+        type: MessageType.text,
+        icon: Icons.check_circle,
+        body: 'Analysis complete! Here are the results:',
+      ),
+    );
+
+    if (searchTerm.isNotEmpty) {
+      log('Adding search term message');
+      messages.add(
+        Message(
+          type: MessageType.text,
+          icon: Icons.search,
+          body: 'Search term: "$searchTerm"',
+        ),
+      );
+    }
+
+    if (verdict.isNotEmpty) {
+      log('Verdict is not empty, adding verdict messages');
+      IconData verdictIcon;
+      switch (verdict) {
+        case 'true':
+          verdictIcon = Icons.check_circle;
+          break;
+        case 'false':
+          verdictIcon = Icons.cancel;
+          break;
+        case 'likely-true':
+          verdictIcon = Icons.check_circle_outline;
+          break;
+        case 'likely-false':
+          verdictIcon = Icons.cancel_outlined;
+          break;
+        default:
+          verdictIcon = Icons.help_outline;
+      }
+
+      messages.add(
+        Message(
+          type: MessageType.text,
+          icon: verdictIcon,
+          body: 'Verdict: ${verdict.replaceAll('-', ' ').toUpperCase()}',
+        ),
+      );
+      
+      // Add fun verdict message
+      final funMessage = 'This shit is ${verdict.replaceAll('-', ' ')} as hell';
+      log('Adding fun message: "$funMessage"');
+      messages.add(
+        Message(
+          type: MessageType.text,
+          body: funMessage,
+        ),
+      );
+    } else {
+      log('Verdict is EMPTY - not adding verdict messages');
+    }
+
+    if (description != null && description.isNotEmpty) {
+      log('Adding description message');
+      messages.add(
+        Message(
+          type: MessageType.text,
+          body: description,
+        ),
+      );
+    }
+    
+    log('Total messages created: ${messages.length}');
+    for (var i = 0; i < messages.length; i++) {
+      log('Message $i: "${messages[i].body}"');
+    }
+
+    return _buildMessageWidgets(messages);
+  }
+
+  List<Widget> _buildMessageWidgets(List<Message> messages) {
+    final List<Widget> widgets = [];
 
     for (var msg in messages) {
       if (msg.body.isEmpty || msg.body == "") continue;
@@ -205,10 +386,16 @@ class _ClaimPageState extends State<ClaimPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (msg.type != MessageType.text) ...[
+              if (msg.icon != null || msg.type == MessageType.loading) ...[
                 Padding(
                   padding: const EdgeInsets.all(2),
-                  child: Icon(msg.icon, size: 16),
+                  child: (msg.type == MessageType.loading)
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(msg.icon, size: 16),
                 ),
                 const SizedBox(width: 8),
               ],
@@ -244,7 +431,7 @@ class _ClaimPageState extends State<ClaimPage> {
                   children: [
                     BackButton(),
                     Text(
-                      'New Claim',
+                      _pageTitle,
                       style: GoogleFonts.inter(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w600,
@@ -275,33 +462,10 @@ class _ClaimPageState extends State<ClaimPage> {
 
                     const SizedBox(height: 8),
 
-                    _isLoading
-                        ? Container(
-                            margin: EdgeInsets.only(bottom: 8),
-                            child: ChatBubble(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text('Processing...'),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: getResponses(),
-                          ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: getResponses(),
+                    ),
                   ],
                 ),
               ),
