@@ -1,6 +1,6 @@
-import 'package:factual/pages/fragments/home_fragment.dart';
-import 'package:factual/pages/fragments/profile_fragment.dart';
-import 'package:factual/providers/navigation_provider.dart';
+import 'package:tracks/pages/fragments/home_fragment.dart';
+import 'package:tracks/pages/fragments/profile_fragment.dart';
+import 'package:tracks/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

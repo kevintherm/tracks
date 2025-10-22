@@ -1,8 +1,8 @@
-import 'package:factual/services/auth_service.dart';
+import 'package:tracks/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:factual/pages/home_page.dart';
-import 'package:factual/pages/login_with_email_page.dart';
+import 'package:tracks/pages/home_page.dart';
+import 'package:tracks/pages/login_with_email_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});

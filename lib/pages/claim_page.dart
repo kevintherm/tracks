@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:factual/components/chat_bubble.dart';
-import 'package:factual/services/pocketbase_service.dart';
-import 'package:factual/utils/consts.dart';
+import 'package:tracks/components/chat_bubble.dart';
+import 'package:tracks/services/pocketbase_service.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';

@@ -1,7 +1,7 @@
-import 'package:factual/pages/claim_page.dart';
-import 'package:factual/services/auth_service.dart';
-import 'package:factual/services/pocketbase_service.dart';
-import 'package:factual/utils/consts.dart';
+import 'package:tracks/pages/claim_page.dart';
+import 'package:tracks/services/auth_service.dart';
+import 'package:tracks/services/pocketbase_service.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';

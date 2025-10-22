@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:pocketbase/pocketbase.dart';
-import 'package:factual/services/secure_auth_store.dart';
+import 'package:tracks/services/secure_auth_store.dart';
 
 /// Singleton service for managing the PocketBase instance
 /// This ensures a single PocketBase client is used throughout the app

@@ -1,7 +1,7 @@
-import 'package:factual/auth_gate.dart';
-import 'package:factual/providers/navigation_provider.dart';
-import 'package:factual/services/auth_service.dart';
-import 'package:factual/services/pocketbase_service.dart';
+import 'package:tracks/auth_gate.dart';
+import 'package:tracks/providers/navigation_provider.dart';
+import 'package:tracks/services/auth_service.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';

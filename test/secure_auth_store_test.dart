@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:factual/services/secure_auth_store.dart';
+import 'package:tracks/services/secure_auth_store.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 void main() {

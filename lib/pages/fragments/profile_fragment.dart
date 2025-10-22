@@ -1,8 +1,8 @@
-import 'package:factual/pages/edit_password_page.dart';
-import 'package:factual/pages/edit_profile_page.dart';
-import 'package:factual/services/auth_service.dart';
-import 'package:factual/services/pocketbase_service.dart';
-import 'package:factual/utils/consts.dart';
+import 'package:tracks/pages/edit_password_page.dart';
+import 'package:tracks/pages/edit_profile_page.dart';
+import 'package:tracks/services/auth_service.dart';
+import 'package:tracks/services/pocketbase_service.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;

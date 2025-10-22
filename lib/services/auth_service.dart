@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:factual/models/app_user.dart';
-import 'package:factual/services/pocketbase_service.dart';
+import 'package:tracks/models/app_user.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 
 class AuthService {
   late final Stream<Map<String, dynamic>?> authStateChanges;

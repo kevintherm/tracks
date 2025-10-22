@@ -1,4 +1,4 @@
-import 'package:factual/services/pocketbase_service.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 /// Example service that demonstrates how to use the PocketBase singleton
