@@ -26,11 +26,13 @@ class AuthGate extends StatelessWidget {
 
         final user = snapshot.data;
 
-        if (user == null) {
-          return const LoginWithEmail();
-        } else {
-          return const HomePage();
-        }
+        return const HomePage();
+
+        // if (user == null) {
+        //   return const LoginWithEmail();
+        // } else {
+        //   return const HomePage();
+        // }
       },
     );
   }

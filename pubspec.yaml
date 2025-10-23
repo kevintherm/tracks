@@ -51,6 +51,7 @@ dependencies:
   build_runner: ^2.10.0
   path_provider: ^2.1.5
   path: ^1.8.2
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/animations/
+    - assets/drawings/
     - assets/icons/
     - assets/icons/solar_icons/
   #   - images/a_dot_ham.jpeg
