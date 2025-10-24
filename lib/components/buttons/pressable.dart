@@ -8,12 +8,14 @@ class Pressable extends StatefulWidget {
 
   /// The callback when the widget is tapped.
   final VoidCallback? onTap;
+  final Duration? duration;
 
   /// Creates a pressable wrapper.
   const Pressable({
     super.key,
     required this.child,
     this.onTap,
+    this.duration
   });
 
   @override
@@ -52,7 +54,7 @@ class _PressableState extends State<Pressable> {
       onTapUp: isDisabled ? null : _onTapUp,
       onTapCancel: isDisabled ? null : _onTapCancel,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: widget.duration ?? const Duration(milliseconds: 150),
         curve: Curves.easeOut,
         transform: Matrix4.identity()..scaleByDouble(scale, scale, 1, 1),
         transformAlignment: Alignment.center,

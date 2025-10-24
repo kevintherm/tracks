@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:lottie/lottie.dart';
+import 'package:tracks/components/buttons/pressable.dart';
 import 'package:tracks/components/buttons/primary_button.dart';
 import 'package:tracks/components/safe_keyboard.dart';
 import 'package:tracks/pages/modals/session_options.dart';
 import 'package:tracks/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
-import 'package:tracks/utils/toast.dart';
 
 class SessionPage extends StatefulWidget {
   const SessionPage({super.key});
@@ -17,7 +17,7 @@ class SessionPage extends StatefulWidget {
 }
 
 class _SessionPageState extends State<SessionPage> {
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   final double _progress = 10;
 
@@ -41,9 +41,8 @@ class _SessionPageState extends State<SessionPage> {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        icon: Icon(MingCute.settings_3_line, size: 32),
-                        onPressed: () async {
+                      Pressable(
+                        onTap: () async {
                           await showModalBottomSheet(
                             context: context,
                             shape: const RoundedRectangleBorder(
@@ -54,6 +53,7 @@ class _SessionPageState extends State<SessionPage> {
                             builder: (context) => ModalOptions(),
                           );
                         },
+                        child: Icon(MingCute.settings_3_line, size: 32),
                       ),
                       Expanded(
                         child: SliderTheme(

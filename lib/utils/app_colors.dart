@@ -4,7 +4,7 @@ class AppColors {
 
   // Primary - Teal (main accent color)
   static const Color primary = Colors.teal;
-  static const Color lightPrimary = Color.fromARGB(255, 38, 166, 154);
+  static const Color lightPrimary = Color.fromARGB(255, 53, 211, 195);
 
   // Secondary - Complementary warm accent (coral/orange) for harmonious contrast
   static const Color secondary = Color.fromARGB(255, 255, 107, 107);

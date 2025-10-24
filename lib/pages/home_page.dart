@@ -1,5 +1,8 @@
+import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/pages/fragments/home_fragment.dart';
+import 'package:tracks/pages/fragments/news_fragment.dart';
 import 'package:tracks/pages/fragments/profile_fragment.dart';
+import 'package:tracks/pages/fragments/schedule_fragment.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,17 +25,27 @@ class _HomePageState extends State<HomePage> {
 
   int get _selectedIndex => navigationProvider.selectedIndex;
 
-  final List<Widget> pages = [HomeFragment(), ProfileFragment()];
+  final List<Widget> pages = [
+    HomeFragment(),
+    ScheduleFragment(),
+    NewsFragment(),
+    ProfileFragment(),
+  ];
   final _navigationItems = [
     NavigationDestination(
       label: 'Home',
-      icon: const Icon(Icons.home_outlined),
-      selectedIcon: const Icon(Icons.home),
+      icon: const Icon(Iconsax.home_2_outline),
+      selectedIcon: const Icon(Iconsax.home_2_bold),
+    ),
+    NavigationDestination(
+      label: "Schedule",
+      icon: const Icon(Iconsax.calendar_2_outline),
+      selectedIcon: const Icon(Iconsax.calendar_2_bold),
     ),
     NavigationDestination(
       label: 'Profile',
-      icon: const Icon(Icons.person_outline),
-      selectedIcon: const Icon(Icons.person),
+      icon: const Icon(Iconsax.user_outline),
+      selectedIcon: const Icon(Iconsax.user_bold),
     ),
   ];
 
