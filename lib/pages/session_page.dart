@@ -5,7 +5,9 @@ import 'package:lottie/lottie.dart';
 import 'package:tracks/components/buttons/primary_button.dart';
 import 'package:tracks/components/safe_keyboard.dart';
 import 'package:tracks/pages/modals/session_options.dart';
+import 'package:tracks/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/toast.dart';
 
 class SessionPage extends StatefulWidget {
   const SessionPage({super.key});
@@ -15,7 +17,16 @@ class SessionPage extends StatefulWidget {
 }
 
 class _SessionPageState extends State<SessionPage> {
+  bool _isLoading = false;
+
   final double _progress = 10;
+
+  void _handleNextButton() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SessionFinishPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +43,8 @@ class _SessionPageState extends State<SessionPage> {
                     children: [
                       IconButton(
                         icon: Icon(MingCute.settings_3_line, size: 32),
-                        onPressed: () {
-                          showModalBottomSheet(
+                        onPressed: () async {
+                          await showModalBottomSheet(
                             context: context,
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
@@ -117,17 +128,31 @@ class _SessionPageState extends State<SessionPage> {
                 left: 0,
                 right: 0,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Card(
-                      elevation: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          "03:00",
-                          style: GoogleFonts.spaceMono(fontSize: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Card(
+                          elevation: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Set 1",
+                              style: GoogleFonts.spaceMono(fontSize: 16),
+                            ),
+                          ),
                         ),
-                      ),
+                        Card(
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "03:00",
+                              style: GoogleFonts.spaceMono(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 16),
@@ -137,6 +162,7 @@ class _SessionPageState extends State<SessionPage> {
                       children: [
                         Expanded(
                           child: PrimaryButton(
+                            onTap: _isLoading ? null : _handleNextButton,
                             padding: EdgeInsets.symmetric(
                               vertical: 12,
                               horizontal: 16,
