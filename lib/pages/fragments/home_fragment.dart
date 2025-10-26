@@ -1,4 +1,5 @@
 import 'package:tracks/components/buttons/pressable.dart';
+import 'package:tracks/pages/search_page.dart';
 // import 'package:tracks/components/safe_keyboard.dart';
 import 'package:tracks/pages/session_page.dart';
 import 'package:tracks/services/auth_service.dart';
@@ -48,7 +49,6 @@ class _HomeFragmentState extends State<HomeFragment> {
     ];
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -62,31 +62,21 @@ class _HomeFragmentState extends State<HomeFragment> {
             ],
           ),
         ),
-    
-        const SizedBox(height: 32),
-    
+
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset(
-                'assets/icons/solar_icons/smile-circle.svg',
-                width: 64,
-                height: 64,
-              ),
-    
-              const SizedBox(height: 8),
-    
               Text(
-                'Hello, $firstName!',
+                'Hello, Human!',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w300,
                   color: Colors.grey[700],
                 ),
               ),
-    
+
               Text(
                 'Never too early to start your workout eh?',
                 style: GoogleFonts.inter(
@@ -95,22 +85,61 @@ class _HomeFragmentState extends State<HomeFragment> {
                   height: 1.2,
                 ),
               ),
-    
-              const SizedBox(height: 32),
-        
+
+              const SizedBox(height: 16),
+
+              Pressable(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    builder: (context) => SearchPage(),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Iconsax.search_normal_1_outline, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Search",
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
               GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                   childAspectRatio: 1.2,
                 ),
                 itemCount: quickAccess.length,
                 itemBuilder: (context, index) {
                   final item = quickAccess[index];
-    
+
                   return Pressable(
                     onTap: () => item['action'] != null
                         ? (item['action'] as Function)(context)
@@ -186,8 +215,119 @@ class _HomeFragmentState extends State<HomeFragment> {
                   );
                 },
               ),
-    
+
+              const SizedBox(height: 24),
+
+              Text(
+                'Today Split',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                ),
+              ),
+
               const SizedBox(height: 16),
+
+              Pressable(
+                onTap: () {},
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(32),
+                        color: Colors.white,
+                      ),
+                      child: Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.asset(
+                                    'assets/drawings/pushup.jpg',
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                ),
+                
+                                const SizedBox(width: 16),
+                
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Push Up",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Average of 8 sets per week",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      SliderTheme(
+                                        data: SliderThemeData(
+                                          padding: EdgeInsets.only(top: 8),
+                                          trackHeight: 14,
+                                          disabledActiveTrackColor:
+                                              AppColors.accent,
+                                          thumbShape:
+                                              SliderComponentShape.noThumb,
+                                        ),
+                                        child: Slider(
+                                          value: 10,
+                                          min: 0,
+                                          max: 100,
+                                          onChanged: null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                
+                          Positioned(
+                            right: 32 + 10,
+                            top: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(8),
+                                  bottomRight: Radius.circular(8),
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 12,
+                              ),
+                              child: Text(
+                                "Mediocre",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
