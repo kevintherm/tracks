@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/components/buttons/pressable.dart';
 import 'package:tracks/components/safe_keyboard.dart';
 
 class SearchPage extends StatefulWidget {
@@ -33,6 +35,20 @@ class _SearchPageState extends State<SearchPage> {
         child: SafeKeyboard(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                child: Row(
+                  children: [
+                    Pressable(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(Iconsax.arrow_left_2_outline, size: 24),
+                    ),
+                  ],
+                ),
+              ),
+
               TextField(
                 focusNode: _focusNode,
                 decoration: InputDecoration(

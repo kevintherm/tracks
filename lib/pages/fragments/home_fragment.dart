@@ -1,14 +1,9 @@
 import 'package:tracks/components/buttons/pressable.dart';
 import 'package:tracks/pages/search_page.dart';
-// import 'package:tracks/components/safe_keyboard.dart';
 import 'package:tracks/pages/session_page.dart';
-import 'package:tracks/services/auth_service.dart';
-// import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:provider/provider.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class HomeFragment extends StatefulWidget {
@@ -23,9 +18,6 @@ class _HomeFragmentState extends State<HomeFragment> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.read<AuthService>().currentUser;
-    final firstName = user?['name'].toString().split(' ')[0] ?? '';
-
     final quickAccess = [
       {
         'icon': Iconsax.thorchain_rune_outline,
@@ -88,6 +80,7 @@ class _HomeFragmentState extends State<HomeFragment> {
 
               const SizedBox(height: 16),
 
+              // Search bar
               Pressable(
                 onTap: () {
                   showModalBottomSheet(
@@ -127,6 +120,7 @@ class _HomeFragmentState extends State<HomeFragment> {
 
               const SizedBox(height: 16),
 
+              // Quick Access
               GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -216,6 +210,63 @@ class _HomeFragmentState extends State<HomeFragment> {
                 },
               ),
 
+              const SizedBox(height: 12),
+
+              // Quick Access 2
+              SizedBox(
+                height: 42,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  itemCount: 3,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Pressable(
+                        onTap: () {},
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            color: Theme.of(context).cardColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey[300]!,
+                                offset: const Offset(0, 1),
+                                blurRadius: 2,
+                              ),
+                              BoxShadow(
+                                color: Colors.grey[200]!,
+                                offset: const Offset(0, -2),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Iconsax.scan_outline, size: 20),
+                              const SizedBox(width: 6),
+                              Text(
+                                "Scan Calories",
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
               const SizedBox(height: 24),
 
               Text(
@@ -252,12 +303,13 @@ class _HomeFragmentState extends State<HomeFragment> {
                                     height: 100,
                                   ),
                                 ),
-                
+
                                 const SizedBox(width: 16),
-                
+
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "Push Up",
@@ -296,7 +348,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                               ],
                             ),
                           ),
-                
+
                           Positioned(
                             right: 32 + 10,
                             top: 0,
