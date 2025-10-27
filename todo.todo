@@ -1,7 +1,8 @@
-- create session history page
 - create manage schedule page
+    - exercises list page
     - create split
     - assign split to a day/weekly
+- create session history page
 - implement schedule fragment calendar
     - check split on day
     - github style like intensity

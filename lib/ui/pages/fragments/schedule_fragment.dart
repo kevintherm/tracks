@@ -4,7 +4,9 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/toast.dart';
 
 class ScheduleFragment extends StatefulWidget {
   const ScheduleFragment({super.key});
@@ -60,7 +62,14 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                 ),
               ),
               Pressable(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ManageSchedulePage(),
+                    ),
+                  );
+                },
                 child: Icon(Iconsax.weight_1_outline, size: 32),
               ),
             ],
@@ -124,12 +133,26 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Text(
-                "24 October, 2025",
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 1),
+                  Text(
+                    "24 October, 2025",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Pressable(
+                    onTap: () {
+                      Toast(
+                        context,
+                      ).neutral(content: Text("Assign workout to day or else"));
+                    },
+                    child: Icon(Iconsax.edit_outline),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),

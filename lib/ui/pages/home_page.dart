@@ -1,11 +1,12 @@
 import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/ui/pages/fragments/exercise_fragment.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
-import 'package:tracks/ui/pages/fragments/news_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
 import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tracks/ui/pages/fragments/workout_fragment.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> pages = [
     HomeFragment(),
     ScheduleFragment(),
+    WorkoutFragment(),
     ProfileFragment(),
   ];
   final _navigationItems = [
@@ -40,6 +42,11 @@ class _HomePageState extends State<HomePage> {
       label: "Schedule",
       icon: const Icon(Iconsax.calendar_2_outline),
       selectedIcon: const Icon(Iconsax.calendar_2_bold),
+    ),
+    NavigationDestination(
+      label: "Workouts",
+      icon: const Icon(Iconsax.weight_1_outline),
+      selectedIcon: const Icon(Iconsax.weight_1_bold),
     ),
     NavigationDestination(
       label: 'Profile',
