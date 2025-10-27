@@ -47,8 +47,13 @@ class _HomeFragmentState extends State<HomeFragment> {
         'action': (context) async {},
       },
       {
-        'icon': Iconsax.weight_1_outline,
+        'icon': Iconsax.calendar_1_outline,
         'title': 'Manage Schedule',
+        'action': (context) async {},
+      },
+      {
+        'icon': Iconsax.weight_1_outline,
+        'title': 'All Exercises',
         'action': (context) async {},
       },
     ];
