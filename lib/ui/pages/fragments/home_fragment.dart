@@ -1,6 +1,6 @@
-import 'package:tracks/components/buttons/pressable.dart';
-import 'package:tracks/pages/search_page.dart';
-import 'package:tracks/pages/session_page.dart';
+import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/search_page.dart';
+import 'package:tracks/ui/pages/session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';

@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tracks/models/app_user.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 
 class AuthService {
   late final Stream<Map<String, dynamic>?> authStateChanges;
+  late SharedPreferences _prefs;
+  static const String _syncEnabledKey = 'syncEnabled';
 
   AuthService() {
     final controller = StreamController<Map<String, dynamic>?>.broadcast();
@@ -24,8 +27,33 @@ class AuthService {
     authStateChanges = controller.stream;
   }
 
+  /// Initialize shared preferences
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
   /// Get the PocketBase client from the singleton service
   PocketBase get _pb => PocketBaseService.instance.client;
+
+  /// Check if sync is currently enabled
+  bool get isSyncEnabled => _prefs.getBool(_syncEnabledKey) ?? false;
+
+  /// Initialize sync preferences based on current auth state
+  Future<void> initializeSyncPreferences() async {
+    final isLoggedIn = _pb.authStore.isValid;
+    await _setSyncEnabled(isLoggedIn);
+  }
+
+  /// Update sync status based on backend availability
+  Future<void> updateSyncAvailability(bool isAvailable) async {
+    final isLoggedIn = _pb.authStore.isValid;
+    await _setSyncEnabled(isLoggedIn && isAvailable);
+  }
+
+  /// Private helper to set sync enabled state
+  Future<void> _setSyncEnabled(bool enabled) async {
+    await _prefs.setBool(_syncEnabledKey, enabled);
+  }
 
   Map<String, dynamic>? get currentUser => _pb.authStore.record?.toJson();
 
@@ -57,11 +85,16 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    return await _pb.collection('users').authWithPassword(email, password);
+    final result = await _pb.collection('users').authWithPassword(email, password);
+    // Enable sync when successfully logged in
+    await _setSyncEnabled(true);
+    return result;
   }
 
   Future<void> signOut() async {
     _pb.authStore.clear();
+    // Disable sync when user signs out
+    await _setSyncEnabled(false);
   }
 
   Future<AppUser?> fetchUserData() async {

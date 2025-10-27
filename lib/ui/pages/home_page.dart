@@ -1,8 +1,8 @@
 import 'package:icons_plus/icons_plus.dart';
-import 'package:tracks/pages/fragments/home_fragment.dart';
-import 'package:tracks/pages/fragments/news_fragment.dart';
-import 'package:tracks/pages/fragments/profile_fragment.dart';
-import 'package:tracks/pages/fragments/schedule_fragment.dart';
+import 'package:tracks/ui/pages/fragments/home_fragment.dart';
+import 'package:tracks/ui/pages/fragments/news_fragment.dart';
+import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
+import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> pages = [
     HomeFragment(),
     ScheduleFragment(),
-    NewsFragment(),
     ProfileFragment(),
   ];
   final _navigationItems = [

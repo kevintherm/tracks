@@ -1,6 +1,6 @@
-import 'package:tracks/components/safe_keyboard.dart';
+import 'package:tracks/ui/components/safe_keyboard.dart';
 import 'package:tracks/models/app_user.dart';
-import 'package:tracks/pages/edit_password_page.dart';
+import 'package:tracks/ui/pages/edit_password_page.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
@@ -10,6 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+
+import 'package:tracks/utils/toast.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -77,15 +79,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     String email = emailController.text.trim();
 
     if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Name and Email cannot be empty'),
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
-          ),
-        ),
-      );
+      Toast(context).error(content: Text('Name and Email cannot be empty'));
       return;
     }
 
@@ -377,9 +371,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .then((value) {
             setState(() {
               if (value == null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(fatalError), backgroundColor: Colors.red));
+                Toast(context).error(content: Text(fatalError));
                 Navigator.pop(context);
                 isLoading = false;
                 return;

@@ -1,5 +1,5 @@
-import 'package:tracks/components/safe_keyboard.dart';
-import 'package:tracks/pages/register_with_email_page.dart';
+import 'package:tracks/ui/components/safe_keyboard.dart';
+import 'package:tracks/ui/pages/register_with_email_page.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';

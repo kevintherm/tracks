@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracks/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/buttons/pressable.dart';
 
 /// Abstract parent class for all app buttons.
 /// Provides common functionality like styling and colors.

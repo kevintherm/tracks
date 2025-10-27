@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:tracks/components/buttons/pressable.dart';
-import 'package:tracks/components/safe_keyboard.dart';
+import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/safe_keyboard.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});

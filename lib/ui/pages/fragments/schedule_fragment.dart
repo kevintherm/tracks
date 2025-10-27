@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:tracks/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class ScheduleFragment extends StatefulWidget {

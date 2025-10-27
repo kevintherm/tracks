@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracks/components/buttons/app_button.dart';
+import 'package:tracks/ui/components/buttons/app_button.dart';
 
 /// Tertiary button - uses a lighter color for cancel, back, dismiss actions.
 class TertiaryButton extends AppButton {

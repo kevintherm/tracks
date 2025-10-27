@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:tracks/components/buttons/primary_button.dart';
-import 'package:tracks/components/buttons/tertiary_button.dart';
+import 'package:tracks/ui/components/buttons/primary_button.dart';
+import 'package:tracks/ui/components/buttons/tertiary_button.dart';
 
 class SessionFinishRepsDialog extends StatefulWidget {
   const SessionFinishRepsDialog({super.key});

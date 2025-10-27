@@ -1,5 +1,5 @@
-import 'package:tracks/pages/edit_password_page.dart';
-import 'package:tracks/pages/edit_profile_page.dart';
+import 'package:tracks/ui/pages/edit_password_page.dart';
+import 'package:tracks/ui/pages/edit_profile_page.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/utils/consts.dart';
@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart';
+import 'package:tracks/utils/toast.dart';
 
 class ProfileFragment extends StatefulWidget {
   const ProfileFragment({super.key});
@@ -62,9 +63,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
       await authService.signOut();
     } on Exception catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      Toast(context).error(content: Text(e.toString()));
     }
   }
 
@@ -110,7 +109,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  user?['name'],
+                  user?['name'] ?? 'User',
                   style: GoogleFonts.inter(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -120,7 +119,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                   ),
                 ),
                 Text(
-                  'Joined on ${DateFormat.yMMMd().format(DateTime.tryParse(user?["created"] ?? "") ?? DateTime.now())}',
+                  'Joined on ${DateFormat.yMMMd().format(DateTime.tryParse(user?["created"] as String? ?? "") ?? DateTime.now())}',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.normal,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracks/components/buttons/app_button.dart';
+import 'package:tracks/ui/components/buttons/app_button.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 /// Secondary button - uses the secondary coral/red color.

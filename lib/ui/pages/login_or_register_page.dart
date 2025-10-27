@@ -1,5 +1,5 @@
-import 'package:tracks/pages/login_with_email_page.dart';
-import 'package:tracks/pages/register_with_email_page.dart';
+import 'package:tracks/ui/pages/login_with_email_page.dart';
+import 'package:tracks/ui/pages/register_with_email_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
