@@ -5,7 +5,11 @@ import 'package:lottie/lottie.dart';
 import 'package:tracks/components/buttons/pressable.dart';
 import 'package:tracks/components/buttons/primary_button.dart';
 import 'package:tracks/components/safe_keyboard.dart';
+import 'package:tracks/pages/modals/session_finish_failure_dialog.dart';
+import 'package:tracks/pages/modals/session_finish_note_dialog.dart';
+import 'package:tracks/pages/modals/session_finish_rate_fail_dialog.dart';
 import 'package:tracks/pages/modals/session_options.dart';
+import 'package:tracks/pages/modals/session_finish_reps_dialog.dart';
 import 'package:tracks/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
@@ -21,9 +25,50 @@ class _SessionPageState extends State<SessionPage> {
 
   final double _progress = 10;
 
-  void _handleNextButton() {
-    Navigator.pushReplacement(
-      context,
+  void _handleNextButton() async {
+    final nav = Navigator.of(context);
+
+    int? currentReps = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(canPop: false, child: SessionFinishRepsDialog());
+      },
+    );
+
+    if (currentReps == null) return;
+
+    if (!mounted) return;
+    int failOnRep = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(canPop: false, child: SessionFinishFailureDialog());
+      },
+    );
+
+    int failRate = 0;
+    if (failOnRep != -1) {
+      if (!mounted) return;
+      failRate = await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return PopScope(canPop: false, child: SessionFinishRateFailDialog());
+        },
+      );
+    }
+
+    if (!mounted) return;
+    String? note = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(canPop: false, child: SessionFinishNoteDialog());
+      },
+    );
+
+    nav.pushReplacement(
       MaterialPageRoute(builder: (context) => SessionFinishPage()),
     );
   }

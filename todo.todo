@@ -1,6 +1,30 @@
+- create session history page
+- create manage schedule page
+    - create split
+    - assign split to a day/weekly
+- implement schedule fragment calendar
+    - check split on day
+    - github style like intensity
+        - 0 did not train
+        - 1 normal
+        - 2 -> 1-2 set failure
+        - 3 -> 50% set failure
+
 #plan
+onboarding page
+    - name, email, stats, etc
 home page   
     - mix of news, workout, and split plan??
 session page
     - option to switch the animations general idle or a guide to specific exercises
     - maybe switch to general if doesn't exists in the lib
+
+#done
+- create detailed end sub session
+    - dropset option
+        - 5,10,15kg down?
+        - last weight
+    - failure set
+        - what rep
+        - rate 1 - 10
+    - note about session

@@ -40,6 +40,19 @@ class _HomeFragmentState extends State<HomeFragment> {
       },
     ];
 
+    final quickChips = [
+      {
+        'icon': Iconsax.scan_outline,
+        'title': 'Scan Calories',
+        'action': (context) async {},
+      },
+      {
+        'icon': Iconsax.weight_1_outline,
+        'title': 'Manage Schedule',
+        'action': (context) async {},
+      },
+    ];
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -55,7 +68,7 @@ class _HomeFragmentState extends State<HomeFragment> {
               ],
             ),
           ),
-      
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -69,7 +82,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                     color: Colors.grey[700],
                   ),
                 ),
-      
+
                 Text(
                   'Never too early to start your workout eh?',
                   style: GoogleFonts.inter(
@@ -78,9 +91,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                     height: 1.2,
                   ),
                 ),
-      
+
                 const SizedBox(height: 16),
-      
+
                 // Search bar
                 Pressable(
                   onTap: () {
@@ -118,9 +131,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                     ),
                   ),
                 ),
-      
+
                 const SizedBox(height: 16),
-      
+
                 // Quick Access
                 GridView.builder(
                   shrinkWrap: true,
@@ -134,7 +147,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   itemCount: quickAccess.length,
                   itemBuilder: (context, index) {
                     final item = quickAccess[index];
-      
+
                     return Pressable(
                       onTap: () => item['action'] != null
                           ? (item['action'] as Function)(context)
@@ -210,9 +223,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                     );
                   },
                 ),
-      
+
                 const SizedBox(height: 12),
-      
+
                 // Quick Access 2
                 SizedBox(
                   height: 42,
@@ -220,12 +233,16 @@ class _HomeFragmentState extends State<HomeFragment> {
                     scrollDirection: Axis.horizontal,
                     clipBehavior: Clip.none,
                     padding: const EdgeInsets.symmetric(horizontal: 0),
-                    itemCount: 3,
+                    itemCount: quickChips.length,
                     itemBuilder: (context, index) {
+                      final item = quickChips[index];
+
                       return Padding(
                         padding: const EdgeInsets.only(right: 12),
                         child: Pressable(
-                          onTap: () {},
+                          onTap: () => item['action'] != null
+                              ? (item['action'] as Function)(context)
+                              : null,
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(32),
@@ -250,10 +267,10 @@ class _HomeFragmentState extends State<HomeFragment> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Iconsax.scan_outline, size: 20),
+                                Icon(item['icon'] as IconData, size: 20),
                                 const SizedBox(width: 6),
                                 Text(
-                                  "Scan Calories",
+                                  item['title'] as String,
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
@@ -267,9 +284,10 @@ class _HomeFragmentState extends State<HomeFragment> {
                     },
                   ),
                 ),
-      
+
                 const SizedBox(height: 24),
-      
+
+                // Today Split
                 Text(
                   'Today Split',
                   style: GoogleFonts.inter(
@@ -278,9 +296,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                     height: 1.2,
                   ),
                 ),
-      
+
                 const SizedBox(height: 16),
-      
+
                 Pressable(
                   onTap: () {},
                   child: Column(
@@ -304,9 +322,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-      
+
                                   const SizedBox(width: 16),
-      
+
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -349,7 +367,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-      
+
                             Positioned(
                               right: 32 + 10,
                               top: 0,
@@ -381,9 +399,10 @@ class _HomeFragmentState extends State<HomeFragment> {
                     ],
                   ),
                 ),
-      
+
                 const SizedBox(height: 24),
-      
+
+                // News
                 Text(
                   'Science Based News',
                   style: GoogleFonts.inter(
@@ -392,9 +411,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                     height: 1.2,
                   ),
                 ),
-      
+
                 const SizedBox(height: 16),
-      
+
                 Pressable(
                   onTap: () {},
                   child: Column(
@@ -418,9 +437,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-      
+
                                   const SizedBox(width: 16),
-      
+
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -463,7 +482,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-      
+
                             Positioned(
                               right: 32 + 10,
                               top: 0,
