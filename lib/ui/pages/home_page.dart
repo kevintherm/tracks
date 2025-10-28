@@ -1,5 +1,4 @@
 import 'package:icons_plus/icons_plus.dart';
-import 'package:tracks/ui/pages/fragments/exercise_fragment.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
 import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
