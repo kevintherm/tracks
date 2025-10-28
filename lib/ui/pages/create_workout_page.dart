@@ -8,6 +8,7 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
+import 'package:tracks/utils/toast.dart';
 
 // --- Models (for Type Safety) ---
 
@@ -215,7 +216,13 @@ class _AppBar extends StatelessWidget {
             "New Workout",
             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(width: 24), // Balance the back arrow
+          Pressable(
+            onTap: () {
+              Toast(context).success(content: Text("Saved"));
+              Navigator.of(context).pop();
+            },
+            child: const Icon(Iconsax.tick_square_outline, size: 24),
+          ),
         ],
       ),
     );
