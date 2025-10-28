@@ -70,7 +70,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                     ),
                   );
                 },
-                child: Icon(Iconsax.weight_1_outline, size: 32),
+                child: Icon(Iconsax.setting_outline, size: 32),
               ),
             ],
           ),
@@ -150,7 +150,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                         context,
                       ).neutral(content: Text("Assign workout to day or else"));
                     },
-                    child: Icon(Iconsax.edit_outline),
+                    child: Icon(Iconsax.edit_outline, color: Colors.grey,),
                   ),
                 ],
               ),

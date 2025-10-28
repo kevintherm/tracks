@@ -26,7 +26,7 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Note?',
+              'Note',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -43,7 +43,7 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
               child: const TextField(
                 maxLines: 6,
                 decoration: InputDecoration(
-                  hintText: 'Something about this set...',
+                  hintText: 'ex: Almost killed myself under the bench...',
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -58,10 +58,8 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
                 Navigator.of(context).pop(_note);
               },
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(MingCute.right_line, color: Colors.white),
-                  const SizedBox(width: 8),
                   Text(
                     "Next",
                     style: GoogleFonts.inter(
@@ -70,6 +68,8 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
                       color: Colors.white,
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Icon(MingCute.right_line, color: Colors.white),
                 ],
               ),
             ),

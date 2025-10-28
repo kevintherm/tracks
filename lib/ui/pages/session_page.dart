@@ -47,17 +47,14 @@ class _SessionPageState extends State<SessionPage> {
       },
     );
 
-    int failRate = 0;
-    if (failOnRep != -1) {
-      if (!mounted) return;
-      failRate = await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return PopScope(canPop: false, child: SessionFinishRateFailDialog());
-        },
-      );
-    }
+    if (!mounted) return;
+    final failRate = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(canPop: false, child: SessionFinishRateFailDialog());
+      },
+    );
 
     if (!mounted) return;
     String? note = await showDialog(

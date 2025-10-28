@@ -28,7 +28,7 @@ class _SessionFinishRateFailDialogState
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Rate the failure?',
+              'Rate the struggle',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -56,10 +56,8 @@ class _SessionFinishRateFailDialogState
                 Navigator.of(context).pop(_failRate);
               },
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(MingCute.right_line, color: Colors.white),
-                  const SizedBox(width: 8),
                   Text(
                     "Next",
                     style: GoogleFonts.inter(
@@ -68,6 +66,8 @@ class _SessionFinishRateFailDialogState
                       color: Colors.white,
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Icon(MingCute.right_line, color: Colors.white),
                 ],
               ),
             ),

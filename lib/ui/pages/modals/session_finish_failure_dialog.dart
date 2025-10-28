@@ -27,7 +27,7 @@ class _SessionFinishFailureDialogState extends State<SessionFinishFailureDialog>
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Set to failure?',
+              'Rep to failure?',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
