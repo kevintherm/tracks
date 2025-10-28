@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:tracks/ui/components/buttons/primary_button.dart';
 
 const String env = "local";
 const String appName = "Factual";
@@ -20,6 +22,28 @@ String errorClient(ClientException e) {
 
 String errorFatal(Exception e) {
   log(e.toString());
-  
+
   return fatalError;
+}
+
+Future<bool> showConfirmDialog(BuildContext context) async {
+  return await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text('Confirm'),
+          content: Text('Are you sure?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            PrimaryButton(
+              onTap: () => Navigator.of(context).pop(true),
+              child: Text('OK', style: TextStyle(color: Colors.white),),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 }

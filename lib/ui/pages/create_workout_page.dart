@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 
 // --- Models (for Type Safety) ---
 
@@ -58,15 +60,15 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   // --- List Management Methods ---
 
   void _onExerciseSelected(ExerciseOption option) {
-    final currentScroll = _scrollController.hasClients 
-        ? _scrollController.offset 
+    final currentScroll = _scrollController.hasClients
+        ? _scrollController.offset
         : 0.0;
-    
+
     setState(() {
       _selectedOptions.add(option);
       _selectOptions.remove(option);
     });
-    
+
     // Restore scroll position after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -76,15 +78,15 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   }
 
   void _onExerciseDeselected(ExerciseOption option) {
-    final currentScroll = _scrollController.hasClients 
-        ? _scrollController.offset 
+    final currentScroll = _scrollController.hasClients
+        ? _scrollController.offset
         : 0.0;
-    
+
     setState(() {
       _selectedOptions.remove(option);
       _selectOptions.add(option);
     });
-    
+
     // Restore scroll position after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -160,18 +162,12 @@ class _CardSection extends StatelessWidget {
   final String title;
   final Widget child;
 
-  const _CardSection({
-    required this.title,
-    required this.child,
-  });
+  const _CardSection({required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -217,10 +213,7 @@ class _AppBar extends StatelessWidget {
           ),
           Text(
             "New Workout",
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 24), // Balance the back arrow
         ],
@@ -261,11 +254,7 @@ class _ThumbnailSection extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Iconsax.document_upload_outline,
-                    size: 32,
-                    color: color,
-                  ),
+                  Icon(Iconsax.document_upload_outline, size: 32, color: color),
                   const SizedBox(height: 8),
                   Text(
                     "Upload a thumbnail",
@@ -371,10 +360,7 @@ class _ExercisesSectionState extends State<_ExercisesSection> {
                 fontSize: 16,
                 fontWeight: FontWeight.w300,
               ),
-              prefixIcon: const Icon(
-                Iconsax.search_normal_1_outline,
-                size: 20,
-              ),
+              prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
               filled: true,
               fillColor: Colors.grey[100],
               contentPadding: const EdgeInsets.symmetric(
@@ -458,6 +444,7 @@ class _ExercisesSectionState extends State<_ExercisesSection> {
                           isSelected: true,
                           order: index + 1,
                           dragIndex: index,
+                          onConfirm: () => showConfirmDialog(context),
                           direction:
                               _ExerciseAnimationDirection.selectedToAvailable,
                           onChanged: widget.onDeselect,
@@ -544,10 +531,7 @@ class _AiRecommendation extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 16,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -576,9 +560,7 @@ class _AiRecommendation extends StatelessWidget {
               onTap: () {},
               child: Text(
                 "Use!",
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                ),
+                style: GoogleFonts.inter(color: Colors.white),
               ),
             ),
           ],
@@ -591,10 +573,7 @@ class _AiRecommendation extends StatelessWidget {
 // --- Animated Exercise Item Widget ---
 
 // Enum for type-safe animation direction
-enum _ExerciseAnimationDirection {
-  selectedToAvailable,
-  availableToSelected,
-}
+enum _ExerciseAnimationDirection { selectedToAvailable, availableToSelected }
 
 class _ExerciseCheckbox extends StatefulWidget {
   final ExerciseOption item;
@@ -630,6 +609,9 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
   late Animation<Offset> _entranceSlideAnimation;
   bool _isEntering = true;
 
+  int selectedSets = 2;
+  int selectedReps = 2;
+
   @override
   void initState() {
     super.initState();
@@ -644,8 +626,8 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
     );
     _entranceSlideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
 
     if (widget.direction == _ExerciseAnimationDirection.selectedToAvailable) {
       // Slide down + fade out (selected to available)
@@ -654,11 +636,11 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
       );
       _slideAnimation =
           Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1.5)).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: Curves.easeInCubic,
-        ),
-      );
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeInCubic,
+            ),
+          );
       _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
         CurvedAnimation(
           parent: _animationController,
@@ -675,11 +657,11 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
       );
       _slideAnimation =
           Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1.5)).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: Curves.easeInCubic,
-        ),
-      );
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeInCubic,
+            ),
+          );
       _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
         CurvedAnimation(
           parent: _animationController,
@@ -721,8 +703,9 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
   @override
   Widget build(BuildContext context) {
     // Use entrance animation when first appearing, exit animation when leaving
-    final slidePosition =
-        _isEntering ? _entranceSlideAnimation : _slideAnimation;
+    final slidePosition = _isEntering
+        ? _entranceSlideAnimation
+        : _slideAnimation;
     final opacity = _isEntering ? _entranceOpacityAnimation : _opacityAnimation;
     final scale = _isEntering
         ? const AlwaysStoppedAnimation<double>(1.0)
@@ -734,7 +717,8 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
     final size = _isEntering ? _entranceOpacityAnimation : _opacityAnimation;
     // --- End of FIX ---
 
-    final content = SizeTransition( // --- FIX: Wrap with SizeTransition ---
+    final content = SizeTransition(
+      // --- FIX: Wrap with SizeTransition ---
       sizeFactor: size,
       child: SlideTransition(
         position: slidePosition,
@@ -750,99 +734,162 @@ class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (widget.isSelected && widget.dragIndex != null)
-                      ReorderableDragStartListener(
-                        index: widget.dragIndex!,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Icon(
-                            Iconsax.sort_outline,
-                            color: Colors.grey[600],
-                            size: 24,
+                    Row(
+                      children: [
+                        if (widget.isSelected && widget.dragIndex != null)
+                          ReorderableDragStartListener(
+                            index: widget.dragIndex!,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Icon(
+                                Iconsax.sort_outline,
+                                color: Colors.grey[600],
+                                size: 24,
+                              ),
+                            ),
+                          )
+                        else if (widget.isSelected)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(
+                              Iconsax.sort_outline,
+                              color: Colors.grey[600],
+                              size: 24,
+                            ),
+                          ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/drawings/pushup.jpg',
+                            width: 100,
+                            height: 100,
                           ),
                         ),
-                      )
-                    else if (widget.isSelected)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Icon(
-                          Iconsax.sort_outline,
-                          color: Colors.grey[600],
-                          size: 24,
-                        ),
-                      ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/drawings/pushup.jpg',
-                        width: 100,
-                        height: 100,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    widget.item.label,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (widget.isSelected)
+                                    DottedBorder(
+                                      options: RoundedRectDottedBorderOptions(
+                                        dashPattern: const [10, 5],
+                                        strokeWidth: 2,
+                                        radius: const Radius.circular(16),
+                                        color: AppColors.darkSecondary,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        widget.order.toString(),
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.darkSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
                               Text(
-                                widget.item.label,
+                                "Average of 8 sets per week",
                                 style: GoogleFonts.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey[600],
                                 ),
                               ),
-                              if (widget.isSelected)
-                                DottedBorder(
-                                  options: RoundedRectDottedBorderOptions(
-                                    dashPattern: const [10, 5],
-                                    strokeWidth: 2,
-                                    radius: const Radius.circular(16),
-                                    color: AppColors.darkSecondary,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 1,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    widget.order.toString(),
-                                    style: GoogleFonts.inter(
-                                      color: AppColors.darkSecondary,
-                                    ),
-                                  ),
+                              SliderTheme(
+                                data: SliderThemeData(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  trackHeight: 14,
+                                  disabledActiveTrackColor: AppColors.accent,
+                                  thumbShape: SliderComponentShape.noThumb,
                                 ),
+                                child: const Slider(
+                                  value: 10,
+                                  min: 0,
+                                  max: 100,
+                                  onChanged: null,
+                                ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Average of 8 sets per week",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          SliderTheme(
-                            data: SliderThemeData(
-                              padding: const EdgeInsets.only(top: 8),
-                              trackHeight: 14,
-                              disabledActiveTrackColor: AppColors.accent,
-                              thumbShape: SliderComponentShape.noThumb,
-                            ),
-                            child: const Slider(
-                              value: 10,
-                              min: 0,
-                              max: 100,
-                              onChanged: null,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+
+                    // Reps and set form
+                    if (widget.isSelected && widget.dragIndex != null) ...[
+                      const SizedBox(height: 16),
+
+                      Text(
+                        "Sets",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      NumberPicker(
+                        value: selectedSets,
+                        minValue: 1,
+                        maxValue: 20,
+                        haptics: false,
+                        axis: Axis.horizontal,
+                        selectedTextStyle: TextStyle(fontSize: 20),
+                        onChanged: (value) =>
+                            setState(() => selectedSets = value),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Text(
+                        "Reps",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      NumberPicker(
+                        value: selectedReps,
+                        minValue: 1,
+                        maxValue: 20,
+                        haptics: false,
+                        axis: Axis.horizontal,
+                        selectedTextStyle: TextStyle(fontSize: 20),
+                        onChanged: (value) =>
+                            setState(() => selectedReps = value),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
