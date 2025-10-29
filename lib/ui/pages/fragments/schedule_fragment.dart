@@ -51,6 +51,19 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           onDateSelected: (value) {},
           selectedDate: DateTime.now(),
         ),
+
+
+        Expanded(
+          child: Center(
+            child: Text(
+              "No schedules for selected day.",
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

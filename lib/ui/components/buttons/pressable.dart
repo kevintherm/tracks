@@ -49,7 +49,7 @@ class _PressableState extends State<Pressable> {
       onTapUp: isDisabled ? null : _onTapUp,
       onTapCancel: isDisabled ? null : _onTapCancel,
       child: AnimatedContainer(
-        duration: widget.duration ?? const Duration(milliseconds: 75),
+        duration: widget.duration ?? const Duration(milliseconds: 125),
         curve: Curves.easeOut,
         transform: Matrix4.identity()..scaleByDouble(scale, scale, 1, 1),
         transformAlignment: Alignment.center,
