@@ -7,7 +7,6 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:tracks/models/exercise_option.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/components/exercise_configuration_section.dart';
 import 'package:tracks/ui/components/exercise_list_item.dart';
 import 'package:tracks/ui/components/exercise_selection_section.dart';
 import 'package:tracks/ui/components/section_card.dart';
@@ -16,10 +15,9 @@ import 'package:tracks/utils/toast.dart';
 
 // --- Models (for Type Safety) ---
 class ExerciseConfig {
-  int sets;
-  int reps;
+  int muscleActivation;
 
-  ExerciseConfig({this.sets = 3, this.reps = 8});
+  ExerciseConfig({this.muscleActivation = 30});
 }
 
 // --- Page Widget ---
@@ -35,11 +33,11 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   final ScrollController _scrollController = ScrollController();
 
   // All available exercises in the system
-  final List<ExerciseOption> _allExercises = [
-    const ExerciseOption(label: 'Apple', id: '123'),
-    const ExerciseOption(label: 'Banana', id: '1234'),
-    const ExerciseOption(label: 'Mango', id: '12345'),
-    const ExerciseOption(label: 'Cherry', id: '123451'),
+  final List<ExerciseOption> _allMuscles = [
+    const ExerciseOption(label: 'Long Head Bicep', id: '123'),
+    const ExerciseOption(label: 'Short Head Bicep', id: '1234'),
+    const ExerciseOption(label: 'Chest', id: '12345'),
+    const ExerciseOption(label: 'Lats', id: '123451'),
     const ExerciseOption(label: 'Pier', id: '123452'),
   ];
   final List<ExerciseOption> _selectedOptions = [];
@@ -67,17 +65,11 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     });
   }
 
-  void _onReorder(int oldIndex, int newIndex) {
+  void _updateExerciseConfig(String exerciseId, int muscleActivation) {
     setState(() {
-      if (newIndex > oldIndex) newIndex--;
-      final item = _selectedOptions.removeAt(oldIndex);
-      _selectedOptions.insert(newIndex, item);
-    });
-  }
-
-  void _updateExerciseConfig(String exerciseId, int sets, int reps) {
-    setState(() {
-      _exerciseConfigs[exerciseId] = ExerciseConfig(sets: sets, reps: reps);
+      _exerciseConfigs[exerciseId] = ExerciseConfig(
+        muscleActivation: muscleActivation,
+      );
     });
   }
 
@@ -102,7 +94,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
               SectionCard(
                 title: "Targeted Muscles",
                 child: ExerciseSelectionSection<ExerciseOption>(
-                  allOptions: _allExercises,
+                  allOptions: _allMuscles,
                   selectedOptions: _selectedOptions,
                   onToggle: _toggleExerciseSelection,
                   getLabel: (option) => option.label,
@@ -129,38 +121,25 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
               // Exercise Configuration Section
               if (_selectedOptions.isNotEmpty)
                 SectionCard(
-                  title: "Configure Exercises (${_selectedOptions.length})",
-                  child:
-                      ExerciseConfigurationSection<
-                        ExerciseOption,
-                        ExerciseConfig
-                      >(
-                        selectedOptions: _selectedOptions,
-                        configurations: _exerciseConfigs,
-                        onReorder: _onReorder,
-                        getId: (option) => option.id,
-                        defaultConfig: () => ExerciseConfig(),
-                        itemBuilder: (option, index, config) {
-                          return _ConfigurableExerciseCard(
-                            key: ValueKey(option.id),
-                            option: option,
-                            order: index + 1,
-                            dragIndex: index,
-                            sets: config.sets,
-                            reps: config.reps,
-                            onSetsChanged: (value) => _updateExerciseConfig(
-                              option.id,
-                              value,
-                              config.reps,
-                            ),
-                            onRepsChanged: (value) => _updateExerciseConfig(
-                              option.id,
-                              config.sets,
-                              value,
-                            ),
-                          );
-                        },
-                      ),
+                  title: "Configure Activation (${_selectedOptions.length})",
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _selectedOptions.length,
+                    itemBuilder: (context, index) {
+                      final option = _selectedOptions[index];
+                      final config =
+                          _exerciseConfigs[option.id] ?? ExerciseConfig();
+
+                      return _ConfigurableExerciseCard(
+                        key: ValueKey(option.id),
+                        option: option,
+                        muscleActivation: config.muscleActivation,
+                        onActivationChanged: (value) =>
+                            _updateExerciseConfig(option.id, value),
+                      );
+                    },
+                  ),
                 ),
 
               Padding(
@@ -309,7 +288,9 @@ class _ExerciseDetailsSection extends StatelessWidget {
           const SizedBox(height: 16),
           TextField(
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+            ],
             decoration: InputDecoration(
               prefixIcon: Icon(MingCute.fire_line),
               labelText: 'Calories Burned (Kkal/Set)',
@@ -328,22 +309,14 @@ class _ExerciseDetailsSection extends StatelessWidget {
 // --- Configurable Exercise Card ---
 class _ConfigurableExerciseCard extends StatelessWidget {
   final ExerciseOption option;
-  final int order;
-  final int dragIndex;
-  final int sets;
-  final int reps;
-  final ValueChanged<int> onSetsChanged;
-  final ValueChanged<int> onRepsChanged;
+  final int muscleActivation;
+  final ValueChanged<int> onActivationChanged;
 
   const _ConfigurableExerciseCard({
     super.key,
     required this.option,
-    required this.order,
-    required this.dragIndex,
-    required this.sets,
-    required this.reps,
-    required this.onSetsChanged,
-    required this.onRepsChanged,
+    required this.muscleActivation,
+    required this.onActivationChanged,
   });
 
   @override
@@ -361,17 +334,6 @@ class _ConfigurableExerciseCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                ReorderableDragStartListener(
-                  index: dragIndex,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Iconsax.sort_outline,
-                      color: Colors.grey[600],
-                      size: 24,
-                    ),
-                  ),
-                ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
@@ -385,35 +347,12 @@ class _ConfigurableExerciseCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            option.label,
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          DottedBorder(
-                            options: RoundedRectDottedBorderOptions(
-                              dashPattern: const [10, 5],
-                              strokeWidth: 2,
-                              radius: const Radius.circular(16),
-                              color: AppColors.darkSecondary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1,
-                              ),
-                            ),
-                            child: Text(
-                              order.toString(),
-                              style: GoogleFonts.inter(
-                                color: AppColors.darkSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        option.label,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -431,14 +370,13 @@ class _ConfigurableExerciseCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Sets and Reps Configuration
             Row(
               children: [
                 Expanded(
                   child: Column(
                     children: [
                       Text(
-                        "Sets",
+                        "Muscle Activation (EMG)",
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -446,77 +384,44 @@ class _ConfigurableExerciseCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black26),
-                        ),
-                        child: Center(
-                          child: NumberPicker(
-                            value: sets,
-                            minValue: 1,
-                            maxValue: 20,
-                            haptics: false,
-                            axis: Axis.horizontal,
-                            itemWidth: 50,
-                            itemHeight: 50,
-                            textStyle: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: Colors.grey[400],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const SizedBox(width: 32),
+                          Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.black26),
                             ),
-                            selectedTextStyle: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                            child: NumberPicker(
+                              step: 5,
+                              value: muscleActivation,
+                              minValue: 5,
+                              maxValue: 100,
+                              haptics: false,
+                              axis: Axis.horizontal,
+                              itemWidth: 60,
+                              itemHeight: 50,
+                              textStyle: GoogleFonts.inter(
+                                fontSize: 16,
+                                color: Colors.grey[400],
+                              ),
+                              selectedTextStyle: GoogleFonts.inter(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                              onChanged: onActivationChanged,
                             ),
-                            onChanged: onSetsChanged,
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Reps",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black26),
-                        ),
-                        child: Center(
-                          child: NumberPicker(
-                            value: reps,
-                            minValue: 1,
-                            maxValue: 20,
-                            haptics: false,
-                            axis: Axis.horizontal,
-                            itemWidth: 50,
-                            itemHeight: 50,
-                            textStyle: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: Colors.grey[400],
-                            ),
-                            selectedTextStyle: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                            onChanged: onRepsChanged,
+                          Icon(
+                            Iconsax.percentage_square_outline,
+                            size: 32,
+                            color: Colors.grey[400],
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
