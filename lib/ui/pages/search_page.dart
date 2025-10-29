@@ -36,7 +36,10 @@ class _SearchPageState extends State<SearchPage> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 8,
+                ),
                 child: Row(
                   children: [
                     Pressable(

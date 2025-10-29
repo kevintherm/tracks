@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-
   // Primary - Teal (main accent color)
   static const Color primary = Colors.teal;
   static const Color lightPrimary = Color.fromARGB(255, 53, 211, 195);
@@ -13,5 +12,4 @@ class AppColors {
   // Accent - Vibrant yellow/gold for highlights and emphasis
   static const Color accent = Color.fromARGB(255, 255, 193, 7);
   static const Color lightAccent = Color.fromARGB(255, 255, 213, 79);
-
 }

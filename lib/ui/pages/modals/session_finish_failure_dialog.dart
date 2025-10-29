@@ -9,10 +9,12 @@ class SessionFinishFailureDialog extends StatefulWidget {
   const SessionFinishFailureDialog({super.key});
 
   @override
-  State<SessionFinishFailureDialog> createState() => _SessionFinishFailureDialogState();
+  State<SessionFinishFailureDialog> createState() =>
+      _SessionFinishFailureDialogState();
 }
 
-class _SessionFinishFailureDialogState extends State<SessionFinishFailureDialog> {
+class _SessionFinishFailureDialogState
+    extends State<SessionFinishFailureDialog> {
   int _failOnRep = 6;
 
   @override
@@ -60,7 +62,7 @@ class _SessionFinishFailureDialogState extends State<SessionFinishFailureDialog>
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white
+                        color: Colors.white,
                       ),
                     ),
                   ),

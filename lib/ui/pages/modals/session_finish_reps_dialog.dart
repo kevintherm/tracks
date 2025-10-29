@@ -9,7 +9,8 @@ class SessionFinishRepsDialog extends StatefulWidget {
   const SessionFinishRepsDialog({super.key});
 
   @override
-  State<SessionFinishRepsDialog> createState() => _SessionFinishRepsDialogState();
+  State<SessionFinishRepsDialog> createState() =>
+      _SessionFinishRepsDialogState();
 }
 
 class _SessionFinishRepsDialogState extends State<SessionFinishRepsDialog> {
@@ -60,7 +61,7 @@ class _SessionFinishRepsDialogState extends State<SessionFinishRepsDialog> {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white
+                        color: Colors.white,
                       ),
                     ),
                   ),

@@ -85,7 +85,9 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final result = await _pb.collection('users').authWithPassword(email, password);
+    final result = await _pb
+        .collection('users')
+        .authWithPassword(email, password);
     // Enable sync when successfully logged in
     await _setSyncEnabled(true);
     return result;
@@ -107,7 +109,9 @@ class AuthService {
     return AppUser.fromMap(data, uid);
   }
 
-  Future<RecordModel> updateProfile({required Map<String, dynamic> toUpdate}) async {
+  Future<RecordModel> updateProfile({
+    required Map<String, dynamic> toUpdate,
+  }) async {
     final record = _pb.authStore.record;
     if (record == null) throw Exception('No user is currently signed in.');
 
@@ -119,26 +123,26 @@ class AuthService {
     // Process each field
     toUpdate.forEach((key, value) {
       if (!allowed.contains(key)) return;
-      
+
       if (key == 'avatar' && value is List<int>) {
         // This is avatar file bytes
         final fileName = toUpdate['avatarName'] as String? ?? 'avatar.jpg';
-        files.add(http.MultipartFile.fromBytes(
-          'avatar',
-          value,
-          filename: fileName,
-        ));
+        files.add(
+          http.MultipartFile.fromBytes('avatar', value, filename: fileName),
+        );
       } else if (key != 'avatarName') {
         // Regular field
         body[key] = value;
       }
     });
 
-    final updatedRecord = await _pb.collection('users').update(record.id, body: body, files: files);
-    
+    final updatedRecord = await _pb
+        .collection('users')
+        .update(record.id, body: body, files: files);
+
     // Update the auth store with the new record
     _pb.authStore.save(_pb.authStore.token, updatedRecord);
-    
+
     return updatedRecord;
   }
 
@@ -167,25 +171,17 @@ class AuthService {
     final email = record.toJson()['email'] as String? ?? '';
 
     // Reauthenticate
-    await signInWithEmail(
-      email: email,
-      password: currentPassword,
-    );
+    await signInWithEmail(email: email, password: currentPassword);
 
     final body = {
       'oldPassword': currentPassword,
-      'password': newPassword, 
-      'passwordConfirm': newPassword
+      'password': newPassword,
+      'passwordConfirm': newPassword,
     };
 
-    await _pb
-        .collection('users')
-        .update(record.id, body: body);
-        
+    await _pb.collection('users').update(record.id, body: body);
+
     // Re-authenticate with new password to get a fresh token
-    await signInWithEmail(
-      email: email,
-      password: newPassword,
-    );
+    await signInWithEmail(email: email, password: newPassword);
   }
 }

@@ -51,9 +51,9 @@ class _ProfileFragmentState extends State<ProfileFragment> {
         'label': 'Dark Mode',
         'action': (context) {
           // Navigator.push(context, )
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
   Future<void> signOut(BuildContext context) async {
@@ -69,7 +69,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
 
   ImageProvider _getUserAvatarProvider(Map<String, dynamic>? user) {
     if (user == null) return NetworkImage(defaultAvatar);
-    
+
     final userAvatar = user['avatar'] as String?;
     if (userAvatar != null && userAvatar.isNotEmpty) {
       // If it's a URL, use NetworkImage
@@ -79,11 +79,12 @@ class _ProfileFragmentState extends State<ProfileFragment> {
       // If it's a PocketBase file reference, construct the URL
       else {
         final userId = user['id'] as String? ?? '';
-        final pbUrl = PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
+        final pbUrl =
+            PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
         return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
       }
     }
-    
+
     // Fall back to default avatar
     return NetworkImage(defaultAvatar);
   }
@@ -104,8 +105,8 @@ class _ProfileFragmentState extends State<ProfileFragment> {
               children: [
                 CircleAvatar(
                   backgroundImage: _getUserAvatarProvider(user),
-                  backgroundColor: Colors.grey[300], 
-                  radius: 56.0
+                  backgroundColor: Colors.grey[300],
+                  radius: 56.0,
                 ),
                 SizedBox(height: 8.0),
                 Text(
@@ -129,7 +130,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
               ],
             ),
           ),
-    
+
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black12, width: 1),
@@ -155,7 +156,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       final item = accountSection['items'][index];
-    
+
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(16.0),
                         child: Material(
@@ -179,9 +180,9 @@ class _ProfileFragmentState extends State<ProfileFragment> {
               ),
             ),
           ),
-    
+
           const SizedBox(height: 16),
-    
+
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black12, width: 1),
@@ -207,7 +208,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       final item = preferencesSection['items'][index];
-    
+
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(16.0),
                         child: Material(
@@ -231,9 +232,9 @@ class _ProfileFragmentState extends State<ProfileFragment> {
               ),
             ),
           ),
-    
+
           const SizedBox(height: 16),
-    
+
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -272,9 +273,9 @@ class _ProfileFragmentState extends State<ProfileFragment> {
               child: Text('Sign Out'),
             ),
           ),
-    
+
           Spacer(),
-    
+
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

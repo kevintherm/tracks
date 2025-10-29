@@ -4,14 +4,19 @@ class AppUser {
   final String name;
   final String email;
 
-  AppUser({required this.uid, required this.photoPath, required this.name, required this.email});
+  AppUser({
+    required this.uid,
+    required this.photoPath,
+    required this.name,
+    required this.email,
+  });
 
   factory AppUser.fromMap(Map<String, dynamic> data, String uid) {
     return AppUser(
-      uid: uid, 
-      photoPath: data['avatar'] ?? data['photoPath'] ?? '', 
-      name: data['name'] ?? '', 
-      email: data['email'] ?? ''
+      uid: uid,
+      photoPath: data['avatar'] ?? data['photoPath'] ?? '',
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
     );
   }
 
@@ -19,7 +24,12 @@ class AppUser {
     return AppUser(uid: '', photoPath: '', name: '', email: '');
   }
 
-  AppUser copyWith({String? uid, String? name, String? photoPath, String? email}) {
+  AppUser copyWith({
+    String? uid,
+    String? name,
+    String? photoPath,
+    String? email,
+  }) {
     return AppUser(
       uid: uid ?? this.uid,
       name: name ?? this.name,

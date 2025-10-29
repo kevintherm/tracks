@@ -47,7 +47,9 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registration success, please login with your new credentials.'),
+          content: Text(
+            'Registration success, please login with your new credentials.',
+          ),
           backgroundColor: Colors.green,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -59,7 +61,6 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
         ),
       );
     } on ClientException catch (e) {
-
       final errors = e.response['data'] ?? {};
       errors.forEach((key, value) {
         setState(() {
@@ -166,13 +167,13 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
-                                  onChanged: (value) {
-                                    if (_errors['name'] != null) {
-                                      setState(() {
-                                        _errors['name'] = null;
-                                      });
-                                    }
-                                  },
+                                onChanged: (value) {
+                                  if (_errors['name'] != null) {
+                                    setState(() {
+                                      _errors['name'] = null;
+                                    });
+                                  }
+                                },
                                 validator: (value) =>
                                     value == null || value.isEmpty
                                     ? 'Please enter your name'
@@ -188,13 +189,13 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     borderRadius: BorderRadius.circular(99.0),
                                   ),
                                 ),
-                                  onChanged: (value) {
-                                    if (_errors['email'] != null) {
-                                      setState(() {
-                                        _errors['email'] = null;
-                                      });
-                                    }
-                                  },
+                                onChanged: (value) {
+                                  if (_errors['email'] != null) {
+                                    setState(() {
+                                      _errors['email'] = null;
+                                    });
+                                  }
+                                },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter your email';
@@ -230,13 +231,13 @@ class _RegisterWithEmailPageState extends State<RegisterWithEmailPage> {
                                     },
                                   ),
                                 ),
-                                  onChanged: (value) {
-                                    if (_errors['password'] != null) {
-                                      setState(() {
-                                        _errors['password'] = null;
-                                      });
-                                    }
-                                  },
+                                onChanged: (value) {
+                                  if (_errors['password'] != null) {
+                                    setState(() {
+                                      _errors['password'] = null;
+                                    });
+                                  }
+                                },
                                 validator: (value) =>
                                     value == null || value.isEmpty
                                     ? 'Please enter your password'

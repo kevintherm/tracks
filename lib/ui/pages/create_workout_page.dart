@@ -1,34 +1,19 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:tracks/models/exercise_option.dart';
+import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/components/buttons/primary_button.dart';
+import 'package:tracks/ui/components/exercise_configuration_section.dart';
+import 'package:tracks/ui/components/exercise_list_item.dart';
+import 'package:tracks/ui/components/exercise_selection_section.dart';
+import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
 // --- Models (for Type Safety) ---
-
-class ExerciseOption {
-  final String id;
-  final String label;
-
-  ExerciseOption({required this.id, required this.label});
-
-  // Add equals and hashCode for proper list comparison
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ExerciseOption &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-}
-
 class ExerciseConfig {
   int sets;
   int reps;
@@ -51,11 +36,11 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   // All available exercises in the system
   final List<ExerciseOption> _allExercises = [
-    ExerciseOption(label: 'Apple', id: '123'),
-    ExerciseOption(label: 'Banana', id: '1234'),
-    ExerciseOption(label: 'Mango', id: '12345'),
-    ExerciseOption(label: 'Cherry', id: '123451'),
-    ExerciseOption(label: 'Pier', id: '123452'),
+    const ExerciseOption(label: 'Apple', id: '123'),
+    const ExerciseOption(label: 'Banana', id: '1234'),
+    const ExerciseOption(label: 'Mango', id: '12345'),
+    const ExerciseOption(label: 'Cherry', id: '123451'),
+    const ExerciseOption(label: 'Pier', id: '123452'),
   ];
   final List<ExerciseOption> _selectedOptions = [];
   final Map<String, ExerciseConfig> _exerciseConfigs = {};
@@ -121,74 +106,71 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               _WorkoutDetailsSection(),
 
               // Exercise Selection Section
-              _ExerciseSelectionSection(
-                allOptions: _allExercises,
-                selectedOptions: _selectedOptions,
-                onToggle: _toggleExerciseSelection,
+              SectionCard(
+                title: "Select Exercises",
+                child: ExerciseSelectionSection<ExerciseOption>(
+                  allOptions: _allExercises,
+                  selectedOptions: _selectedOptions,
+                  onToggle: _toggleExerciseSelection,
+                  getLabel: (option) => option.label,
+                  getId: (option) => option.id,
+                  itemBuilder: (option, isSelected, onChanged) {
+                    return ExerciseListItem(
+                      id: option.id,
+                      label: option.label,
+                      isSelected: isSelected,
+                      onChanged: onChanged,
+                      imagePath: option.imagePath,
+                      subtitle: option.subtitle,
+                    );
+                  },
+                  aiRecommendation: AiRecommendation(
+                    onUse: () {
+                      // TODO: Implement AI recommendation
+                    },
+                    buttonText: "Use!",
+                  ),
+                ),
               ),
 
               // Exercise Configuration Section
               if (_selectedOptions.isNotEmpty)
-                _ExerciseConfigurationSection(
-                  selectedOptions: _selectedOptions,
-                  exerciseConfigs: _exerciseConfigs,
-                  onReorder: _onReorder,
-                  onUpdateConfig: _updateExerciseConfig,
+                SectionCard(
+                  title: "Configure Exercises (${_selectedOptions.length})",
+                  child:
+                      ExerciseConfigurationSection<
+                        ExerciseOption,
+                        ExerciseConfig
+                      >(
+                        selectedOptions: _selectedOptions,
+                        configurations: _exerciseConfigs,
+                        onReorder: _onReorder,
+                        getId: (option) => option.id,
+                        defaultConfig: () => ExerciseConfig(),
+                        itemBuilder: (option, index, config) {
+                          return _ConfigurableExerciseCard(
+                            key: ValueKey(option.id),
+                            option: option,
+                            order: index + 1,
+                            dragIndex: index,
+                            sets: config.sets,
+                            reps: config.reps,
+                            onSetsChanged: (value) => _updateExerciseConfig(
+                              option.id,
+                              value,
+                              config.reps,
+                            ),
+                            onRepsChanged: (value) => _updateExerciseConfig(
+                              option.id,
+                              config.sets,
+                              value,
+                            ),
+                          );
+                        },
+                      ),
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// --- Reusable Card Widget ---
-
-const List<BoxShadow> _kCardShadow = [
-  BoxShadow(
-    color: Color(0xFFE0E0E0), // Colors.grey[300]!
-    offset: Offset(0, 1),
-    blurRadius: 2,
-  ),
-  BoxShadow(
-    color: Color(0xFFF5F5F5), // Colors.grey[200]!
-    offset: Offset(0, -2),
-    blurRadius: 10,
-  ),
-];
-
-class _CardSection extends StatelessWidget {
-  final String title;
-  final Widget child;
-
-  const _CardSection({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          color: Colors.white,
-          boxShadow: _kCardShadow,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            child,
-          ],
         ),
       ),
     );
@@ -242,7 +224,7 @@ class _ThumbnailSection extends StatelessWidget {
     final bool isDisabled = useFirstExercise;
     final Color color = isDisabled ? Colors.grey : AppColors.secondary;
 
-    return _CardSection(
+    return SectionCard(
       title: "Thumbnail",
       child: Column(
         children: [
@@ -292,7 +274,7 @@ class _WorkoutDetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _CardSection(
+    return SectionCard(
       title: "Workout Details",
       child: Column(
         children: [
@@ -316,221 +298,6 @@ class _WorkoutDetailsSection extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-const OutlineInputBorder _kSearchBorder = OutlineInputBorder(
-  borderRadius: BorderRadius.all(Radius.circular(32)),
-  borderSide: BorderSide.none,
-);
-
-// --- Exercise Selection Section (Checkboxes) ---
-class _ExerciseSelectionSection extends StatefulWidget {
-  final List<ExerciseOption> allOptions;
-  final List<ExerciseOption> selectedOptions;
-  final void Function(ExerciseOption, bool) onToggle;
-
-  const _ExerciseSelectionSection({
-    required this.allOptions,
-    required this.selectedOptions,
-    required this.onToggle,
-  });
-
-  @override
-  State<_ExerciseSelectionSection> createState() =>
-      _ExerciseSelectionSectionState();
-}
-
-class _ExerciseSelectionSectionState extends State<_ExerciseSelectionSection> {
-  String _searchQuery = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final filteredOptions = widget.allOptions.where((option) {
-      return option.label.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
-
-    return _CardSection(
-      title: "Select Exercises",
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search Bar
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: "Search",
-              hintStyle: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w300,
-              ),
-              prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
-              filled: true,
-              fillColor: Colors.grey[100],
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 16,
-              ),
-              border: _kSearchBorder,
-              enabledBorder: _kSearchBorder,
-              focusedBorder: _kSearchBorder,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // AI Recommendation
-          _AiRecommendation(),
-          const SizedBox(height: 16),
-
-          // Exercise List
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filteredOptions.length,
-            itemBuilder: (context, index) {
-              final option = filteredOptions[index];
-              final isSelected = widget.selectedOptions.contains(option);
-
-              return _ExerciseCheckboxItem(
-                key: ValueKey(option.id),
-                option: option,
-                isSelected: isSelected,
-                onChanged: (value) => widget.onToggle(option, value ?? false),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// --- Simple Checkbox Item ---
-class _ExerciseCheckboxItem extends StatelessWidget {
-  final ExerciseOption option;
-  final bool isSelected;
-  final ValueChanged<bool?> onChanged;
-
-  const _ExerciseCheckboxItem({
-    super.key,
-    required this.option,
-    required this.isSelected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.grey[50],
-        border: Border.all(
-          color: isSelected ? AppColors.secondary : Colors.grey[200]!,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      child: CheckboxListTile(
-        value: isSelected,
-        onChanged: onChanged,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        title: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/drawings/pushup.jpg',
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    option.label,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Average of 8 sets per week",
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// --- Exercise Configuration Section ---
-class _ExerciseConfigurationSection extends StatelessWidget {
-  final List<ExerciseOption> selectedOptions;
-  final Map<String, ExerciseConfig> exerciseConfigs;
-  final void Function(int, int) onReorder;
-  final void Function(String, int, int) onUpdateConfig;
-
-  const _ExerciseConfigurationSection({
-    required this.selectedOptions,
-    required this.exerciseConfigs,
-    required this.onReorder,
-    required this.onUpdateConfig,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _CardSection(
-      title: "Configure Exercises (${selectedOptions.length})",
-      child: ReorderableListView.builder(
-        buildDefaultDragHandles: false,
-        onReorder: onReorder,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: selectedOptions.length,
-        proxyDecorator: (child, index, animation) {
-          return Material(
-            color: Colors.transparent,
-            elevation: 8,
-            borderRadius: BorderRadius.circular(16),
-            child: child,
-          );
-        },
-        itemBuilder: (context, index) {
-          final option = selectedOptions[index];
-          final config = exerciseConfigs[option.id] ?? ExerciseConfig();
-
-          return _ConfigurableExerciseCard(
-            key: ValueKey(option.id),
-            option: option,
-            order: index + 1,
-            dragIndex: index,
-            sets: config.sets,
-            reps: config.reps,
-            onSetsChanged: (value) =>
-                onUpdateConfig(option.id, value, config.reps),
-            onRepsChanged: (value) =>
-                onUpdateConfig(option.id, config.sets, value),
-          );
-        },
       ),
     );
   }
@@ -739,73 +506,4 @@ class _ConfigurableExerciseCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _AiRecommendation extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/ai-weight.svg',
-                  width: 20,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.black87,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Try recommendation!",
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ],
-            ),
-            PrimaryButton(
-              onTap: () {},
-              child: Text(
-                "Use!",
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Future<bool> showConfirmDialog(BuildContext context) async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Remove Exercise'),
-          content: const Text('Are you sure you want to remove this exercise?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Remove'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
 }

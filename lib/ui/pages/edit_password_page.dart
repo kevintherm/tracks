@@ -26,9 +26,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
 
   void handleChangePassword(BuildContext context) async {
     FocusScope.of(context).unfocus();
-  if (!_formKey.currentState!.validate()) return;
-  final currentPassword = currentPasswordController.text.trim();
-  final newPassword = newPasswordController.text.trim();
+    if (!_formKey.currentState!.validate()) return;
+    final currentPassword = currentPasswordController.text.trim();
+    final newPassword = newPasswordController.text.trim();
 
     setState(() {
       isLoading = true;
@@ -61,7 +61,6 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
         ),
       );
     } on ClientException catch (error) {
-      
       final errs = error.response['data'] ?? {};
       errs.forEach((key, value) {
         setState(() {

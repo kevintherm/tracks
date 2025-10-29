@@ -11,12 +11,7 @@ class Pressable extends StatefulWidget {
   final Duration? duration;
 
   /// Creates a pressable wrapper.
-  const Pressable({
-    super.key,
-    required this.child,
-    this.onTap,
-    this.duration
-  });
+  const Pressable({super.key, required this.child, this.onTap, this.duration});
 
   @override
   State<Pressable> createState() => _PressableState();

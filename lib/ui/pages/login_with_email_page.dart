@@ -39,9 +39,15 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
     setState(() => _isLoading = true);
 
     try {
-      final AuthService authService = Provider.of<AuthService>(context, listen: false);
+      final AuthService authService = Provider.of<AuthService>(
+        context,
+        listen: false,
+      );
 
-      await authService.signInWithEmail(email: _emailController.text, password: _passwordController.text);
+      await authService.signInWithEmail(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,7 +56,10 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8.0),
+              topRight: Radius.circular(8.0),
+            ),
           ),
           duration: snackBarShort,
         ),
@@ -82,7 +91,9 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
   }
 
   void handleRedirectRegister(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterWithEmailPage()));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RegisterWithEmailPage()),
+    );
   }
 
   @override
@@ -102,20 +113,39 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SvgPicture.asset('assets/icons/solar_icons/login-3.svg', width: 64, height: 64),
+                      SvgPicture.asset(
+                        'assets/icons/solar_icons/login-3.svg',
+                        width: 64,
+                        height: 64,
+                      ),
 
-                      Text('Login', style: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Login',
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Did not have an account?', style: GoogleFonts.inter(fontWeight: FontWeight.normal)),
+                          Text(
+                            'Did not have an account?',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                           SizedBox(width: 8),
                           GestureDetector(
                             onTap: () => handleRedirectRegister(context),
                             child: Text(
                               'Register',
-                              style: GoogleFonts.inter(color: Colors.teal, fontSize: 16, fontWeight: FontWeight.w600),
+                              style: GoogleFonts.inter(
+                                color: Colors.teal,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -128,7 +158,9 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(99.0)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(99.0),
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -150,9 +182,15 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                         obscureText: _hidePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(99.0)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(99.0),
+                          ),
                           suffixIcon: IconButton(
-                            icon: Icon(_hidePassword ? Icons.visibility : Icons.visibility_off),
+                            icon: Icon(
+                              _hidePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _hidePassword = !_hidePassword;
@@ -160,14 +198,21 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                             },
                           ),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'Please enter your password' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your password'
+                            : null,
                       ),
 
                       const SizedBox(height: 16.0),
 
                       GestureDetector(
                         onTap: () => handleRedirectRegister(context),
-                        child: Text('Forgot your password?', style: GoogleFonts.inter(fontWeight: FontWeight.normal)),
+                        child: Text(
+                          'Forgot your password?',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 16.0),

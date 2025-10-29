@@ -10,12 +10,8 @@ class Exercise {
   String? pocketbaseId;
 
   late String name;
-  
+
   bool needSync;
 
-  Exercise({
-    required this.name,
-    this.pocketbaseId,
-    this.needSync = true,
-  });
+  Exercise({required this.name, this.pocketbaseId, this.needSync = true});
 }

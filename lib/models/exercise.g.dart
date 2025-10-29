@@ -17,21 +17,13 @@ const ExerciseSchema = CollectionSchema(
   name: r'Exercise',
   id: 2972066467915231902,
   properties: {
-    r'name': PropertySchema(
-      id: 0,
-      name: r'name',
-      type: IsarType.string,
-    ),
-    r'needSync': PropertySchema(
-      id: 1,
-      name: r'needSync',
-      type: IsarType.bool,
-    ),
+    r'name': PropertySchema(id: 0, name: r'name', type: IsarType.string),
+    r'needSync': PropertySchema(id: 1, name: r'needSync', type: IsarType.bool),
     r'pocketbaseId': PropertySchema(
       id: 2,
       name: r'pocketbaseId',
       type: IsarType.string,
-    )
+    ),
   },
   estimateSize: _exerciseEstimateSize,
   serialize: _exerciseSerialize,
@@ -49,9 +41,9 @@ const ExerciseSchema = CollectionSchema(
           name: r'pocketbaseId',
           type: IndexType.hash,
           caseSensitive: true,
-        )
+        ),
       ],
-    )
+    ),
   },
   links: {},
   embeddedSchemas: {},
@@ -151,7 +143,8 @@ extension ExerciseByIndex on IsarCollection<Exercise> {
   }
 
   Future<List<Exercise?>> getAllByPocketbaseId(
-      List<String?> pocketbaseIdValues) {
+    List<String?> pocketbaseIdValues,
+  ) {
     final values = pocketbaseIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'pocketbaseId', values);
   }
@@ -183,8 +176,10 @@ extension ExerciseByIndex on IsarCollection<Exercise> {
     return putAllByIndex(r'pocketbaseId', objects);
   }
 
-  List<Id> putAllByPocketbaseIdSync(List<Exercise> objects,
-      {bool saveLinks = true}) {
+  List<Id> putAllByPocketbaseIdSync(
+    List<Exercise> objects, {
+    bool saveLinks = true,
+  }) {
     return putAllByIndexSync(r'pocketbaseId', objects, saveLinks: saveLinks);
   }
 }
@@ -200,10 +195,7 @@ extension ExerciseQueryWhereSort on QueryBuilder<Exercise, Exercise, QWhere> {
 extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
   QueryBuilder<Exercise, Exercise, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
@@ -229,8 +221,10 @@ extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<Exercise, Exercise, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -238,8 +232,10 @@ extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<Exercise, Exercise, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -254,76 +250,91 @@ extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterWhereClause> pocketbaseIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'pocketbaseId',
-        value: [null],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'pocketbaseId', value: [null]),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterWhereClause> pocketbaseIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'pocketbaseId',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'pocketbaseId',
+          lower: [null],
+          includeLower: false,
+          upper: [],
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterWhereClause> pocketbaseIdEqualTo(
-      String? pocketbaseId) {
+    String? pocketbaseId,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'pocketbaseId',
-        value: [pocketbaseId],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'pocketbaseId',
+          value: [pocketbaseId],
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterWhereClause> pocketbaseIdNotEqualTo(
-      String? pocketbaseId) {
+    String? pocketbaseId,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'pocketbaseId',
-              lower: [],
-              upper: [pocketbaseId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'pocketbaseId',
-              lower: [pocketbaseId],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'pocketbaseId',
+                lower: [],
+                upper: [pocketbaseId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'pocketbaseId',
+                lower: [pocketbaseId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'pocketbaseId',
-              lower: [pocketbaseId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'pocketbaseId',
-              lower: [],
-              upper: [pocketbaseId],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'pocketbaseId',
+                lower: [pocketbaseId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'pocketbaseId',
+                lower: [],
+                upper: [pocketbaseId],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
@@ -333,10 +344,9 @@ extension ExerciseQueryFilter
     on QueryBuilder<Exercise, Exercise, QFilterCondition> {
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
@@ -345,11 +355,13 @@ extension ExerciseQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -358,11 +370,13 @@ extension ExerciseQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -373,13 +387,15 @@ extension ExerciseQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
@@ -388,11 +404,13 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -402,12 +420,14 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -417,12 +437,14 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -434,14 +456,16 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'name',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -450,11 +474,13 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -463,80 +489,86 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> nameContains(
-      String value,
-      {bool caseSensitive = true}) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> nameMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'name',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'name', value: ''),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'name', value: ''),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> needSyncEqualTo(
-      bool value) {
+    bool value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'needSync',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'needSync', value: value),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> pocketbaseIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'pocketbaseId',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'pocketbaseId'),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      pocketbaseIdIsNotNull() {
+  pocketbaseIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'pocketbaseId',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'pocketbaseId'),
+      );
     });
   }
 
@@ -545,27 +577,31 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      pocketbaseIdGreaterThan(
+  pocketbaseIdGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -575,12 +611,14 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -592,28 +630,29 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'pocketbaseId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'pocketbaseId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      pocketbaseIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  pocketbaseIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -622,55 +661,61 @@ extension ExerciseQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> pocketbaseIdContains(
-      String value,
-      {bool caseSensitive = true}) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'pocketbaseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'pocketbaseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> pocketbaseIdMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'pocketbaseId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'pocketbaseId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      pocketbaseIdIsEmpty() {
+  pocketbaseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pocketbaseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'pocketbaseId', value: ''),
+      );
     });
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      pocketbaseIdIsNotEmpty() {
+  pocketbaseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'pocketbaseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'pocketbaseId', value: ''),
+      );
     });
   }
 }
@@ -772,8 +817,9 @@ extension ExerciseQuerySortThenBy
 
 extension ExerciseQueryWhereDistinct
     on QueryBuilder<Exercise, Exercise, QDistinct> {
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByName(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByName({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
     });
@@ -785,8 +831,9 @@ extension ExerciseQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByPocketbaseId(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByPocketbaseId({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
     });

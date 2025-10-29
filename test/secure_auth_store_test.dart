@@ -27,13 +27,13 @@ void main() {
 
       // Save auth data
       authStore.save('test_token', testRecord);
-      
+
       expect(authStore.token, 'test_token');
       expect(authStore.record?.id, 'test123');
 
       // Clear auth data
       authStore.clear();
-      
+
       expect(authStore.token, '');
       expect(authStore.record, null);
     });

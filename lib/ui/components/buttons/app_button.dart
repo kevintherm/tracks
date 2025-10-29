@@ -15,12 +15,7 @@ abstract class AppButton extends StatelessWidget {
   final VoidCallback? onTap;
 
   /// Creates an app button.
-  const AppButton({
-    super.key,
-    required this.child,
-    this.onTap,
-    this.padding,
-  });
+  const AppButton({super.key, required this.child, this.onTap, this.padding});
 
   /// Returns the button's background color.
   Color get backgroundColor;
@@ -39,9 +34,7 @@ abstract class AppButton extends StatelessWidget {
     return Opacity(
       opacity: isDisabled ? 0.5 : 1.0,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(32)),
         child: Pressable(
           onTap: isDisabled ? null : onTap,
           child: Container(

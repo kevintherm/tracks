@@ -35,7 +35,7 @@ class PocketBaseService {
   SecureAuthStore get authStore => _authStore;
 
   /// Determine the appropriate PocketBase URL based on platform
-static String getPocketBaseUrl() {
+  static String getPocketBaseUrl() {
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:8090';
       // return 'http://192.168.1.188:8090';

@@ -45,13 +45,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final currentUser = authService.currentUser;
     String? userAvatar = currentUser?['avatar'];
     String? userId = currentUser?['id'];
-    
+
     // If not available, fall back to local user object
     if (userAvatar == null || userAvatar.isEmpty) {
       userAvatar = user.photoPath;
       userId = user.uid;
     }
-    
+
     if (userAvatar.isNotEmpty) {
       // If it's a URL, use NetworkImage
       if (userAvatar.startsWith('http')) {
@@ -59,11 +59,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
       // If it's a PocketBase file reference, construct the URL
       else {
-        final pbUrl = PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
+        final pbUrl =
+            PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
         return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
       }
     }
-    
+
     // Fall back to default avatar
     if (defaultAvatar.startsWith('http')) {
       return NetworkImage(defaultAvatar);
@@ -93,7 +94,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Editing sensitive information, please enter your password to continue.'),
+                Text(
+                  'Editing sensitive information, please enter your password to continue.',
+                ),
                 TextField(
                   controller: passwordController,
                   obscureText: true,
@@ -102,7 +105,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
@@ -131,7 +137,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       return;
                     }
 
-                    await authService.updateEmail(email: email, password: passwordController.text);
+                    await authService.updateEmail(
+                      email: email,
+                      password: passwordController.text,
+                    );
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text('Email updated successfully'),
@@ -146,15 +155,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     );
 
                     if (name != user.name || profileImagePath != null) {
-                      final file = profileImagePath != null ? File(profileImagePath!) : null;
+                      final file = profileImagePath != null
+                          ? File(profileImagePath!)
+                          : null;
                       final bytes = file?.readAsBytesSync();
 
-                      final updatedRecord = await authService.updateProfile(toUpdate: {
-                        'name': name,
-                        if (bytes != null) 'avatar': bytes,
-                        if (file != null) 'avatarName': file.path.split('/').last,
-                      });
-                      
+                      final updatedRecord = await authService.updateProfile(
+                        toUpdate: {
+                          'name': name,
+                          if (bytes != null) 'avatar': bytes,
+                          if (file != null)
+                            'avatarName': file.path.split('/').last,
+                        },
+                      );
+
                       // Update user with new avatar data
                       final updatedData = updatedRecord.toJson();
                       user = user.copyWith(
@@ -179,20 +193,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     setState(() {
                       hasUnsavedChanges = false;
                     });
-                    } on Exception catch (e) {
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(e.toString()),
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8.0),
-                              topRight: Radius.circular(8.0),
-                            ),
+                  } on Exception catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
                           ),
                         ),
-                      );
-                    } catch (e) {
+                      ),
+                    );
+                  } catch (e) {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(e.toString()),
@@ -226,13 +240,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         final file = profileImagePath != null ? File(profileImagePath!) : null;
         final bytes = file?.readAsBytesSync();
-        
+
         authService
-            .updateProfile(toUpdate: {
-              'name': name,
-              if (bytes != null) 'avatar': bytes,
-              if (file != null) 'avatarName': file.path.split('/').last,
-            })
+            .updateProfile(
+              toUpdate: {
+                'name': name,
+                if (bytes != null) 'avatar': bytes,
+                if (file != null) 'avatarName': file.path.split('/').last,
+              },
+            )
             .then((updatedRecord) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
@@ -243,7 +259,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(8.0),
-                      topRight: Radius.circular(8.0)
+                      topRight: Radius.circular(8.0),
                     ),
                   ),
                 ),
@@ -269,7 +285,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(8.0),
-                      topRight: Radius.circular(8.0)
+                      topRight: Radius.circular(8.0),
                     ),
                   ),
                 ),
@@ -286,9 +302,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void handleUnsavedChanges() {
     setState(() {
-      hasUnsavedChanges = nameController.text.trim() != user.name || 
-                         emailController.text.trim() != user.email ||
-                         profileImagePath != null;
+      hasUnsavedChanges =
+          nameController.text.trim() != user.name ||
+          emailController.text.trim() != user.email ||
+          profileImagePath != null;
     });
   }
 
@@ -299,10 +316,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
           context: context,
           builder: (context) => AlertDialog(
             title: Text('Unsaved Changes'),
-            content: Text('You have unsaved changes. Are you sure you want to leave without saving?'),
+            content: Text(
+              'You have unsaved changes. Are you sure you want to leave without saving?',
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('Cancel')),
-              TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('Leave')),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Leave'),
+              ),
             ],
           ),
         ) ??
@@ -323,10 +348,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   title: Text('Choose from Gallery'),
                   onTap: () async {
                     Navigator.pop(context);
-                    final XFile? picture = await picker.pickImage(source: ImageSource.gallery);
+                    final XFile? picture = await picker.pickImage(
+                      source: ImageSource.gallery,
+                    );
                     if (picture != null) {
                       setState(() {
-                        profileImagePath = picture.path; // Update state with selected image path
+                        profileImagePath = picture
+                            .path; // Update state with selected image path
                         handleUnsavedChanges();
                       });
                     }
@@ -337,10 +365,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   title: Text('Take a Photo'),
                   onTap: () async {
                     Navigator.pop(context);
-                    final XFile? picture = await picker.pickImage(source: ImageSource.camera);
+                    final XFile? picture = await picker.pickImage(
+                      source: ImageSource.camera,
+                    );
                     if (picture != null) {
                       setState(() {
-                        profileImagePath = picture.path; // Update state with selected image path
+                        profileImagePath = picture
+                            .path; // Update state with selected image path
                         handleUnsavedChanges();
                       });
                     }
@@ -361,7 +392,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     // Initialize authService before using it
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
       setState(() {
         isLoading = true;
       });
@@ -384,9 +414,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
             });
           })
           .catchError((e) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(e.toString()),
+                backgroundColor: Colors.red,
+              ),
+            );
             Navigator.pop(context);
             setState(() {
               isLoading = false;
@@ -397,13 +430,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     // Add listeners to update hasUnsavedChanges
     nameController.addListener(() {
       setState(() {
-        hasUnsavedChanges = nameController.text.trim() != user.name || emailController.text.trim() != user.email;
+        hasUnsavedChanges =
+            nameController.text.trim() != user.name ||
+            emailController.text.trim() != user.email;
       });
     });
 
     emailController.addListener(() {
       setState(() {
-        hasUnsavedChanges = nameController.text.trim() != user.name || emailController.text.trim() != user.email;
+        hasUnsavedChanges =
+            nameController.text.trim() != user.name ||
+            emailController.text.trim() != user.email;
       });
     });
   }
@@ -440,14 +477,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         onPressed: () async {
                           if (await confirmUnsavedChanges(context)) {
                             if (!context.mounted) return;
-                            Provider.of<NavigationProvider>(context, listen: false).setSelectedIndex(1);
+                            Provider.of<NavigationProvider>(
+                              context,
+                              listen: false,
+                            ).setSelectedIndex(1);
                             Navigator.pop(context);
                           }
                         },
                       ),
                       Text(
                         'Edit Profile',
-                        style: GoogleFonts.inter(fontSize: 16.0, fontWeight: FontWeight.w600, letterSpacing: 0.2),
+                        style: GoogleFonts.inter(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
                       ),
                     ],
                   ),
@@ -462,9 +506,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           CircleAvatar(
                             radius: 50,
                             backgroundImage: profileImagePath != null
-                                ? FileImage(File(profileImagePath!)) // Display selected image
+                                ? FileImage(
+                                    File(profileImagePath!),
+                                  ) // Display selected image
                                 : _getAvatarImageProvider(),
-                            key: ValueKey(user.photoPath), // Force rebuild when avatar changes
+                            key: ValueKey(
+                              user.photoPath,
+                            ), // Force rebuild when avatar changes
                           ),
                           Positioned(
                             bottom: 0,
@@ -472,7 +520,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             child: CircleAvatar(
                               radius: 15,
                               backgroundColor: Colors.teal,
-                              child: Icon(Icons.edit, size: 16, color: Colors.white),
+                              child: Icon(
+                                Icons.edit,
+                                size: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
@@ -494,15 +546,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Name', style: GoogleFonts.inter(fontSize: 14.0)),
+                          Text(
+                            'Name',
+                            style: GoogleFonts.inter(fontSize: 14.0),
+                          ),
                           const SizedBox(height: 6.0),
                           TextFormField(
                             enabled: !isLoading,
                             controller: nameController,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(99.0)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(99.0),
+                              ),
                             ),
-                            validator: (value) => value == null || value.isEmpty ? 'Name cannot be empty' : null,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Name cannot be empty'
+                                : null,
                           ),
 
                           const SizedBox(height: 16.0),
@@ -510,27 +569,43 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Email', style: GoogleFonts.inter(fontSize: 14.0)),
+                              Text(
+                                'Email',
+                                style: GoogleFonts.inter(fontSize: 14.0),
+                              ),
                               const SizedBox(width: 8.0),
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
-                                  color: isEmailVerified ? Colors.blue[50] : Colors.amber[50],
+                                  color: isEmailVerified
+                                      ? Colors.blue[50]
+                                      : Colors.amber[50],
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                    horizontal: 8,
+                                  ),
                                   child: Row(
                                     children: [
                                       Icon(
-                                        isEmailVerified ? Icons.check : Icons.clear,
+                                        isEmailVerified
+                                            ? Icons.check
+                                            : Icons.clear,
                                         size: 16.0,
-                                        color: isEmailVerified ? Colors.blue : Colors.amber,
+                                        color: isEmailVerified
+                                            ? Colors.blue
+                                            : Colors.amber,
                                       ),
                                       const SizedBox(width: 4.0),
                                       Text(
-                                        isEmailVerified ? 'VERIFIED' : 'UNVERIFIED',
+                                        isEmailVerified
+                                            ? 'VERIFIED'
+                                            : 'UNVERIFIED',
                                         style: TextStyle(
-                                          color: isEmailVerified ? Colors.blue[700] : Colors.amber[700],
+                                          color: isEmailVerified
+                                              ? Colors.blue[700]
+                                              : Colors.amber[700],
                                           fontSize: 12,
                                         ),
                                       ),
@@ -545,9 +620,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             enabled: !isLoading,
                             controller: emailController,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(99.0)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(99.0),
+                              ),
                             ),
-                            validator: (value) => value == null || value.isEmpty ? 'Name cannot be empty' : null,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Name cannot be empty'
+                                : null,
                           ),
 
                           const SizedBox(height: 16.0),
@@ -555,7 +634,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton(
-                              onPressed: isLoading ? null : () => handleSaveChange(context),
+                              onPressed: isLoading
+                                  ? null
+                                  : () => handleSaveChange(context),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -565,7 +646,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                 ],
                               ),
@@ -582,7 +666,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 8.0),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditPasswordPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditPasswordPage(),
+                        ),
+                      );
                     },
                     child: Text('Change Password'),
                   ),

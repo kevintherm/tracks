@@ -5,6 +5,7 @@ import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:tracks/utils/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,15 +37,15 @@ class MyApp extends StatelessWidget {
       title: 'Tracks',
       themeMode: ThemeMode.light,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.lightPrimary),
         textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
         scaffoldBackgroundColor: Colors.grey[100],
         cardColor: Colors.white,
-        cardTheme: CardThemeData(color: Colors.white)
+        cardTheme: CardThemeData(color: Colors.white),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
+          seedColor: AppColors.primary,
           brightness: Brightness.dark,
         ),
         textTheme: GoogleFonts.interTextTheme(

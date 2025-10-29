@@ -26,13 +26,17 @@ String errorFatal(Exception e) {
   return fatalError;
 }
 
-Future<bool> showConfirmDialog(BuildContext context) async {
+Future<bool> showConfirmDialog(
+  BuildContext context, {
+  String? title,
+  String? text,
+}) async {
   return await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: Text('Confirm'),
-          content: Text('Are you sure?'),
+          title: Text(title ?? 'Confirm'),
+          content: Text(text ?? 'Are you sure?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -40,7 +44,7 @@ Future<bool> showConfirmDialog(BuildContext context) async {
             ),
             PrimaryButton(
               onTap: () => Navigator.of(context).pop(true),
-              child: Text('OK', style: TextStyle(color: Colors.white),),
+              child: Text('OK', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
