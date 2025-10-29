@@ -7,7 +7,6 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/utils/app_colors.dart';
-import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
 // --- Models (for Type Safety) ---
@@ -30,6 +29,13 @@ class ExerciseOption {
   int get hashCode => id.hashCode;
 }
 
+class ExerciseConfig {
+  int sets;
+  int reps;
+
+  ExerciseConfig({this.sets = 3, this.reps = 8});
+}
+
 // --- Page Widget ---
 
 class CreateWorkoutPage extends StatefulWidget {
@@ -43,7 +49,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   bool _useFirstExerciseThumbnail = false;
   final ScrollController _scrollController = ScrollController();
 
-  final List<ExerciseOption> _selectOptions = [
+  // All available exercises in the system
+  final List<ExerciseOption> _allExercises = [
     ExerciseOption(label: 'Apple', id: '123'),
     ExerciseOption(label: 'Banana', id: '1234'),
     ExerciseOption(label: 'Mango', id: '12345'),
@@ -51,6 +58,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     ExerciseOption(label: 'Pier', id: '123452'),
   ];
   final List<ExerciseOption> _selectedOptions = [];
+  final Map<String, ExerciseConfig> _exerciseConfigs = {};
 
   @override
   void dispose() {
@@ -60,38 +68,16 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   // --- List Management Methods ---
 
-  void _onExerciseSelected(ExerciseOption option) {
-    final currentScroll = _scrollController.hasClients
-        ? _scrollController.offset
-        : 0.0;
-
+  void _toggleExerciseSelection(ExerciseOption option, bool isSelected) {
     setState(() {
-      _selectedOptions.add(option);
-      _selectOptions.remove(option);
-    });
-
-    // Restore scroll position after build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(currentScroll);
-      }
-    });
-  }
-
-  void _onExerciseDeselected(ExerciseOption option) {
-    final currentScroll = _scrollController.hasClients
-        ? _scrollController.offset
-        : 0.0;
-
-    setState(() {
-      _selectedOptions.remove(option);
-      _selectOptions.add(option);
-    });
-
-    // Restore scroll position after build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(currentScroll);
+      if (isSelected) {
+        if (!_selectedOptions.contains(option)) {
+          _selectedOptions.add(option);
+          _exerciseConfigs[option.id] = ExerciseConfig();
+        }
+      } else {
+        _selectedOptions.remove(option);
+        _exerciseConfigs.remove(option.id);
       }
     });
   }
@@ -101,6 +87,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       if (newIndex > oldIndex) newIndex--;
       final item = _selectedOptions.removeAt(oldIndex);
       _selectedOptions.insert(newIndex, item);
+    });
+  }
+
+  void _updateExerciseConfig(String exerciseId, int sets, int reps) {
+    setState(() {
+      _exerciseConfigs[exerciseId] = ExerciseConfig(sets: sets, reps: reps);
     });
   }
 
@@ -128,14 +120,21 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               // Extracted Details Section
               _WorkoutDetailsSection(),
 
-              // Extracted Exercises Section
-              _ExercisesSection(
+              // Exercise Selection Section
+              _ExerciseSelectionSection(
+                allOptions: _allExercises,
                 selectedOptions: _selectedOptions,
-                availableOptions: _selectOptions,
-                onDeselect: _onExerciseDeselected,
-                onSelect: _onExerciseSelected,
-                onReorder: _onReorder,
+                onToggle: _toggleExerciseSelection,
               ),
+
+              // Exercise Configuration Section
+              if (_selectedOptions.isNotEmpty)
+                _ExerciseConfigurationSection(
+                  selectedOptions: _selectedOptions,
+                  exerciseConfigs: _exerciseConfigs,
+                  onReorder: _onReorder,
+                  onUpdateConfig: _updateExerciseConfig,
+                ),
             ],
           ),
         ),
@@ -327,40 +326,44 @@ const OutlineInputBorder _kSearchBorder = OutlineInputBorder(
   borderSide: BorderSide.none,
 );
 
-// --- MODIFIED: Converted to StatefulWidget ---
-class _ExercisesSection extends StatefulWidget {
+// --- Exercise Selection Section (Checkboxes) ---
+class _ExerciseSelectionSection extends StatefulWidget {
+  final List<ExerciseOption> allOptions;
   final List<ExerciseOption> selectedOptions;
-  final List<ExerciseOption> availableOptions;
-  final void Function(ExerciseOption) onSelect;
-  final void Function(ExerciseOption) onDeselect;
-  final void Function(int, int) onReorder;
+  final void Function(ExerciseOption, bool) onToggle;
 
-  const _ExercisesSection({
+  const _ExerciseSelectionSection({
+    required this.allOptions,
     required this.selectedOptions,
-    required this.availableOptions,
-    required this.onSelect,
-    required this.onDeselect,
-    required this.onReorder,
+    required this.onToggle,
   });
 
   @override
-  State<_ExercisesSection> createState() => _ExercisesSectionState();
+  State<_ExerciseSelectionSection> createState() =>
+      _ExerciseSelectionSectionState();
 }
 
-class _ExercisesSectionState extends State<_ExercisesSection> {
-  // --- ADDED: State for collapsibles ---
-  bool _isSelectedExpanded = true;
-  bool _isAvailableExpanded = true;
+class _ExerciseSelectionSectionState extends State<_ExerciseSelectionSection> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    final filteredOptions = widget.allOptions.where((option) {
+      return option.label.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return _CardSection(
-      title: "Exercises",
+      title: "Select Exercises",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Search Bar
           TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
             decoration: InputDecoration(
               hintText: "Search",
               hintStyle: GoogleFonts.inter(
@@ -385,149 +388,358 @@ class _ExercisesSectionState extends State<_ExercisesSection> {
           _AiRecommendation(),
           const SizedBox(height: 16),
 
-          // --- MODIFIED: Selected List Group (always show, collapsed if empty) ---
-          // --- ADDED: Collapsible Header ---
-          InkWell(
-            onTap: widget.selectedOptions.isNotEmpty
-                ? () {
-                    setState(() {
-                      _isSelectedExpanded = !_isSelectedExpanded;
-                    });
-                  }
-                : null, // Disable tap when empty
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Selected (${widget.selectedOptions.length})",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: widget.selectedOptions.isEmpty
-                          ? Colors.grey[400]
-                          : null,
-                    ),
-                  ),
-                  if (widget.selectedOptions.isNotEmpty)
-                    Icon(
-                      _isSelectedExpanded
-                          ? Iconsax.arrow_up_2_outline
-                          : Iconsax.arrow_down_1_outline,
-                      size: 20,
-                      color: Colors.grey[700],
-                    ),
-                ],
-              ),
-            ),
+          // Exercise List
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredOptions.length,
+            itemBuilder: (context, index) {
+              final option = filteredOptions[index];
+              final isSelected = widget.selectedOptions.contains(option);
+
+              return _ExerciseCheckboxItem(
+                key: ValueKey(option.id),
+                option: option,
+                isSelected: isSelected,
+                onChanged: (value) => widget.onToggle(option, value ?? false),
+              );
+            },
           ),
-          // --- ADDED: AnimatedSize wrapper ---
-          if (widget.selectedOptions.isNotEmpty)
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: _isSelectedExpanded
-                  ? ReorderableListView.builder(
-                      buildDefaultDragHandles: false,
-                      onReorder: widget.onReorder,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.selectedOptions.length,
-                      proxyDecorator: (child, index, animation) {
-                        return Material(
-                          color: Colors.transparent,
-                          elevation: 8,
-                          borderRadius: BorderRadius.circular(16),
-                          child: child,
-                        );
-                      },
-                      itemBuilder: (context, index) {
-                        final option = widget.selectedOptions[index];
-                        return _ExerciseCheckbox(
-                          key: ValueKey(option.id),
-                          item: option,
-                          isSelected: true,
-                          order: index + 1,
-                          dragIndex: index,
-                          onConfirm: () => showConfirmDialog(context),
-                          direction:
-                              _ExerciseAnimationDirection.selectedToAvailable,
-                          onChanged: widget.onDeselect,
-                        );
-                      },
-                    )
-                  : const SizedBox.shrink(), // Collapsed state
-            ),
-
-          // --- MODIFIED: Separator logic ---
-          if (widget.availableOptions.isNotEmpty) const SizedBox(height: 16),
-
-          // --- MODIFIED: Available List Group ---
-          if (widget.availableOptions.isNotEmpty) ...[
-            // --- ADDED: Collapsible Header ---
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _isAvailableExpanded = !_isAvailableExpanded;
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Available (${widget.availableOptions.length})",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Icon(
-                      _isAvailableExpanded
-                          ? Iconsax.arrow_up_2_outline
-                          : Iconsax.arrow_down_1_outline,
-                      size: 20,
-                      color: Colors.grey[700],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // --- ADDED: AnimatedSize wrapper ---
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: _isAvailableExpanded
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.availableOptions.length,
-                      itemBuilder: (context, index) {
-                        final option = widget.availableOptions[index];
-                        return _ExerciseCheckbox(
-                          key: ValueKey(option.id),
-                          item: option,
-                          isSelected: false,
-                          order: 0,
-                          direction:
-                              _ExerciseAnimationDirection.availableToSelected,
-                          onChanged: widget.onSelect,
-                        );
-                      },
-                    )
-                  : const SizedBox.shrink(), // Collapsed state
-            ),
-          ],
         ],
       ),
     );
   }
 }
-// --- End of MODIFIED Section ---
+
+// --- Simple Checkbox Item ---
+class _ExerciseCheckboxItem extends StatelessWidget {
+  final ExerciseOption option;
+  final bool isSelected;
+  final ValueChanged<bool?> onChanged;
+
+  const _ExerciseCheckboxItem({
+    super.key,
+    required this.option,
+    required this.isSelected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.grey[50],
+        border: Border.all(
+          color: isSelected ? AppColors.secondary : Colors.grey[200]!,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: CheckboxListTile(
+        value: isSelected,
+        onChanged: onChanged,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/drawings/pushup.jpg',
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    option.label,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Average of 8 sets per week",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- Exercise Configuration Section ---
+class _ExerciseConfigurationSection extends StatelessWidget {
+  final List<ExerciseOption> selectedOptions;
+  final Map<String, ExerciseConfig> exerciseConfigs;
+  final void Function(int, int) onReorder;
+  final void Function(String, int, int) onUpdateConfig;
+
+  const _ExerciseConfigurationSection({
+    required this.selectedOptions,
+    required this.exerciseConfigs,
+    required this.onReorder,
+    required this.onUpdateConfig,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _CardSection(
+      title: "Configure Exercises (${selectedOptions.length})",
+      child: ReorderableListView.builder(
+        buildDefaultDragHandles: false,
+        onReorder: onReorder,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: selectedOptions.length,
+        proxyDecorator: (child, index, animation) {
+          return Material(
+            color: Colors.transparent,
+            elevation: 8,
+            borderRadius: BorderRadius.circular(16),
+            child: child,
+          );
+        },
+        itemBuilder: (context, index) {
+          final option = selectedOptions[index];
+          final config = exerciseConfigs[option.id] ?? ExerciseConfig();
+
+          return _ConfigurableExerciseCard(
+            key: ValueKey(option.id),
+            option: option,
+            order: index + 1,
+            dragIndex: index,
+            sets: config.sets,
+            reps: config.reps,
+            onSetsChanged: (value) =>
+                onUpdateConfig(option.id, value, config.reps),
+            onRepsChanged: (value) =>
+                onUpdateConfig(option.id, config.sets, value),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// --- Configurable Exercise Card ---
+class _ConfigurableExerciseCard extends StatelessWidget {
+  final ExerciseOption option;
+  final int order;
+  final int dragIndex;
+  final int sets;
+  final int reps;
+  final ValueChanged<int> onSetsChanged;
+  final ValueChanged<int> onRepsChanged;
+
+  const _ConfigurableExerciseCard({
+    super.key,
+    required this.option,
+    required this.order,
+    required this.dragIndex,
+    required this.sets,
+    required this.reps,
+    required this.onSetsChanged,
+    required this.onRepsChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.grey[100],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                ReorderableDragStartListener(
+                  index: dragIndex,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(
+                      Iconsax.sort_outline,
+                      color: Colors.grey[600],
+                      size: 24,
+                    ),
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/drawings/pushup.jpg',
+                    width: 80,
+                    height: 80,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            option.label,
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          DottedBorder(
+                            options: RoundedRectDottedBorderOptions(
+                              dashPattern: const [10, 5],
+                              strokeWidth: 2,
+                              radius: const Radius.circular(16),
+                              color: AppColors.darkSecondary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1,
+                              ),
+                            ),
+                            child: Text(
+                              order.toString(),
+                              style: GoogleFonts.inter(
+                                color: AppColors.darkSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Average of 8 sets per week",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Sets and Reps Configuration
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        "Sets",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                        child: Center(
+                          child: NumberPicker(
+                            value: sets,
+                            minValue: 1,
+                            maxValue: 20,
+                            haptics: false,
+                            axis: Axis.horizontal,
+                            itemWidth: 50,
+                            itemHeight: 50,
+                            textStyle: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.grey[400],
+                            ),
+                            selectedTextStyle: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                            onChanged: onSetsChanged,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        "Reps",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                        child: Center(
+                          child: NumberPicker(
+                            value: reps,
+                            minValue: 1,
+                            maxValue: 20,
+                            haptics: false,
+                            axis: Axis.horizontal,
+                            itemWidth: 50,
+                            itemHeight: 50,
+                            textStyle: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.grey[400],
+                            ),
+                            selectedTextStyle: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                            onChanged: onRepsChanged,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _AiRecommendation extends StatelessWidget {
   @override
@@ -577,373 +789,23 @@ class _AiRecommendation extends StatelessWidget {
   }
 }
 
-// --- Animated Exercise Item Widget ---
-
-// Enum for type-safe animation direction
-enum _ExerciseAnimationDirection { selectedToAvailable, availableToSelected }
-
-class _ExerciseCheckbox extends StatefulWidget {
-  final ExerciseOption item;
-  final bool isSelected;
-  final int order;
-  final int? dragIndex;
-  final _ExerciseAnimationDirection direction;
-  final void Function(ExerciseOption) onChanged;
-  final Future<bool> Function()? onConfirm;
-
-  const _ExerciseCheckbox({
-    super.key,
-    required this.isSelected,
-    required this.onChanged,
-    required this.order,
-    required this.item,
-    required this.direction,
-    this.onConfirm,
-    this.dragIndex,
-  });
-
-  @override
-  State<_ExerciseCheckbox> createState() => _ExerciseCheckboxState();
-}
-
-class _ExerciseCheckboxState extends State<_ExerciseCheckbox>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
-  late Animation<double> _entranceOpacityAnimation;
-  late Animation<Offset> _entranceSlideAnimation;
-  bool _isEntering = true;
-
-  int selectedSets = 2;
-  int selectedReps = 2;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-
-    // Entrance animations (fade in from position)
-    _entranceOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
-    _entranceSlideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-        );
-
-    if (widget.direction == _ExerciseAnimationDirection.selectedToAvailable) {
-      // Slide down + fade out (selected to available)
-      _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
-      );
-      _slideAnimation =
-          Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1.5)).animate(
-            CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.easeInCubic,
+Future<bool> showConfirmDialog(BuildContext context) async {
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Remove Exercise'),
+          content: const Text('Are you sure you want to remove this exercise?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
             ),
-          );
-      _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-        ),
-      );
-    } else {
-      // Pop (scale up) + slide up + fade out (available to selected)
-      _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-        ),
-      );
-      _slideAnimation =
-          Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1.5)).animate(
-            CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.easeInCubic,
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Remove'),
             ),
-          );
-      _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+          ],
         ),
-      );
-    }
-
-    // Trigger entrance animation
-    _animationController.forward().then((_) {
-      if (mounted) {
-        setState(() {
-          _isEntering = false;
-        });
-        _animationController.reset();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _runExitAnimation() async {
-    if (!mounted) return;
-    setState(() {
-      _isEntering = false;
-    });
-
-    await _animationController.forward();
-    if (mounted) {
-      widget.onChanged(widget.item);
-      // No need to reset, widget is being removed
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Use entrance animation when first appearing, exit animation when leaving
-    final slidePosition = _isEntering
-        ? _entranceSlideAnimation
-        : _slideAnimation;
-    final opacity = _isEntering ? _entranceOpacityAnimation : _opacityAnimation;
-    final scale = _isEntering
-        ? const AlwaysStoppedAnimation<double>(1.0)
-        : _scaleAnimation;
-
-    // --- FIX: Add a size animation ---
-    // We reuse the opacity animations as they already go
-    // from 0.0 -> 1.0 (on entrance) and 1.0 -> 0.0 (on exit).
-    final size = _isEntering ? _entranceOpacityAnimation : _opacityAnimation;
-    // --- End of FIX ---
-
-    final content = SizeTransition(
-      // --- FIX: Wrap with SizeTransition ---
-      sizeFactor: size,
-      child: SlideTransition(
-        position: slidePosition,
-        child: ScaleTransition(
-          scale: scale,
-          child: FadeTransition(
-            opacity: opacity,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                color: Colors.grey[100],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        if (widget.isSelected && widget.dragIndex != null)
-                          ReorderableDragStartListener(
-                            index: widget.dragIndex!,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Icon(
-                                Iconsax.sort_outline,
-                                color: Colors.grey[600],
-                                size: 24,
-                              ),
-                            ),
-                          )
-                        else if (widget.isSelected)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Icon(
-                              Iconsax.sort_outline,
-                              color: Colors.grey[600],
-                              size: 24,
-                            ),
-                          ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            'assets/drawings/pushup.jpg',
-                            width: 100,
-                            height: 100,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    widget.item.label,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (widget.isSelected)
-                                    DottedBorder(
-                                      options: RoundedRectDottedBorderOptions(
-                                        dashPattern: const [10, 5],
-                                        strokeWidth: 2,
-                                        radius: const Radius.circular(16),
-                                        color: AppColors.darkSecondary,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        widget.order.toString(),
-                                        style: GoogleFonts.inter(
-                                          color: AppColors.darkSecondary,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                "Average of 8 sets per week",
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              SliderTheme(
-                                data: SliderThemeData(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  trackHeight: 14,
-                                  disabledActiveTrackColor: AppColors.accent,
-                                  thumbShape: SliderComponentShape.noThumb,
-                                ),
-                                child: const Slider(
-                                  value: 10,
-                                  min: 0,
-                                  max: 100,
-                                  onChanged: null,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Reps and set form
-                    if (widget.isSelected && widget.dragIndex != null) ...[
-                      const SizedBox(height: 16),
-
-                      Text(
-                        "Sets",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-
-                      NumberPicker(
-                        value: selectedSets,
-                        minValue: 1,
-                        maxValue: 20,
-                        haptics: false,
-                        axis: Axis.horizontal,
-                        selectedTextStyle: TextStyle(fontSize: 20),
-                        onChanged: (value) =>
-                            setState(() => selectedSets = value),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black26),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Text(
-                        "Reps",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-
-                      NumberPicker(
-                        value: selectedReps,
-                        minValue: 1,
-                        maxValue: 20,
-                        haptics: false,
-                        axis: Axis.horizontal,
-                        selectedTextStyle: TextStyle(fontSize: 20),
-                        onChanged: (value) =>
-                            setState(() => selectedReps = value),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.black26),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ); // --- End of SizeTransition wrap ---
-
-    // Wrap with Dismissible for selected items, Pressable for available items
-    if (widget.isSelected) {
-      return Dismissible(
-        key: ValueKey(widget.item.id),
-        direction: DismissDirection.endToStart,
-        confirmDismiss: (direction) async {
-          if (widget.onConfirm != null) {
-            final confirmed = await widget.onConfirm!();
-            if (confirmed) {
-              _runExitAnimation();
-            }
-            return confirmed; // Dismissible handles the animation
-          }
-          _runExitAnimation(); // Trigger exit animation
-          return true; // Optimistically assume dismiss
-        },
-        onDismissed: (direction) {
-          // The onChanged call is now handled by _runExitAnimation
-          // or by confirmDismiss if it returns false
-        },
-        background: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            color: Colors.red[400],
-          ),
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 24),
-          child: const Icon(
-            Icons.delete_outline,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-        child: content,
-      );
-    } else {
-      return Pressable(onTap: _runExitAnimation, child: content);
-    }
-  }
+      ) ??
+      false;
 }

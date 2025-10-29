@@ -34,7 +34,7 @@ class _HomeFragmentState extends State<HomeFragment> {
       },
       {
         'icon': Iconsax.search_favorite_outline,
-        'subtitle': 'See other people splits!',
+        'subtitle': 'See more splits!',
         'title': 'Explore',
         'action': (context) async {},
       },
