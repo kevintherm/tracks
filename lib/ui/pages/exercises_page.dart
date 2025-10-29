@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -58,7 +59,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CreateWorkoutPage(),
+                                builder: (context) => CreateExercisePage(),
                               ),
                             );
                           },
@@ -257,31 +258,32 @@ class _ExercisesPageState extends State<ExercisesPage> {
                                     ),
                                   ),
 
-                                  if (true) Positioned(
-                                    right: 32 + 10,
-                                    top: 0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[900],
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(8),
-                                          bottomRight: Radius.circular(8),
+                                  if (true)
+                                    Positioned(
+                                      right: 32 + 10,
+                                      top: 0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[900],
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(8),
+                                            bottomRight: Radius.circular(8),
+                                          ),
                                         ),
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 4,
-                                        horizontal: 12,
-                                      ),
-                                      child: Text(
-                                        "Imported",
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 4,
+                                          horizontal: 12,
+                                        ),
+                                        child: Text(
+                                          "Imported",
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),

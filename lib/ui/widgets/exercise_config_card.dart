@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/utils/app_colors.dart';
 
-export 'package:tracks/ui/pages/modals/widgets/exercise_config_card.dart'
+export 'package:tracks/ui/widgets/exercise_config_card.dart'
     show ExerciseConfig, ScheduleTypes;
 
 enum ScheduleTypes { individual, dayName, day }

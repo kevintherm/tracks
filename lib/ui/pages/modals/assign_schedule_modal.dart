@@ -9,7 +9,7 @@ import 'package:tracks/ui/components/exercise_configuration_section.dart';
 import 'package:tracks/ui/components/exercise_list_item.dart';
 import 'package:tracks/ui/components/exercise_selection_section.dart';
 import 'package:tracks/ui/components/section_card.dart';
-import 'package:tracks/ui/pages/modals/widgets/exercise_config_card.dart';
+import 'package:tracks/ui/widgets/exercise_config_card.dart';
 import 'package:tracks/utils/toast.dart';
 
 class AssignScheduleModal extends StatefulWidget {
