@@ -1,4 +1,3 @@
-- exercises list page
 - create session history page
 - implement schedule fragment calendar
     - check split on day
@@ -18,6 +17,8 @@ session page
     - maybe switch to general if doesn't exists in the lib
 
 #done
+- exercises list page
+- optimize reordering performance
 - create manage schedule page
     - create split
     - assign split to a day/weekly

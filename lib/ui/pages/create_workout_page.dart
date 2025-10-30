@@ -69,7 +69,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) newIndex--;
       final item = _selectedOptions.removeAt(oldIndex);
       _selectedOptions.insert(newIndex, item);
     });
@@ -146,8 +145,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         configurations: _exerciseConfigs,
                         onReorder: _onReorder,
                         getId: (option) => option.id,
+                        getLabel: (option) => option.label,
                         defaultConfig: () => ExerciseConfig(),
-                        itemBuilder: (option, index, config) {
+                        scrollController: _scrollController,
+                        enableReordering: true,
+                        enableReorderAnimation: true,
+                        showReorderToast: true,
+                        autoScrollToReorderedItem: true,
+                        itemBuilder: (option, index, config, onReorderTap) {
                           return _ConfigurableExerciseCard(
                             key: ValueKey(option.id),
                             option: option,
@@ -165,6 +170,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                               config.sets,
                               value,
                             ),
+                            onReorderTap: onReorderTap,
                           );
                         },
                       ),
@@ -312,6 +318,7 @@ class _ConfigurableExerciseCard extends StatelessWidget {
   final int reps;
   final ValueChanged<int> onSetsChanged;
   final ValueChanged<int> onRepsChanged;
+  final VoidCallback? onReorderTap;
 
   const _ConfigurableExerciseCard({
     super.key,
@@ -322,92 +329,88 @@ class _ConfigurableExerciseCard extends StatelessWidget {
     required this.reps,
     required this.onSetsChanged,
     required this.onRepsChanged,
+    this.onReorderTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.grey[100],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                ReorderableDragStartListener(
-                  index: dragIndex,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Iconsax.sort_outline,
-                      color: Colors.grey[600],
-                      size: 24,
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.grey[100],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/drawings/pushup.jpg',
+                      width: 80,
+                      height: 80,
+                      cacheWidth: 160,
+                      cacheHeight: 160,
                     ),
                   ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/drawings/pushup.jpg',
-                    width: 80,
-                    height: 80,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            option.label,
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          DottedBorder(
-                            options: RoundedRectDottedBorderOptions(
-                              dashPattern: const [10, 5],
-                              strokeWidth: 2,
-                              radius: const Radius.circular(16),
-                              color: AppColors.darkSecondary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1,
-                              ),
-                            ),
-                            child: Text(
-                              order.toString(),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              option.label,
                               style: GoogleFonts.inter(
-                                color: AppColors.darkSecondary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Average of 8 sets per week",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey[600],
+                            Pressable(
+                              onTap: onReorderTap,
+                              child: DottedBorder(
+                                options: RoundedRectDottedBorderOptions(
+                                  dashPattern: const [10, 5],
+                                  strokeWidth: 2,
+                                  radius: const Radius.circular(16),
+                                  color: AppColors.darkSecondary,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  order.toString(),
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.darkSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          "Average of 8 sets per week",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                ],
+              ),
+              const SizedBox(height: 16),
 
             // Sets and Reps Configuration
             Row(
@@ -504,6 +507,6 @@ class _ConfigurableExerciseCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),);
   }
 }

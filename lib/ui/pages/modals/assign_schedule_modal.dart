@@ -23,6 +23,7 @@ class AssignScheduleModal extends StatefulWidget {
 
 class _AssignScheduleModalState extends State<AssignScheduleModal> {
   late final String selectedDayName;
+  final ScrollController _scrollController = ScrollController();
 
   final Map<String, ExerciseConfig> exerciseConfigs = {};
 
@@ -73,10 +74,18 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               Padding(
@@ -170,14 +179,19 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                         configurations: exerciseConfigs,
                         onReorder: (int oldIndex, int newIndex) {
                           setState(() {
-                            if (newIndex > oldIndex) newIndex--;
                             final item = selectedOptions.removeAt(oldIndex);
                             selectedOptions.insert(newIndex, item);
                           });
                         },
                         getId: (option) => option.id,
+                        getLabel: (option) => option.label,
                         defaultConfig: () => ExerciseConfig(),
-                        itemBuilder: (option, index, config) {
+                        scrollController: _scrollController,
+                        enableReordering: true,
+                        enableReorderAnimation: true,
+                        showReorderToast: true,
+                        autoScrollToReorderedItem: true,
+                        itemBuilder: (option, index, config, onReorderTap) {
                           return ExerciseConfigCard(
                             key: ValueKey(option.id),
                             exerciseId: option.id,
@@ -188,6 +202,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                             selectedDayNumber: widget.selectedDay.day,
                             onConfigChanged: (newConfig) =>
                                 _updateExerciseConfig(option.id, newConfig),
+                            onReorderTap: onReorderTap,
                             imagePath: option.imagePath,
                             subtitle: option.subtitle,
                           );

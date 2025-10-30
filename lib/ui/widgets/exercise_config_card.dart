@@ -55,6 +55,7 @@ class ExerciseConfigCard extends StatelessWidget {
   final String selectedDayName;
   final int selectedDayNumber;
   final ValueChanged<ExerciseConfig> onConfigChanged;
+  final VoidCallback? onReorderTap;
   final String? imagePath;
   final String? subtitle;
 
@@ -67,6 +68,7 @@ class ExerciseConfigCard extends StatelessWidget {
     required this.selectedDayName,
     required this.selectedDayNumber,
     required this.onConfigChanged,
+    this.onReorderTap,
     this.imagePath,
     this.subtitle,
   });
@@ -108,16 +110,17 @@ class ExerciseConfigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: ValueKey(exerciseId),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.grey[100],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return RepaintBoundary(
+      child: Container(
+        key: ValueKey(exerciseId),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.grey[100],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -160,21 +163,24 @@ class ExerciseConfigCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          DottedBorder(
-                            options: RoundedRectDottedBorderOptions(
-                              dashPattern: const [10, 5],
-                              strokeWidth: 2,
-                              radius: const Radius.circular(16),
-                              color: AppColors.darkSecondary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1,
-                              ),
-                            ),
-                            child: Text(
-                              (index + 1).toString(),
-                              style: GoogleFonts.inter(
+                          Pressable(
+                            onTap: onReorderTap,
+                            child: DottedBorder(
+                              options: RoundedRectDottedBorderOptions(
+                                dashPattern: const [10, 5],
+                                strokeWidth: 2,
+                                radius: const Radius.circular(16),
                                 color: AppColors.darkSecondary,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
+                              ),
+                              child: Text(
+                                (index + 1).toString(),
+                                style: GoogleFonts.inter(
+                                  color: AppColors.darkSecondary,
+                                ),
                               ),
                             ),
                           ),
@@ -319,6 +325,7 @@ class ExerciseConfigCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
-import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/utils/toast.dart';
 
 class ExercisesPage extends StatefulWidget {
