@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/utils/app_colors.dart';
 
-export 'package:tracks/ui/widgets/exercise_config_card.dart'
+export 'package:tracks/ui/widgets/assign_schedule_config_card.dart'
     show ExerciseConfig, ScheduleTypes;
 
 enum ScheduleTypes { individual, dayName, day }
@@ -47,19 +47,20 @@ class ExerciseConfig {
   }
 }
 
-class ExerciseConfigCard extends StatelessWidget {
+class AssignScheduleConfigCard extends StatelessWidget {
   final String exerciseId;
   final String exerciseName;
   final int index;
   final ExerciseConfig config;
   final String selectedDayName;
   final int selectedDayNumber;
+  final DateTime selectedDay;
   final ValueChanged<ExerciseConfig> onConfigChanged;
   final VoidCallback? onReorderTap;
   final String? imagePath;
   final String? subtitle;
 
-  const ExerciseConfigCard({
+  const AssignScheduleConfigCard({
     super.key,
     required this.exerciseId,
     required this.exerciseName,
@@ -67,6 +68,7 @@ class ExerciseConfigCard extends StatelessWidget {
     required this.config,
     required this.selectedDayName,
     required this.selectedDayNumber,
+    required this.selectedDay,
     required this.onConfigChanged,
     this.onReorderTap,
     this.imagePath,
@@ -81,6 +83,28 @@ class ExerciseConfigCard extends StatelessWidget {
 
     if (picked != null) {
       onConfigChanged(config.copyWith(startTime: picked));
+    }
+  }
+
+  bool _isSelectedDayInPast() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    return selected.isBefore(today);
+  }
+
+  Future<void> _selectPlannedDuration(BuildContext context) async {
+    final int? picked = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return _DurationPickerDialog(
+          initialDuration: config.plannedDuration,
+        );
+      },
+    );
+
+    if (picked != null) {
+      onConfigChanged(config.copyWith(plannedDuration: Duration(minutes: picked)));
     }
   }
 
@@ -110,6 +134,14 @@ class ExerciseConfigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If the selected day is in the past and the schedule type is "Once",
+    // automatically change it to "Day" (dayName)
+    if (_isSelectedDayInPast() && config.scheduleType == ScheduleTypes.individual) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onConfigChanged(config.copyWith(scheduleType: ScheduleTypes.dayName));
+      });
+    }
+
     return RepaintBoundary(
       child: Container(
         key: ValueKey(exerciseId),
@@ -125,17 +157,6 @@ class ExerciseConfigCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Iconsax.sort_outline,
-                      color: Colors.grey[600],
-                      size: 24,
-                    ),
-                  ),
-                ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
@@ -210,6 +231,7 @@ class ExerciseConfigCard extends StatelessWidget {
                       label: const Text('Once'),
                       icon: const Icon(MingCute.time_line),
                       tooltip: "Start this workout only on this day.",
+                      enabled: !_isSelectedDayInPast(),
                     ),
                     ButtonSegment<ScheduleTypes>(
                       value: ScheduleTypes.dayName,
@@ -264,49 +286,30 @@ class ExerciseConfigCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Planned Duration'),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 6,
-                              horizontal: 12,
-                            ),
-                            child: Text(
-                              _formatDuration(config.plannedDuration),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  minVerticalPadding: 0,
+                  title: const Text('Planned Duration'),
+                  visualDensity: const VisualDensity(vertical: -2),
+                  trailing: Pressable(
+                    onTap: () => _selectPlannedDuration(context),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(32),
                       ),
-                      Slider(
-                        value: config.plannedDuration.inMinutes.toDouble(),
-                        min: 15,
-                        max: 180,
-                        divisions: 11, // (180 - 15) / 15 = 11 steps
-                        label: _formatDuration(config.plannedDuration),
-                        onChanged: (value) {
-                          final duration = Duration(minutes: value.round());
-                          onConfigChanged(
-                            config.copyWith(plannedDuration: duration),
-                          );
-                        },
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 12,
                       ),
-                    ],
+                      child: Text(
+                        _formatDuration(config.plannedDuration),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SwitchListTile(
@@ -326,6 +329,132 @@ class ExerciseConfigCard extends StatelessWidget {
           ],
         ),
       ),
+      ),
+    );
+  }
+}
+
+class _DurationPickerDialog extends StatefulWidget {
+  final Duration initialDuration;
+
+  const _DurationPickerDialog({
+    required this.initialDuration,
+  });
+
+  @override
+  State<_DurationPickerDialog> createState() => _DurationPickerDialogState();
+}
+
+class _DurationPickerDialogState extends State<_DurationPickerDialog> {
+  late int selectedMinutes;
+
+  // Duration options from 15 to 180 minutes in 15-minute increments
+  final List<int> durationOptions = List.generate(12, (index) => 15 + (index * 15));
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMinutes = widget.initialDuration.inMinutes;
+    // Ensure the selected duration is in our options list
+    if (!durationOptions.contains(selectedMinutes)) {
+      selectedMinutes = durationOptions.reduce((a, b) => 
+        (a - selectedMinutes).abs() < (b - selectedMinutes).abs() ? a : b
+      );
+    }
+  }
+
+  String _formatDuration(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (hours > 0) {
+      return '${hours}h ${mins}m';
+    }
+    return '${mins}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Select Duration',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: durationOptions.length,
+                itemBuilder: (context, index) {
+                  final minutes = durationOptions[index];
+                  final isSelected = minutes == selectedMinutes;
+                  
+                  return Pressable(
+                    onTap: () {
+                      setState(() {
+                        selectedMinutes = minutes;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.2)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.grey[300]!,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Text(
+                        _formatDuration(minutes),
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected ? AppColors.primary : Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(selectedMinutes),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

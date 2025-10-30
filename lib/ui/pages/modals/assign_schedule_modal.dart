@@ -9,7 +9,7 @@ import 'package:tracks/ui/components/exercise_configuration_section.dart';
 import 'package:tracks/ui/components/exercise_list_item.dart';
 import 'package:tracks/ui/components/exercise_selection_section.dart';
 import 'package:tracks/ui/components/section_card.dart';
-import 'package:tracks/ui/widgets/exercise_config_card.dart';
+import 'package:tracks/ui/widgets/assign_schedule_config_card.dart';
 import 'package:tracks/utils/toast.dart';
 
 class AssignScheduleModal extends StatefulWidget {
@@ -192,7 +192,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                         showReorderToast: true,
                         autoScrollToReorderedItem: true,
                         itemBuilder: (option, index, config, onReorderTap) {
-                          return ExerciseConfigCard(
+                          return AssignScheduleConfigCard(
                             key: ValueKey(option.id),
                             exerciseId: option.id,
                             exerciseName: option.label,
@@ -200,6 +200,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                             config: config,
                             selectedDayName: selectedDayName,
                             selectedDayNumber: widget.selectedDay.day,
+                            selectedDay: widget.selectedDay,
                             onConfigChanged: (newConfig) =>
                                 _updateExerciseConfig(option.id, newConfig),
                             onReorderTap: onReorderTap,
