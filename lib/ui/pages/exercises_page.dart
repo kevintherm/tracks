@@ -25,6 +25,23 @@ class _ExercisesPageState extends State<ExercisesPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Row(
+                    children: [
+                      Tooltip(
+                        message: "Back",
+                        child: Pressable(
+                          onTap: () async {
+                            Navigator.of(context).pop();
+                          },
+                          child: Icon(
+                            Iconsax.arrow_left_2_outline,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 40),
+                    ],
+                  ),
                   Text(
                     "Exercises",
                     style: GoogleFonts.inter(
