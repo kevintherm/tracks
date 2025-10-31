@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 class SafeKeyboard extends StatelessWidget {
   final Widget child;
 
-  const SafeKeyboard({super.key, required this.child});
+  final offsetBottom;
+
+  const SafeKeyboard({super.key, required this.child, this.offsetBottom = 100});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,7 @@ class SafeKeyboard extends StatelessWidget {
             bottom: MediaQuery.of(context).viewInsets.bottom + 16,
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 100),
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - offsetBottom),
             child: IntrinsicHeight(child: child),
           ),
         );

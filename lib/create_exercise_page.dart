@@ -29,9 +29,7 @@ class ExerciseConfig {
 // --- Page Widget ---
 
 class CreateExercisePage extends StatefulWidget {
-  final Exercise? exercise; // Optional exercise for editing
-  
-  const CreateExercisePage({super.key, this.exercise});
+  const CreateExercisePage({super.key});
 
   @override
   State<CreateExercisePage> createState() => _CreateExercisePageState();
@@ -48,7 +46,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
   // Thumbnail image
   XFile? _thumbnailImage;
-  bool _thumbnailRemoved = false; // Track if user explicitly removed thumbnail
 
   // All available exercises in the system
   final List<ExerciseOption> _allMuscles = [
@@ -62,23 +59,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   final Map<String, ExerciseConfig> _exerciseConfigs = {};
 
   @override
-  void initState() {
-    super.initState();
-    // If editing, populate the form
-    if (widget.exercise != null) {
-      _nameController.text = widget.exercise!.name;
-      _descriptionController.text = widget.exercise!.description ?? '';
-      _caloriesController.text = widget.exercise!.caloriesBurned.toString();
-      
-      // Load existing thumbnail if available
-      if (widget.exercise!.thumbnailLocal != null) {
-        // Note: We'll need to handle this differently since XFile expects a path
-        // For now, we'll just keep the path and handle it in the image preview
-      }
-    }
-  }
-
-  @override
   void dispose() {
     _scrollController.dispose();
     _nameController.dispose();
@@ -90,6 +70,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   // --- List Management Methods ---
 
   Future<void> _pickThumbnailImage() async {
+    print("hello");
     // Show dialog to choose between camera and gallery
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
@@ -131,7 +112,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       if (image != null) {
         setState(() {
           _thumbnailImage = image;
-          _thumbnailRemoved = false; // Reset removal flag when new image is picked
         });
       }
     } catch (e) {
@@ -144,7 +124,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   void _removeThumbnailImage() {
     setState(() {
       _thumbnailImage = null;
-      _thumbnailRemoved = true;
     });
   }
 
@@ -181,7 +160,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           child: Column(
             children: [
               _AppBar(
-                title: widget.exercise != null ? "Edit Exercise" : "Create Exercise",
                 onSave: () async {
                   final toast = Toast(context);
                   final nav = Navigator.of(context);
@@ -195,60 +173,34 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
                   final calories =
                       double.tryParse(_caloriesController.text) ?? 0.0;
-                  final name = _nameController.text.trim();
                   final description = _descriptionController.text.trim().isEmpty
                       ? null
                       : _descriptionController.text.trim();
 
-                  if (widget.exercise != null) {
-                    // Update existing exercise
-                    String? thumbnailPath;
-                    if (_thumbnailImage != null) {
-                      // New image selected
-                      thumbnailPath = _thumbnailImage!.path;
-                    } else if (_thumbnailRemoved) {
-                      // User explicitly removed the thumbnail
-                      thumbnailPath = null;
-                    } else {
-                      // Keep existing thumbnail
-                      thumbnailPath = widget.exercise!.thumbnailLocal;
-                    }
-                    
-                    final updatedExercise = Exercise(
-                      name: name,
-                      description: description,
-                      caloriesBurned: calories,
-                      thumbnailLocal: thumbnailPath,
-                      thumbnailCloud: widget.exercise!.thumbnailCloud,
-                      pocketbaseId: widget.exercise!.pocketbaseId,
-                      needSync: widget.exercise!.needSync,
-                      imported: widget.exercise!.imported,
-                    )..id = widget.exercise!.id;
+                  final newExercise = Exercise(
+                    name: _nameController.text.trim(),
+                    description: description,
+                    caloriesBurned: calories,
+                    thumbnailLocal: _thumbnailImage?.path,
+                  );
 
-                    await exerciseRepo.updateExercise(updatedExercise);
-                    toast.success(content: const Text("Exercise updated!"));
-                  } else {
-                    // Create new exercise
-                    final newExercise = Exercise(
-                      name: name,
-                      description: description,
-                      caloriesBurned: calories,
-                      thumbnailLocal: _thumbnailImage?.path,
-                    );
+                  await exerciseRepo.createExercise(newExercise);
 
-                    await exerciseRepo.createExercise(newExercise);
-                    toast.success(content: const Text("Exercise created!"));
-                  }
-                  
+                  toast.success(content: const Text("Exercise created!"));
                   nav.pop(true);
                 },
               ),
 
-              _ThumbnailSection(
-                thumbnailImage: _thumbnailImage,
-                existingThumbnailPath: widget.exercise?.thumbnailLocal,
-                onPickImage: _pickThumbnailImage,
-                onRemoveImage: _removeThumbnailImage,
+              // _ThumbnailSection(
+              //   thumbnailImage: _thumbnailImage,
+              //   onPickImage: _pickThumbnailImage,
+              //   onRemoveImage: _removeThumbnailImage,
+              // ),
+              Pressable(
+                onTap: () {
+                  Toast(context).neutral(content: Text("hello"));
+                },
+                child: Icon(Iconsax.document_upload_outline, size: 64),
               ),
 
               _ExerciseDetailsSection(
@@ -347,9 +299,8 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
 class _AppBar extends StatelessWidget {
   final VoidCallback onSave;
-  final String title;
 
-  const _AppBar({required this.onSave, this.title = "New Exercise"});
+  const _AppBar({required this.onSave});
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +316,7 @@ class _AppBar extends StatelessWidget {
             child: const Icon(Iconsax.arrow_left_2_outline, size: 24),
           ),
           Text(
-            title,
+            "New Exercise",
             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           Pressable(
@@ -380,13 +331,11 @@ class _AppBar extends StatelessWidget {
 
 class _ThumbnailSection extends StatelessWidget {
   final XFile? thumbnailImage;
-  final String? existingThumbnailPath;
   final VoidCallback onPickImage;
   final VoidCallback onRemoveImage;
 
   const _ThumbnailSection({
     required this.thumbnailImage,
-    this.existingThumbnailPath,
     required this.onPickImage,
     required this.onRemoveImage,
   });
@@ -397,208 +346,86 @@ class _ThumbnailSection extends StatelessWidget {
 
     return SectionCard(
       title: "Thumbnail",
-      child: thumbnailImage != null
-          ? _buildImagePreview(thumbnailImage!)
-          : existingThumbnailPath != null
-              ? _buildExistingImagePreview(existingThumbnailPath!)
-              : _buildUploadArea(color),
-    );
-  }
-
-  Widget _buildExistingImagePreview(String imagePath) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: FutureBuilder<Uint8List>(
-        future: File(imagePath).readAsBytes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: Colors.grey[300],
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Iconsax.gallery_slash_outline, size: 48, color: Colors.grey[600]),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Failed to load image',
-                      style: GoogleFonts.inter(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-    
-          if (!snapshot.hasData) {
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-    
-          return Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.memory(
-                  snapshot.data!,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        onRemoveImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.trash_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        onPickImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.camera_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
+      // child: thumbnailImage != null
+      //     ? _buildImagePreview(thumbnailImage!)
+      //     : _buildUploadArea(color),
+      child: Pressable(
+        onTap: () {
+          Toast(context).neutral(content: Text("hello"));
         },
+        child: Icon(Iconsax.document_upload_outline, size: 64),
       ),
     );
   }
 
   Widget _buildImagePreview(XFile image) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: FutureBuilder<Uint8List>(
-        future: image.readAsBytes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: Colors.grey[300],
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Iconsax.gallery_slash_outline, size: 48, color: Colors.grey[600]),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Failed to load image',
-                      style: GoogleFonts.inter(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-    
-          if (!snapshot.hasData) {
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-    
-          return Stack(
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.file(
+            File(image.path),
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.memory(
-                  snapshot.data!,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
+              IconButton(
+                onPressed: () {
+                  print("Remove clicked!");
+                  onRemoveImage();
+                },
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Iconsax.trash_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        onRemoveImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.trash_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        onPickImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.edit_2_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  print("Edit clicked!");
+                  onPickImage();
+                },
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Iconsax.edit_2_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildUploadArea(Color color) {
     return InkWell(
-      onTap: onPickImage,
+      onTap: () {
+        print("Upload area clicked!");
+        onPickImage();
+      },
       borderRadius: BorderRadius.circular(16),
       child: DottedBorder(
         options: RoundedRectDottedBorderOptions(

@@ -103,6 +103,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
         child: Form(
           key: _formKey,
           child: SafeKeyboard(
+            offsetBottom: 0,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

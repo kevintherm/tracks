@@ -19,17 +19,17 @@ class ExerciseRepository {
   }
 
   Future<void> createExercise(Exercise exercise) async {
-    if (exercise.thumbnailPath != null) {
+    if (exercise.thumbnailLocal != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailPath!,
+          sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
           syncEnabled: false,
         );
 
-        exercise.thumbnailPath = imageResult['localPath'];
+        exercise.thumbnailLocal = imageResult['localPath'];
       } catch (e) {
-        exercise.thumbnailPath = null;
+        exercise.thumbnailLocal = null;
       }
     }
 
@@ -47,13 +47,13 @@ class ExerciseRepository {
 
   Future<void> updateExercise(Exercise exercise) async {
     // Handle thumbnail update if needed
-    if (exercise.thumbnailPath != null && !exercise.thumbnailPath!.contains('app_flutter')) {
+    if (exercise.thumbnailLocal != null && !exercise.thumbnailLocal!.contains('app_flutter')) {
       try {
         // Delete old image if exists
         final oldExercise = await isar.exercises.get(exercise.id);
-        if (oldExercise?.thumbnailPath != null) {
+        if (oldExercise?.thumbnailLocal != null) {
           await imageStorageService.deleteImage(
-            localPath: oldExercise!.thumbnailPath,
+            localPath: oldExercise!.thumbnailLocal,
             collection: 'exercise',
             recordId: oldExercise.pocketbaseId,
             fieldName: 'thumbnail',
@@ -63,12 +63,12 @@ class ExerciseRepository {
 
         // Save new image
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailPath!,
+          sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
           syncEnabled: false,
         );
 
-        exercise.thumbnailPath = imageResult['localPath'];
+        exercise.thumbnailLocal = imageResult['localPath'];
       } catch (e) {
         // Keep old thumbnail path if new one fails
       }
@@ -92,10 +92,10 @@ class ExerciseRepository {
 
   Future<void> deleteExercise(Exercise exercise) async {
     // Delete image files
-    if (exercise.thumbnailPath != null) {
+    if (exercise.thumbnailLocal != null) {
       try {
         await imageStorageService.deleteImage(
-          localPath: exercise.thumbnailPath,
+          localPath: exercise.thumbnailLocal,
           collection: 'exercise',
           recordId: exercise.pocketbaseId,
           fieldName: 'thumbnail',
@@ -136,9 +136,9 @@ class ExerciseRepository {
       );
 
       // Upload thumbnail if exists
-      if (exercise.thumbnailPath != null) {
+      if (exercise.thumbnailLocal != null) {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailPath!,
+          sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
           collection: 'exercise',
           recordId: record.id,
@@ -147,7 +147,7 @@ class ExerciseRepository {
         );
 
         // Update exercise with cloud URL
-        exercise.thumbnailUrl = imageResult['cloudUrl'];
+        exercise.thumbnailLocal = imageResult['cloudUrl'];
       }
 
       // Success! Update local exercise with PocketBase ID and set sync to false
@@ -178,9 +178,9 @@ class ExerciseRepository {
       );
 
       // Upload new thumbnail if changed
-      if (exercise.thumbnailPath != null && !exercise.thumbnailPath!.contains('app_flutter')) {
+      if (exercise.thumbnailLocal != null && !exercise.thumbnailLocal!.contains('app_flutter')) {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailPath!,
+          sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
           collection: 'exercise',
           recordId: exercise.pocketbaseId!,
@@ -188,7 +188,7 @@ class ExerciseRepository {
           syncEnabled: true,
         );
 
-        exercise.thumbnailUrl = imageResult['cloudUrl'];
+        exercise.thumbnailLocal = imageResult['cloudUrl'];
       }
 
       // Success! Mark as synced
@@ -234,8 +234,8 @@ class ExerciseRepository {
             name: record.data['name'],
             description: record.data['description'],
             caloriesBurned: record.data['calories_burned'],
-            thumbnailPath: record.data['thumbnail_path'],
-            thumbnailUrl: record.data['thumbnail_url'],
+            thumbnailLocal: record.data['thumbnail_local'],
+            thumbnailCloud: record.data['thumbnail_cloud'],
             pocketbaseId: record.id,
             needSync: false,
           ),

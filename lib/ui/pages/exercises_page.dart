@@ -399,11 +399,11 @@ class _ExerciseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasLocalImage =
-        exercise.thumbnailPath != null &&
-        File(exercise.thumbnailPath!).existsSync();
+        exercise.thumbnailLocal != null &&
+        File(exercise.thumbnailLocal!).existsSync();
     final image = hasLocalImage
         ? Image.memory(
-            File(exercise.thumbnailPath!).readAsBytesSync(),
+            File(exercise.thumbnailLocal!).readAsBytesSync(),
             width: 100,
             height: 100,
             fit: BoxFit.cover,

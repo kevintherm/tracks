@@ -10,8 +10,8 @@ class Exercise {
 
   late String name;
   late String? description;
-  late String? thumbnailPath;
-  late String? thumbnailUrl;
+  late String? thumbnailLocal;
+  late String? thumbnailCloud;
   late double caloriesBurned;
 
   bool needSync;
@@ -20,8 +20,8 @@ class Exercise {
   Exercise({
     required this.name,
     this.description,
-    this.thumbnailPath,
-    this.thumbnailUrl,
+    this.thumbnailLocal,
+    this.thumbnailCloud,
     required this.caloriesBurned,
     this.pocketbaseId,
     this.needSync = true,

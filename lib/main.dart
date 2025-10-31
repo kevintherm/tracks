@@ -36,6 +36,8 @@ void main() async {
     inspector: true,
   );
 
+  print('${authService.isSyncEnabled}');
+
   runApp(
     MultiProvider(
       providers: [
