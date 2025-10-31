@@ -1,7 +1,6 @@
 import 'package:tracks/ui/components/safe_keyboard.dart';
-import 'package:tracks/models/app_user.dart';
+import 'package:tracks/models/auth_user.dart';
 import 'package:tracks/ui/pages/edit_password_page.dart';
-import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/utils/consts.dart';
@@ -32,7 +31,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return (current['emailVerified'] == true) || (current['confirmed'] == true);
   }
 
-  AppUser user = AppUser.empty();
+  AuthUser user = AuthUser.empty();
 
   bool isLoading = false;
   bool hasUnsavedChanges = false;

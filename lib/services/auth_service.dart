@@ -3,7 +3,7 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:tracks/models/app_user.dart';
+import 'package:tracks/models/auth_user.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 
 class AuthService {
@@ -101,14 +101,14 @@ class AuthService {
     await _setSyncEnabled(false);
   }
 
-  Future<AppUser?> fetchUserData() async {
+  Future<AuthUser?> fetchUserData() async {
     final record = _pb.authStore.record;
     if (record == null) return null;
 
     final data = record.toJson();
     final uid = data['id'] as String? ?? '';
 
-    return AppUser.fromMap(data, uid);
+    return AuthUser.fromMap(data, uid);
   }
 
   Future<RecordModel> updateProfile({

@@ -3,12 +3,14 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:tracks/services/auth_service.dart';
 
 /// Service for handling image storage both locally and in the cloud
 class ImageStorageService {
   final PocketBase pb;
+  final AuthService authService;
 
-  ImageStorageService(this.pb);
+  ImageStorageService(this.pb, this.authService);
 
   /// Saves an image to local disk and optionally uploads to cloud
   /// 
@@ -20,7 +22,7 @@ class ImageStorageService {
   /// [directory] - The subdirectory name (e.g., 'exercises', 'profiles')
   /// [fileName] - Optional custom file name (defaults to timestamp-based name)
   /// [collection] - The PocketBase collection name for upload
-  /// [recordId] - The PocketBase record ID to attach the file to
+  /// [pbRecord] - The PocketBase record to attach the file to
   /// [fieldName] - The field name in PocketBase collection (e.g., 'thumbnail')
   /// [syncEnabled] - Whether to upload to cloud
   Future<Map<String, String?>> saveImage({
@@ -28,9 +30,9 @@ class ImageStorageService {
     required String directory,
     String? fileName,
     String? collection,
-    String? recordId,
+    RecordModel? pbRecord,
     String? fieldName,
-    bool syncEnabled = false,
+    bool syncEnabled = true,
   }) async {
     // Step 1: Save to local disk
     final localPath = await _saveToLocalDisk(
@@ -41,11 +43,11 @@ class ImageStorageService {
 
     // Step 2: Upload to cloud if sync is enabled
     String? cloudUrl;
-    if (syncEnabled && collection != null && recordId != null && fieldName != null) {
+    if (syncEnabled && collection != null && pbRecord != null && fieldName != null) {
       cloudUrl = await _uploadToCloud(
         localPath: localPath,
         collection: collection,
-        recordId: recordId,
+        record: pbRecord,
         fieldName: fieldName,
       );
     }
@@ -91,7 +93,7 @@ class ImageStorageService {
   Future<String?> _uploadToCloud({
     required String localPath,
     required String collection,
-    required String recordId,
+    required RecordModel record,
     required String fieldName,
   }) async {
     try {
@@ -99,6 +101,8 @@ class ImageStorageService {
       if (!await imageFile.exists()) {
         return null;
       }
+
+      final recordId = record.id;
 
       // Create multipart file
       final fileName = path.basename(localPath);
@@ -108,17 +112,25 @@ class ImageStorageService {
         filename: fileName,
       );
 
+      print('${recordId}, ${fileName}, ${multipartFile}');
+
       // Update the record with the file
-      final record = await pb.collection(collection).update(
+      final updatedRecord = await pb.collection(collection).update(
         recordId,
-        body: {},
+        body: {
+          'user': authService.currentUser?['id']
+        },
         files: [multipartFile],
       );
 
       // Get the file URL from the record
-      final fileUrl = pb.files.getUrl(record, fileName);
+
+      final updatedFileName = updatedRecord.getStringValue('thumbnail');
+
+      final fileUrl = pb.files.getUrl(updatedRecord, updatedFileName);
       return fileUrl.toString();
     } catch (e) {
+      print('Error updating collection image $e');
       return null;
     }
   }

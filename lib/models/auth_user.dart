@@ -1,18 +1,18 @@
-class AppUser {
+class AuthUser {
   final String uid;
   final String photoPath;
   final String name;
   final String email;
 
-  AppUser({
+  AuthUser({
     required this.uid,
     required this.photoPath,
     required this.name,
     required this.email,
   });
 
-  factory AppUser.fromMap(Map<String, dynamic> data, String uid) {
-    return AppUser(
+  factory AuthUser.fromMap(Map<String, dynamic> data, String uid) {
+    return AuthUser(
       uid: uid,
       photoPath: data['avatar'] ?? data['photoPath'] ?? '',
       name: data['name'] ?? '',
@@ -20,17 +20,17 @@ class AppUser {
     );
   }
 
-  static AppUser empty() {
-    return AppUser(uid: '', photoPath: '', name: '', email: '');
+  static AuthUser empty() {
+    return AuthUser(uid: '', photoPath: '', name: '', email: '');
   }
 
-  AppUser copyWith({
+  AuthUser copyWith({
     String? uid,
     String? name,
     String? photoPath,
     String? email,
   }) {
-    return AppUser(
+    return AuthUser(
       uid: uid ?? this.uid,
       name: name ?? this.name,
       photoPath: photoPath ?? this.photoPath,

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
+import 'package:http/http.dart' as http;
 
 class ExerciseRepository {
   final Isar isar;
@@ -11,7 +14,7 @@ class ExerciseRepository {
   late final ImageStorageService imageStorageService;
 
   ExerciseRepository(this.isar, this.pb, this.authService) {
-    imageStorageService = ImageStorageService(pb);
+    imageStorageService = ImageStorageService(pb, authService);
   }
 
   Stream<List<Exercise>> watchAllExercises() {
@@ -33,21 +36,19 @@ class ExerciseRepository {
       }
     }
 
-    // 2. ALWAYS save to local DB first (this is the offline-first part)
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
     });
 
-    // 3. Check if user wants to sync
     if (authService.isSyncEnabled) {
-      // 4. Sync in the background
       _syncExerciseToCloud(exercise);
     }
   }
 
   Future<void> updateExercise(Exercise exercise) async {
     // Handle thumbnail update if needed
-    if (exercise.thumbnailLocal != null && !exercise.thumbnailLocal!.contains('app_flutter')) {
+    if (exercise.thumbnailLocal != null &&
+        !exercise.thumbnailLocal!.contains('app_flutter')) {
       try {
         // Delete old image if exists
         final oldExercise = await isar.exercises.get(exercise.id);
@@ -126,39 +127,38 @@ class ExerciseRepository {
   // Upload a single exercise to the cloud
   Future<void> _syncExerciseToCloud(Exercise exercise) async {
     try {
-      // Create the record first
-      final record = await pb.collection('exercise').create(
-        body: {
-          'name': exercise.name,
-          'description': exercise.description,
-          'calories_burned': exercise.caloriesBurned,
-        },
-      );
+      final record = await pb
+          .collection('exercises')
+          .create(
+            body: {
+              'user': authService.currentUser?['id'],
+              'name': exercise.name,
+              'description': exercise.description,
+              'calories_burned': exercise.caloriesBurned,
+            }
+          );
 
-      // Upload thumbnail if exists
       if (exercise.thumbnailLocal != null) {
         final imageResult = await imageStorageService.saveImage(
           sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
-          collection: 'exercise',
-          recordId: record.id,
+          collection: 'exercises',
+          pbRecord: record,
           fieldName: 'thumbnail',
           syncEnabled: true,
         );
 
-        // Update exercise with cloud URL
-        exercise.thumbnailLocal = imageResult['cloudUrl'];
+        exercise.thumbnailCloud = imageResult['cloudUrl'];
       }
 
-      // Success! Update local exercise with PocketBase ID and set sync to false
       exercise.pocketbaseId = record.id;
       exercise.needSync = false;
 
-      // Write update to local DB
       await isar.writeTxn(() async {
         await isar.exercises.put(exercise);
       });
     } catch (e) {
+      print('Error sync ${exercise.name}: $e');
       // Exercise remains marked as needsSync = true
       // You can run a background job later to sync all exercises where needsSync == true
     }
@@ -168,22 +168,26 @@ class ExerciseRepository {
   Future<void> _updateExerciseOnCloud(Exercise exercise) async {
     try {
       // Update the record
-      await pb.collection('exercise').update(
-        exercise.pocketbaseId!,
-        body: {
-          'name': exercise.name,
-          'description': exercise.description,
-          'calories_burned': exercise.caloriesBurned,
-        },
-      );
+      final pbRecord = await pb
+          .collection('exercise')
+          .update(
+            exercise.pocketbaseId!,
+            body: {
+              'user': authService.currentUser?['id'],
+              'name': exercise.name,
+              'description': exercise.description,
+              'calories_burned': exercise.caloriesBurned,
+            },
+          );
 
       // Upload new thumbnail if changed
-      if (exercise.thumbnailLocal != null && !exercise.thumbnailLocal!.contains('app_flutter')) {
+      if (exercise.thumbnailLocal != null &&
+          !exercise.thumbnailLocal!.contains('app_flutter')) {
         final imageResult = await imageStorageService.saveImage(
           sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
           collection: 'exercise',
-          recordId: exercise.pocketbaseId!,
+          pbRecord: pbRecord,
           fieldName: 'thumbnail',
           syncEnabled: true,
         );
