@@ -35,6 +35,11 @@ class AuthService {
   /// Check if sync is currently enabled
   bool get isSyncEnabled => _prefs.getBool(_syncEnabledKey) ?? false;
 
+  /// Set sync enabled state
+  set isSyncEnabled(bool value) {
+    _prefs.setBool(_syncEnabledKey, value);
+  }
+
   /// Initialize sync preferences based on current auth state
   Future<void> initializeSyncPreferences() async {
     final isLoggedIn = _pb.authStore.isValid;

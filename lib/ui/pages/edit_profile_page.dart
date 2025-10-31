@@ -477,10 +477,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         onPressed: () async {
                           if (await confirmUnsavedChanges(context)) {
                             if (!context.mounted) return;
-                            Provider.of<NavigationProvider>(
-                              context,
-                              listen: false,
-                            ).setSelectedIndex(1);
                             Navigator.pop(context);
                           }
                         },
@@ -662,8 +658,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                   const SizedBox(height: 32.0),
 
-                  Text('Searching for these?'),
-                  const SizedBox(height: 8.0),
+                  Text(
+                    "Looking for something else?",
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
