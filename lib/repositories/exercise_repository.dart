@@ -2,49 +2,80 @@ import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/services/auth_service.dart';
+import 'package:tracks/services/image_storage_service.dart';
 
 class ExerciseRepository {
   final Isar isar;
   final PocketBase pb;
   final AuthService authService;
+  late final ImageStorageService imageStorageService;
 
-  ExerciseRepository(this.isar, this.pb, this.authService);
+  ExerciseRepository(this.isar, this.pb, this.authService) {
+    imageStorageService = ImageStorageService(pb);
+  }
 
   Stream<List<Exercise>> watchAllExercises() {
     return isar.exercises.where().watch(fireImmediately: true);
   }
 
-  // This is the key function for your flow
-  Future<void> createExercise(String name) async {
-    final newExercise = Exercise(name: name);
+  Future<void> createExercise(Exercise exercise) async {
+    if (exercise.thumbnailPath != null) {
+      try {
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: exercise.thumbnailPath!,
+          directory: 'exercises',
+          syncEnabled: false,
+        );
 
-    // 1. ALWAYS save to local DB first (this is the offline-first part)
+        exercise.thumbnailPath = imageResult['localPath'];
+      } catch (e) {
+        print('Error saving exercise thumbnail: $e');
+        exercise.thumbnailPath = null;
+      }
+    }
+
+    // 2. ALWAYS save to local DB first (this is the offline-first part)
     await isar.writeTxn(() async {
-      await isar.exercises.put(newExercise);
+      await isar.exercises.put(exercise);
     });
 
-    // 2. Check if user wants to sync
+    // 3. Check if user wants to sync
     if (authService.isSyncEnabled) {
-      // 3. Sync in the background
-      _syncNoteToCloud(newExercise);
+      // 4. Sync in the background
+      _syncExerciseToCloud(exercise);
     }
   }
 
   // --- SYNC LOGIC ---
 
-  // Upload a single note
-  Future<void> _syncNoteToCloud(Exercise exercise) async {
+  // Upload a single exercise to the cloud
+  Future<void> _syncExerciseToCloud(Exercise exercise) async {
     try {
-      final record = await pb
-          .collection('exercise')
-          .create(
-            body: {
-              'name': exercise.name,
-              // any other fields...
-            },
-          );
+      // Create the record first
+      final record = await pb.collection('exercise').create(
+        body: {
+          'name': exercise.name,
+          'description': exercise.description,
+          'calories_burned': exercise.caloriesBurned,
+        },
+      );
 
-      // Success! Update local note with PocketBase ID and set sync to false
+      // Upload thumbnail if exists
+      if (exercise.thumbnailPath != null) {
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: exercise.thumbnailPath!,
+          directory: 'exercises',
+          collection: 'exercise',
+          recordId: record.id,
+          fieldName: 'thumbnail',
+          syncEnabled: true,
+        );
+
+        // Update exercise with cloud URL
+        exercise.thumbnailUrl = imageResult['cloudUrl'];
+      }
+
+      // Success! Update local exercise with PocketBase ID and set sync to false
       exercise.pocketbaseId = record.id;
       exercise.needSync = false;
 
@@ -54,8 +85,8 @@ class ExerciseRepository {
       });
     } catch (e) {
       print("Sync failed: $e");
-      // Note remains marked as needsSync = true
-      // You can run a background job later to sync all notes where needsSync == true
+      // Exercise remains marked as needsSync = true
+      // You can run a background job later to sync all exercises where needsSync == true
     }
   }
 
@@ -69,7 +100,7 @@ class ExerciseRepository {
         .pocketbaseIdIsNull()
         .findAll();
     for (final note in localOnlyNotes) {
-      await _syncNoteToCloud(note);
+      await _syncExerciseToCloud(note);
     }
 
     // 2. Download cloud-only data
@@ -88,6 +119,10 @@ class ExerciseRepository {
         notesToSave.add(
           Exercise(
             name: record.data['name'],
+            description: record.data['description'],
+            caloriesBurned: record.data['calories_burned'],
+            thumbnailPath: record.data['thumbnail_path'],
+            thumbnailUrl: record.data['thumbnail_url'],
             pocketbaseId: record.id,
             needSync: false,
           ),

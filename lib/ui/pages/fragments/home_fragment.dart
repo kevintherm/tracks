@@ -49,22 +49,22 @@ class _HomeFragmentState extends State<HomeFragment> {
         'action': (context) async {},
       },
       {
-        'icon': Iconsax.calendar_1_outline,
-        'title': 'Manage Schedule',
-        'action': (context) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ManageSchedulePage()),
-          );
-        },
-      },
-      {
         'icon': Iconsax.weight_1_outline,
         'title': 'All Exercises',
         'action': (context) {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ExercisesPage()),
+          );
+        },
+      },
+      {
+        'icon': Iconsax.calendar_1_outline,
+        'title': 'Manage Schedule',
+        'action': (context) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ManageSchedulePage()),
           );
         },
       },

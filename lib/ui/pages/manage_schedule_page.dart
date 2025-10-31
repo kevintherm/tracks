@@ -6,7 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/modals/assign_schedule_modal.dart';
 import 'package:tracks/utils/app_colors.dart';
-import 'package:tracks/utils/toast.dart';
 
 class ManageSchedulePage extends StatefulWidget {
   const ManageSchedulePage({super.key});

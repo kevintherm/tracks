@@ -6,12 +6,25 @@ part 'exercise.g.dart';
 class Exercise {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: true)
   String? pocketbaseId;
 
   late String name;
+  late String? description;
+  late String? thumbnailPath;
+  late String? thumbnailUrl;
+  late double caloriesBurned;
 
   bool needSync;
+  bool imported;
 
-  Exercise({required this.name, this.pocketbaseId, this.needSync = true});
+  Exercise({
+    required this.name,
+    this.description,
+    this.thumbnailPath,
+    this.thumbnailUrl,
+    required this.caloriesBurned,
+    this.pocketbaseId,
+    this.needSync = true,
+    this.imported = false,
+  });
 }

@@ -11,7 +11,9 @@ class AuthService {
   late SharedPreferences _prefs;
   static const String _syncEnabledKey = 'syncEnabled';
 
-  AuthService() {
+  AuthService(SharedPreferences prefs) {
+    _prefs = prefs;
+    
     final controller = StreamController<Map<String, dynamic>?>.broadcast();
 
     // Emit the current user state on listen
@@ -25,11 +27,6 @@ class AuthService {
     });
 
     authStateChanges = controller.stream;
-  }
-
-  /// Initialize shared preferences
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
   }
 
   /// Get the PocketBase client from the singleton service

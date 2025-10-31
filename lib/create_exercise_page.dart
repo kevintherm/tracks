@@ -70,6 +70,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   // --- List Management Methods ---
 
   Future<void> _pickThumbnailImage() async {
+    print("hello");
     // Show dialog to choose between camera and gallery
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
@@ -172,13 +173,12 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
                   final calories =
                       double.tryParse(_caloriesController.text) ?? 0.0;
-                  final name = _nameController.text.trim();
                   final description = _descriptionController.text.trim().isEmpty
                       ? null
                       : _descriptionController.text.trim();
 
                   final newExercise = Exercise(
-                    name: name,
+                    name: _nameController.text.trim(),
                     description: description,
                     caloriesBurned: calories,
                     thumbnailPath: _thumbnailImage?.path,
@@ -191,10 +191,16 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 },
               ),
 
-              _ThumbnailSection(
-                thumbnailImage: _thumbnailImage,
-                onPickImage: _pickThumbnailImage,
-                onRemoveImage: _removeThumbnailImage,
+              // _ThumbnailSection(
+              //   thumbnailImage: _thumbnailImage,
+              //   onPickImage: _pickThumbnailImage,
+              //   onRemoveImage: _removeThumbnailImage,
+              // ),
+              Pressable(
+                onTap: () {
+                  Toast(context).neutral(content: Text("hello"));
+                },
+                child: Icon(Iconsax.document_upload_outline, size: 64),
               ),
 
               _ExerciseDetailsSection(
@@ -340,111 +346,86 @@ class _ThumbnailSection extends StatelessWidget {
 
     return SectionCard(
       title: "Thumbnail",
-      child: thumbnailImage != null
-          ? _buildImagePreview(thumbnailImage!)
-          : _buildUploadArea(color),
+      // child: thumbnailImage != null
+      //     ? _buildImagePreview(thumbnailImage!)
+      //     : _buildUploadArea(color),
+      child: Pressable(
+        onTap: () {
+          Toast(context).neutral(content: Text("hello"));
+        },
+        child: Icon(Iconsax.document_upload_outline, size: 64),
+      ),
     );
   }
 
   Widget _buildImagePreview(XFile image) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: FutureBuilder<Uint8List>(
-        future: image.readAsBytes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            print('Error reading image bytes: ${snapshot.error}');
-            return Container(
-              color: Colors.grey[300],
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Iconsax.gallery_slash_outline, size: 48, color: Colors.grey[600]),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Failed to load image',
-                      style: GoogleFonts.inter(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-    
-          if (!snapshot.hasData) {
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-    
-          return Stack(
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.file(
+            File(image.path),
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.memory(
-                  snapshot.data!,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
+              IconButton(
+                onPressed: () {
+                  print("Remove clicked!");
+                  onRemoveImage();
+                },
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Iconsax.trash_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        onRemoveImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.trash_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        onPickImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.edit_2_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  print("Edit clicked!");
+                  onPickImage();
+                },
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Iconsax.edit_2_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildUploadArea(Color color) {
     return InkWell(
-      onTap: onPickImage,
+      onTap: () {
+        print("Upload area clicked!");
+        onPickImage();
+      },
       borderRadius: BorderRadius.circular(16),
       child: DottedBorder(
         options: RoundedRectDottedBorderOptions(
