@@ -229,11 +229,121 @@ class _ExerciseListItem extends StatelessWidget {
 
   const _ExerciseListItem({required this.index, required this.exercise});
 
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final exerciseRepo = context.read<ExerciseRepository>();
+    
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Iconsax.trash_outline,
+                size: 48,
+                color: Colors.red[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Delete Exercise?',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Pressable(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Pressable(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.red[400],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Delete',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await exerciseRepo.deleteExercise(exercise);
+      if (context.mounted) {
+        Toast(context).success(content: const Text("Exercise deleted"));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key: ValueKey(index),
       direction: DismissDirection.horizontal,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // Delete action
+          await _showDeleteConfirmation(context);
+          return false; // Don't dismiss, we handle it in the confirmation
+        } else {
+          // Edit action
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateExercisePage(exercise: exercise),
+            ),
+          );
+          return false; // Don't dismiss
+        }
+      },
       background: _DismissBackground(
         alignment: Alignment.centerLeft,
         color: Colors.green[200]!,
@@ -246,12 +356,6 @@ class _ExerciseListItem extends StatelessWidget {
         icon: Icons.delete,
         padding: const EdgeInsets.only(right: 20),
       ),
-      onDismissed: (direction) {
-        final message = direction == DismissDirection.endToStart
-            ? "Swipe left"
-            : "Swipe right";
-        Toast(context).success(content: Text(message));
-      },
       child: Pressable(
         onTap: () {},
         child: _ExerciseCard(exercise: exercise),

@@ -83,7 +83,6 @@ class ImageStorageService {
 
       return destinationFile.path;
     } catch (e) {
-      print('Error saving image to local disk: $e');
       rethrow;
     }
   }
@@ -98,7 +97,6 @@ class ImageStorageService {
     try {
       final File imageFile = File(localPath);
       if (!await imageFile.exists()) {
-        print('Image file does not exist at path: $localPath');
         return null;
       }
 
@@ -121,7 +119,6 @@ class ImageStorageService {
       final fileUrl = pb.files.getUrl(record, fileName);
       return fileUrl.toString();
     } catch (e) {
-      print('Error uploading image to cloud: $e');
       return null;
     }
   }
@@ -136,7 +133,6 @@ class ImageStorageService {
       }
       return false;
     } catch (e) {
-      print('Error deleting local image: $e');
       return false;
     }
   }
@@ -162,7 +158,7 @@ class ImageStorageService {
           body: {fieldName: null},
         );
       } catch (e) {
-        print('Error deleting image from cloud: $e');
+        // Failed to delete from cloud
       }
     }
   }

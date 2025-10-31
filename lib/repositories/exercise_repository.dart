@@ -29,7 +29,6 @@ class ExerciseRepository {
 
         exercise.thumbnailPath = imageResult['localPath'];
       } catch (e) {
-        print('Error saving exercise thumbnail: $e');
         exercise.thumbnailPath = null;
       }
     }
@@ -43,6 +42,82 @@ class ExerciseRepository {
     if (authService.isSyncEnabled) {
       // 4. Sync in the background
       _syncExerciseToCloud(exercise);
+    }
+  }
+
+  Future<void> updateExercise(Exercise exercise) async {
+    // Handle thumbnail update if needed
+    if (exercise.thumbnailPath != null && !exercise.thumbnailPath!.contains('app_flutter')) {
+      try {
+        // Delete old image if exists
+        final oldExercise = await isar.exercises.get(exercise.id);
+        if (oldExercise?.thumbnailPath != null) {
+          await imageStorageService.deleteImage(
+            localPath: oldExercise!.thumbnailPath,
+            collection: 'exercise',
+            recordId: oldExercise.pocketbaseId,
+            fieldName: 'thumbnail',
+            syncEnabled: authService.isSyncEnabled,
+          );
+        }
+
+        // Save new image
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: exercise.thumbnailPath!,
+          directory: 'exercises',
+          syncEnabled: false,
+        );
+
+        exercise.thumbnailPath = imageResult['localPath'];
+      } catch (e) {
+        // Keep old thumbnail path if new one fails
+      }
+    }
+
+    // Mark as needing sync if cloud ID exists
+    if (exercise.pocketbaseId != null) {
+      exercise.needSync = true;
+    }
+
+    // Update local DB
+    await isar.writeTxn(() async {
+      await isar.exercises.put(exercise);
+    });
+
+    // Sync to cloud if enabled
+    if (authService.isSyncEnabled && exercise.pocketbaseId != null) {
+      _updateExerciseOnCloud(exercise);
+    }
+  }
+
+  Future<void> deleteExercise(Exercise exercise) async {
+    // Delete image files
+    if (exercise.thumbnailPath != null) {
+      try {
+        await imageStorageService.deleteImage(
+          localPath: exercise.thumbnailPath,
+          collection: 'exercise',
+          recordId: exercise.pocketbaseId,
+          fieldName: 'thumbnail',
+          syncEnabled: authService.isSyncEnabled,
+        );
+      } catch (e) {
+        // Continue with deletion even if image deletion fails
+      }
+    }
+
+    // Delete from local DB
+    await isar.writeTxn(() async {
+      await isar.exercises.delete(exercise.id);
+    });
+
+    // Delete from cloud if synced
+    if (authService.isSyncEnabled && exercise.pocketbaseId != null) {
+      try {
+        await pb.collection('exercise').delete(exercise.pocketbaseId!);
+      } catch (e) {
+        // Already deleted locally, cloud deletion failure is acceptable
+      }
     }
   }
 
@@ -84,9 +159,47 @@ class ExerciseRepository {
         await isar.exercises.put(exercise);
       });
     } catch (e) {
-      print("Sync failed: $e");
       // Exercise remains marked as needsSync = true
       // You can run a background job later to sync all exercises where needsSync == true
+    }
+  }
+
+  // Update an existing exercise on the cloud
+  Future<void> _updateExerciseOnCloud(Exercise exercise) async {
+    try {
+      // Update the record
+      await pb.collection('exercise').update(
+        exercise.pocketbaseId!,
+        body: {
+          'name': exercise.name,
+          'description': exercise.description,
+          'calories_burned': exercise.caloriesBurned,
+        },
+      );
+
+      // Upload new thumbnail if changed
+      if (exercise.thumbnailPath != null && !exercise.thumbnailPath!.contains('app_flutter')) {
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: exercise.thumbnailPath!,
+          directory: 'exercises',
+          collection: 'exercise',
+          recordId: exercise.pocketbaseId!,
+          fieldName: 'thumbnail',
+          syncEnabled: true,
+        );
+
+        exercise.thumbnailUrl = imageResult['cloudUrl'];
+      }
+
+      // Success! Mark as synced
+      exercise.needSync = false;
+
+      // Write update to local DB
+      await isar.writeTxn(() async {
+        await isar.exercises.put(exercise);
+      });
+    } catch (e) {
+      // Exercise remains marked as needsSync = true
     }
   }
 

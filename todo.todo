@@ -1,8 +1,10 @@
-- image were not saving on internal storage
+- edit and delete exercises
+- search exercises
 - sync image on cloud and device
 - add a muscles and activation table 
 
 #done
+- image were not saving on internal storage
 - create session history page
 - exercises list page
 - optimize reordering performance
