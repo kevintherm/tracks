@@ -8,6 +8,7 @@ class Exercise {
 
   String? pocketbaseId;
 
+  @Index()
   late String name;
   late String? description;
   late String? thumbnailLocal;

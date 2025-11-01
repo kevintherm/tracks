@@ -1,8 +1,8 @@
-- search exercises
 - add a muscles and activation table 
-- sync data in background
+- sync data in background periodically
 
 #done
+- search exercises
 - sync image on cloud and device
 - edit and delete exercises
 - image were not saving on internal storage

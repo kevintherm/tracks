@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
@@ -18,6 +19,26 @@ class ExercisesPage extends StatefulWidget {
 }
 
 class _ExercisesPageState extends State<ExercisesPage> {
+  final searchController = TextEditingController();
+  String search = "";
+
+  @override
+  void initState() {
+    super.initState();
+
+    searchController.addListener(() {
+      setState(() {
+        search = searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final exerciseRepo = context.read<ExerciseRepository>();
@@ -28,7 +49,9 @@ class _ExercisesPageState extends State<ExercisesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const _ExercisesAppBar(),
-            const _SearchBar(),
+
+            _SearchBar(controller: searchController),
+
             Expanded(
               child: StreamBuilder<List<Exercise>>(
                 stream: exerciseRepo.watchAllExercises(),
@@ -53,6 +76,36 @@ class _ExercisesPageState extends State<ExercisesPage> {
                   }
 
                   final exercises = snapshot.data ?? [];
+                  List<Exercise> filtered = exercises;
+
+                  if (search.isNotEmpty) {
+                    final lowerSearch = search.toLowerCase();
+                    final threshold = 0.2;
+
+                    final prefixFiltered = exercises.where((e) {
+                      final name = e.name.toLowerCase();
+                      return name.startsWith(lowerSearch) ||
+                          name.contains(lowerSearch);
+                    });
+
+                    final scored = prefixFiltered.map(
+                      (e) => MapEntry(
+                        e,
+                        e.name.toLowerCase().similarityTo(lowerSearch),
+                      ),
+                    );
+
+                    final scoredFiltered =
+                        scored
+                            .where((entry) => entry.value > threshold)
+                            .toList()
+                          ..sort((a, b) => b.value.compareTo(a.value));
+
+                    filtered = scoredFiltered.map((e) => e.key).toList();
+                  } else {
+                    filtered = exercises.toList()
+                      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+                  }
 
                   if (exercises.isEmpty) {
                     return Center(
@@ -66,7 +119,19 @@ class _ExercisesPageState extends State<ExercisesPage> {
                     );
                   }
 
-                  return _ExercisesList(exercises: exercises);
+                  if (filtered.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No matching exercise found.",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return _ExercisesList(exercises: filtered);
                 },
               ),
             ),
@@ -162,39 +227,55 @@ class _ActionButtons extends StatelessWidget {
 }
 
 class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+  final TextEditingController controller;
+
+  const _SearchBar({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Search",
-          hintStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
+      child: Column(
+        children: [
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: "Search",
+              hintStyle: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w300,
+              ),
+              prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 16,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
-          prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 16,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(32),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(32),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(32),
-            borderSide: BorderSide.none,
-          ),
-        ),
+          if (controller.text.isNotEmpty)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 8),
+              child: Text(
+                'Searching for `${controller.text}`',
+                style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -230,7 +311,7 @@ class _ExerciseListItem extends StatelessWidget {
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
     final exerciseRepo = context.read<ExerciseRepository>();
-    
+
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -286,9 +367,7 @@ class _ExerciseListItem extends StatelessWidget {
 }
 
 class _ConfirmDeleteDialog extends StatelessWidget {
-  const _ConfirmDeleteDialog({
-    required this.exercise,
-  });
+  const _ConfirmDeleteDialog({required this.exercise});
 
   final Exercise exercise;
 
@@ -299,27 +378,17 @@ class _ConfirmDeleteDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Iconsax.trash_outline,
-            size: 48,
-            color: Colors.red[400],
-          ),
+          Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
           const SizedBox(height: 16),
           Text(
             'Delete Exercise?',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           Row(

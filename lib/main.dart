@@ -12,7 +12,6 @@ import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:tracks/services/sync_service.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 void main() async {

@@ -73,7 +73,21 @@ const ExerciseSchema = CollectionSchema(
   deserialize: _exerciseDeserialize,
   deserializeProp: _exerciseDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'name': IndexSchema(
+      id: 879695947855722453,
+      name: r'name',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'name',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _exerciseGetId,
@@ -271,6 +285,50 @@ extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterWhereClause> nameEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'name',
+        value: [name],
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterWhereClause> nameNotEqualTo(
+      String name) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
