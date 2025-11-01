@@ -1,4 +1,5 @@
 import 'package:tracks/ui/components/safe_keyboard.dart';
+import 'package:tracks/ui/pages/home_page.dart';
 import 'package:tracks/ui/pages/register_with_email_page.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/utils/consts.dart';
@@ -225,6 +226,36 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('Login'),
+                            SizedBox(width: 8),
+                            (_isLoading)
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.arrow_forward),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const HomePage(),
+                                  ),
+                                );
+                              },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Guest'),
                             SizedBox(width: 8),
                             (_isLoading)
                                 ? const SizedBox(

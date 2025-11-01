@@ -4,6 +4,8 @@ import 'package:tracks/ui/pages/edit_password_page.dart';
 import 'package:tracks/ui/pages/edit_profile_page.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
+import 'package:tracks/ui/pages/login_with_email_page.dart';
+import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +41,8 @@ class ProfileFragment extends StatefulWidget {
 
 class _ProfileFragmentState extends State<ProfileFragment> {
   List<_Section> _buildSections() {
+    final authService = context.read<AuthService>();
+
     return [
       _Section(
         title: 'Account',
@@ -47,6 +51,13 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             label: 'Edit Profile',
             icon: Icon(Iconsax.user_edit_outline),
             action: (context) {
+              if (authService.currentUser == null) {
+                Toast(
+                  context,
+                ).neutral(content: Text("Login to access this feature."));
+                return;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EditProfilePage()),
@@ -57,6 +68,13 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             label: 'Change Password',
             icon: Icon(Iconsax.key_outline),
             action: (context) {
+              if (authService.currentUser == null) {
+                Toast(
+                  context,
+                ).neutral(content: Text("Login to access this feature."));
+                return;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EditPasswordPage()),
@@ -163,6 +181,8 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () {
+                        if (authService.currentUser == null) return;
+
                         setModalState(() {
                           authService.isSyncEnabled = !isSyncEnabled;
                         });
@@ -203,12 +223,14 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                             ),
                             Switch(
                               value: isSyncEnabled,
-                              onChanged: (value) {
-                                setModalState(() {
-                                  authService.isSyncEnabled = value;
-                                });
-                                setState(() {}); // Update parent state
-                              },
+                              onChanged: (value) =>
+                                  authService.currentUser ??
+                                  (value) {
+                                    setModalState(() {
+                                      authService.isSyncEnabled = value;
+                                    });
+                                    setState(() {}); // Update parent state
+                                  },
                             ),
                           ],
                         ),
@@ -244,6 +266,39 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                         ],
                       ),
                     ),
+
+                  if (authService.currentUser == null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Iconsax.login_bold,
+                            color: AppColors.darkAccent.withValues(alpha: 0.9),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Login to sync your data to the cloud',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.darkAccent.withValues(
+                                  alpha: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             );
@@ -252,7 +307,6 @@ class _ProfileFragmentState extends State<ProfileFragment> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -343,6 +397,16 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
+                if (user == null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginWithEmail(),
+                    ),
+                  );
+                  return;
+                }
+
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -374,7 +438,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                   ),
                 ),
               ),
-              child: Text('Sign Out'),
+              child: Text(user == null ? 'Login' : 'Sign Out'),
             ),
           ),
         ),

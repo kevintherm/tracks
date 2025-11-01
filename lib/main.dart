@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +12,7 @@ import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:tracks/services/sync_service.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 void main() async {
@@ -35,6 +38,8 @@ void main() async {
     directory: dir.path,
     inspector: true,
   );
+
+  // await SyncService.initialize();
 
   runApp(
     MultiProvider(

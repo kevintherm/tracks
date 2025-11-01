@@ -12,4 +12,6 @@ class AppColors {
   // Accent - Vibrant yellow/gold for highlights and emphasis
   static const Color accent = Color.fromARGB(255, 255, 193, 7);
   static const Color lightAccent = Color.fromARGB(255, 255, 213, 79);
+  static const Color darkAccent = Color.fromARGB(255, 208, 157, 6);
+
 }

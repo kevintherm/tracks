@@ -17,7 +17,7 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
       elevation: 0,
       backgroundColor: Colors.white,
       child: Padding(
