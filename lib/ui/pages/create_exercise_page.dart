@@ -247,6 +247,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
               _ThumbnailSection(
                 thumbnailImage: _thumbnailImage,
                 existingThumbnailPath: widget.exercise?.thumbnailLocal,
+                thumbnailRemoved: _thumbnailRemoved,
                 onPickImage: _pickThumbnailImage,
                 onRemoveImage: _removeThumbnailImage,
               ),
@@ -381,12 +382,14 @@ class _AppBar extends StatelessWidget {
 class _ThumbnailSection extends StatelessWidget {
   final XFile? thumbnailImage;
   final String? existingThumbnailPath;
+  final bool thumbnailRemoved;
   final VoidCallback onPickImage;
   final VoidCallback onRemoveImage;
 
   const _ThumbnailSection({
     required this.thumbnailImage,
     this.existingThumbnailPath,
+    this.thumbnailRemoved = false,
     required this.onPickImage,
     required this.onRemoveImage,
   });
@@ -399,7 +402,7 @@ class _ThumbnailSection extends StatelessWidget {
       title: "Thumbnail",
       child: thumbnailImage != null
           ? _buildImagePreview(thumbnailImage!)
-          : existingThumbnailPath != null
+          : (existingThumbnailPath != null && !thumbnailRemoved)
               ? _buildExistingImagePreview(existingThumbnailPath!)
               : _buildUploadArea(color),
     );

@@ -503,7 +503,7 @@ class _ExerciseCard extends StatelessWidget {
             fit: BoxFit.cover,
           )
         : Image.asset(
-            'assets/drawings/pushup.jpg',
+            'assets/drawings/not-found.jpg',
             width: 100,
             height: 100,
             fit: BoxFit.cover,
