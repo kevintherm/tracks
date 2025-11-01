@@ -267,12 +267,27 @@ class _SearchBar extends StatelessWidget {
             ),
           ),
           if (controller.text.isNotEmpty)
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(top: 8),
-              child: Text(
-                'Searching for `${controller.text}`',
-                style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Searching for `${controller.text}`',
+                    style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+                  ),
+
+                  Pressable(
+                    onTap: () {
+                      controller.text = "";
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: Text(
+                      'Clear',
+                      style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[700]),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
