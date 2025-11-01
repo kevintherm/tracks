@@ -51,3 +51,12 @@ Future<bool> showConfirmDialog(
       ) ??
       false;
 }
+
+enum PBCollections {
+  exercises("exercises"),
+  muscles("muscles"),
+  muscleGroups("muscle_groups");
+
+  final String value;
+  const PBCollections(this.value);
+}

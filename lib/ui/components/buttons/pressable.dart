@@ -19,6 +19,13 @@ class Pressable extends StatefulWidget {
 
 class _PressableState extends State<Pressable> {
   bool _isPressed = false;
+  Duration _duration = Duration(milliseconds: 125);
+
+  @override
+  void initState() {
+    if (widget.duration != null) _duration = widget.duration!;
+    super.initState();
+  }
 
   void _onTapDown(TapDownDetails details) {
     setState(() {
@@ -26,10 +33,13 @@ class _PressableState extends State<Pressable> {
     });
   }
 
-  void _onTapUp(TapUpDetails details) {
+  void _onTapUp(TapUpDetails details) async {
+    await Future.delayed(_duration);
+
     setState(() {
       _isPressed = false;
     });
+
     widget.onTap?.call();
   }
 
@@ -41,7 +51,7 @@ class _PressableState extends State<Pressable> {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = _isPressed ? 0.95 : 1.0;
+    final double scale = _isPressed ? 0.9 : 1.0;
     final bool isDisabled = widget.onTap == null;
 
     return GestureDetector(

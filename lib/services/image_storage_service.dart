@@ -112,7 +112,7 @@ class ImageStorageService {
         filename: fileName,
       );
 
-      print('${recordId}, ${fileName}, ${multipartFile}');
+      print('$recordId, $fileName, $multipartFile');
 
       // Update the record with the file
       final updatedRecord = await pb.collection(collection).update(
@@ -179,5 +179,59 @@ class ImageStorageService {
   Future<String> getLocalPath(String directory, String fileName) async {
     final Directory appDir = await getApplicationDocumentsDirectory();
     return path.join(appDir.path, directory, fileName);
+  }
+
+  /// Downloads an image from cloud URL and saves it locally
+  /// 
+  /// Returns the local file path where the image was saved, or null if download fails
+  /// 
+  /// [cloudUrl] - The URL of the image in PocketBase cloud storage
+  /// [directory] - The subdirectory name where to save locally (e.g., 'exercises')
+  /// [fileName] - Optional custom file name (defaults to extracted from URL)
+  Future<String?> downloadImageFromCloud({
+    required String cloudUrl,
+    required String directory,
+    String? fileName,
+  }) async {
+    try {
+      // Download the image from the URL
+      final response = await http.get(Uri.parse(cloudUrl));
+      
+      if (response.statusCode != 200) {
+        return null;
+      }
+
+      // Get the app's documents directory
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      
+      // Create subdirectory if it doesn't exist
+      final Directory imageDir = Directory(path.join(appDir.path, directory));
+      if (!await imageDir.exists()) {
+        await imageDir.create(recursive: true);
+      }
+
+      // Generate file name if not provided
+      String finalFileName;
+      if (fileName != null) {
+        finalFileName = fileName;
+      } else {
+        // Extract filename from URL or generate timestamp-based name
+        final uri = Uri.parse(cloudUrl);
+        final urlFileName = path.basename(uri.path);
+        finalFileName = urlFileName.isNotEmpty 
+            ? urlFileName 
+            : '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      }
+
+      // Save the downloaded bytes to local file
+      final String destinationPath = path.join(imageDir.path, finalFileName);
+      final File destinationFile = File(destinationPath);
+      await destinationFile.writeAsBytes(response.bodyBytes);
+
+      return destinationFile.path;
+    } catch (e) {
+      print('Error downloading image from cloud: $e');
+      return null;
+    }
   }
 }

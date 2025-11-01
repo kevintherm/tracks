@@ -22,40 +22,50 @@ const ExerciseSchema = CollectionSchema(
       name: r'caloriesBurned',
       type: IsarType.double,
     ),
-    r'description': PropertySchema(
+    r'createdAt': PropertySchema(
       id: 1,
+      name: r'createdAt',
+      type: IsarType.dateTime,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'imported': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'imported',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'needSync': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'thumbnailCloud': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'thumbnailCloud',
       type: IsarType.string,
     ),
     r'thumbnailLocal': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'thumbnailLocal',
       type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 9,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _exerciseEstimateSize,
@@ -113,13 +123,15 @@ void _exerciseSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.caloriesBurned);
-  writer.writeString(offsets[1], object.description);
-  writer.writeBool(offsets[2], object.imported);
-  writer.writeString(offsets[3], object.name);
-  writer.writeBool(offsets[4], object.needSync);
-  writer.writeString(offsets[5], object.pocketbaseId);
-  writer.writeString(offsets[6], object.thumbnailCloud);
-  writer.writeString(offsets[7], object.thumbnailLocal);
+  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeString(offsets[2], object.description);
+  writer.writeBool(offsets[3], object.imported);
+  writer.writeString(offsets[4], object.name);
+  writer.writeBool(offsets[5], object.needSync);
+  writer.writeString(offsets[6], object.pocketbaseId);
+  writer.writeString(offsets[7], object.thumbnailCloud);
+  writer.writeString(offsets[8], object.thumbnailLocal);
+  writer.writeDateTime(offsets[9], object.updatedAt);
 }
 
 Exercise _exerciseDeserialize(
@@ -130,15 +142,17 @@ Exercise _exerciseDeserialize(
 ) {
   final object = Exercise(
     caloriesBurned: reader.readDouble(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    imported: reader.readBoolOrNull(offsets[2]) ?? false,
-    name: reader.readString(offsets[3]),
-    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[5]),
-    thumbnailCloud: reader.readStringOrNull(offsets[6]),
-    thumbnailLocal: reader.readStringOrNull(offsets[7]),
+    description: reader.readStringOrNull(offsets[2]),
+    imported: reader.readBoolOrNull(offsets[3]) ?? false,
+    name: reader.readString(offsets[4]),
+    needSync: reader.readBoolOrNull(offsets[5]) ?? true,
+    pocketbaseId: reader.readStringOrNull(offsets[6]),
+    thumbnailCloud: reader.readStringOrNull(offsets[7]),
+    thumbnailLocal: reader.readStringOrNull(offsets[8]),
   );
+  object.createdAt = reader.readDateTime(offsets[1]);
   object.id = id;
+  object.updatedAt = reader.readDateTime(offsets[9]);
   return object;
 }
 
@@ -152,19 +166,23 @@ P _exerciseDeserializeProp<P>(
     case 0:
       return (reader.readDouble(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 3:
-      return (reader.readString(offset)) as P;
-    case 4:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -319,6 +337,59 @@ extension ExerciseQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> createdAtEqualTo(
+      DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> createdAtGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> createdAtLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> createdAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'createdAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1130,6 +1201,59 @@ extension ExerciseQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> updatedAtEqualTo(
+      DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> updatedAtGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> updatedAtLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> updatedAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension ExerciseQueryObject
@@ -1148,6 +1272,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCaloriesBurnedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'caloriesBurned', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
@@ -1234,6 +1370,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
       return query.addSortBy(r'thumbnailLocal', Sort.desc);
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension ExerciseQuerySortThenBy
@@ -1247,6 +1395,18 @@ extension ExerciseQuerySortThenBy
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCaloriesBurnedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'caloriesBurned', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
@@ -1345,6 +1505,18 @@ extension ExerciseQuerySortThenBy
       return query.addSortBy(r'thumbnailLocal', Sort.desc);
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension ExerciseQueryWhereDistinct
@@ -1352,6 +1524,12 @@ extension ExerciseQueryWhereDistinct
   QueryBuilder<Exercise, Exercise, QDistinct> distinctByCaloriesBurned() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'caloriesBurned');
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAt');
     });
   }
 
@@ -1403,6 +1581,12 @@ extension ExerciseQueryWhereDistinct
           caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
 }
 
 extension ExerciseQueryProperty
@@ -1416,6 +1600,12 @@ extension ExerciseQueryProperty
   QueryBuilder<Exercise, double, QQueryOperations> caloriesBurnedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'caloriesBurned');
+    });
+  }
+
+  QueryBuilder<Exercise, DateTime, QQueryOperations> createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAt');
     });
   }
 
@@ -1458,6 +1648,12 @@ extension ExerciseQueryProperty
   QueryBuilder<Exercise, String?, QQueryOperations> thumbnailLocalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'thumbnailLocal');
+    });
+  }
+
+  QueryBuilder<Exercise, DateTime, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

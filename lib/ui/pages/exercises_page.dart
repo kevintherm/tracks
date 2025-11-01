@@ -216,7 +216,7 @@ class _ExercisesList extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final exercise = exercises[index];
-          return _ExerciseListItem(index: exercise.id, exercise: exercise);
+          return _ExerciseListItem(exercise: exercise);
         },
       ),
     );
@@ -225,9 +225,8 @@ class _ExercisesList extends StatelessWidget {
 
 class _ExerciseListItem extends StatelessWidget {
   final Exercise exercise;
-  final int index;
 
-  const _ExerciseListItem({required this.index, required this.exercise});
+  const _ExerciseListItem({required this.exercise});
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
     final exerciseRepo = context.read<ExerciseRepository>();
@@ -235,83 +234,7 @@ class _ExerciseListItem extends StatelessWidget {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Iconsax.trash_outline,
-                size: 48,
-                color: Colors.red[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Delete Exercise?',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Pressable(
-                      onTap: () => Navigator.pop(context, false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Cancel',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Pressable(
-                      onTap: () => Navigator.pop(context, true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.red[400],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Delete',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+        return _ConfirmDeleteDialog(exercise: exercise);
       },
     );
 
@@ -326,15 +249,13 @@ class _ExerciseListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: ValueKey(index),
+      key: ValueKey(exercise.id),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          // Delete action
           await _showDeleteConfirmation(context);
-          return false; // Don't dismiss, we handle it in the confirmation
+          return false;
         } else {
-          // Edit action
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -359,6 +280,95 @@ class _ExerciseListItem extends StatelessWidget {
       child: Pressable(
         onTap: () {},
         child: _ExerciseCard(exercise: exercise),
+      ),
+    );
+  }
+}
+
+class _ConfirmDeleteDialog extends StatelessWidget {
+  const _ConfirmDeleteDialog({
+    required this.exercise,
+  });
+
+  final Exercise exercise;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Iconsax.trash_outline,
+            size: 48,
+            color: Colors.red[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Delete Exercise?',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.red[400],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Delete',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

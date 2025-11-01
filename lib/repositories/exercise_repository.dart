@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
-import 'package:http/http.dart' as http;
+import 'package:tracks/utils/consts.dart';
 
 class ExerciseRepository {
   final Isar isar;
@@ -55,7 +53,7 @@ class ExerciseRepository {
         if (oldExercise?.thumbnailLocal != null) {
           await imageStorageService.deleteImage(
             localPath: oldExercise!.thumbnailLocal,
-            collection: 'exercise',
+            collection: PBCollections.exercises.value,
             recordId: oldExercise.pocketbaseId,
             fieldName: 'thumbnail',
             syncEnabled: authService.isSyncEnabled,
@@ -92,32 +90,31 @@ class ExerciseRepository {
   }
 
   Future<void> deleteExercise(Exercise exercise) async {
-    // Delete image files
     if (exercise.thumbnailLocal != null) {
       try {
         await imageStorageService.deleteImage(
           localPath: exercise.thumbnailLocal,
-          collection: 'exercise',
+          collection: PBCollections.exercises.value,
           recordId: exercise.pocketbaseId,
           fieldName: 'thumbnail',
-          syncEnabled: authService.isSyncEnabled,
+          syncEnabled: false, // We're deleting the entire row anyway
         );
       } catch (e) {
         // Continue with deletion even if image deletion fails
       }
     }
 
-    // Delete from local DB
     await isar.writeTxn(() async {
       await isar.exercises.delete(exercise.id);
     });
 
-    // Delete from cloud if synced
     if (authService.isSyncEnabled && exercise.pocketbaseId != null) {
       try {
-        await pb.collection('exercise').delete(exercise.pocketbaseId!);
+        await pb
+            .collection(PBCollections.exercises.value)
+            .delete(exercise.pocketbaseId!);
       } catch (e) {
-        // Already deleted locally, cloud deletion failure is acceptable
+        // Already deleted locally, cloud deletion failure is acceptabler
       }
     }
   }
@@ -135,7 +132,7 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
-            }
+            },
           );
 
       if (exercise.thumbnailLocal != null) {
@@ -169,7 +166,7 @@ class ExerciseRepository {
     try {
       // Update the record
       final pbRecord = await pb
-          .collection('exercise')
+          .collection(PBCollections.exercises.value)
           .update(
             exercise.pocketbaseId!,
             body: {
@@ -186,7 +183,7 @@ class ExerciseRepository {
         final imageResult = await imageStorageService.saveImage(
           sourcePath: exercise.thumbnailLocal!,
           directory: 'exercises',
-          collection: 'exercise',
+          collection: PBCollections.exercises.value,
           pbRecord: pbRecord,
           fieldName: 'thumbnail',
           syncEnabled: true,
@@ -212,48 +209,109 @@ class ExerciseRepository {
     if (!authService.isSyncEnabled) return;
 
     // 1. Upload local-only data
-    final localOnlyNotes = await isar.exercises
+    final localExercises = await isar.exercises
         .filter()
         .pocketbaseIdIsNull()
         .findAll();
-    for (final note in localOnlyNotes) {
-      await _syncExerciseToCloud(note);
+    for (final exercise in localExercises) {
+      print('Synching ${exercise.name}');
+      await _syncExerciseToCloud(exercise);
     }
 
     // 2. Download cloud-only data
-    final records = await pb.collection('notes').getFullList();
-    final List<Exercise> notesToSave = [];
+    final pbRecords = await pb
+        .collection(PBCollections.exercises.value)
+        .getFullList();
+    final List<Exercise> exercisesToSave = [];
 
-    for (final record in records) {
-      // Check if we already have this note locally
+    for (final record in pbRecords) {
+      // Check if we already have this exercise locally
       final exists = await isar.exercises
           .filter()
           .pocketbaseIdEqualTo(record.id)
           .findFirst();
 
       if (exists == null) {
-        // Doesn't exist locally, so add it
-        notesToSave.add(
-          Exercise(
-            name: record.data['name'],
-            description: record.data['description'],
-            caloriesBurned: record.data['calories_burned'],
-            thumbnailLocal: record.data['thumbnail_local'],
-            thumbnailCloud: record.data['thumbnail_cloud'],
-            pocketbaseId: record.id,
-            needSync: false,
-          ),
+        final toInsert = Exercise(
+          name: record.data['name'],
+          description: record.data['description'],
+          caloriesBurned: record.data['calories_burned'].toDouble() ?? 0,
+          pocketbaseId: record.id,
+          needSync: false,
         );
+
+        toInsert.createdAt = DateTime.tryParse(record.data['created']) ?? DateTime.now();
+        toInsert.updatedAt = DateTime.tryParse(record.data['updated']) ?? DateTime.now();
+
+        // Download thumbnail from cloud if exists
+        final thumbnailField = record.data['thumbnail'];
+        if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
+          try {
+            final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
+            toInsert.thumbnailCloud = cloudUrl;
+            
+            final localPath = await imageStorageService.downloadImageFromCloud(
+              cloudUrl: cloudUrl,
+              directory: 'exercises',
+            );
+            
+            if (localPath != null) {
+              toInsert.thumbnailLocal = localPath;
+            }
+          } catch (e) {
+            print('Error downloading thumbnail for new exercise: $e');
+            // Continue without thumbnail
+          }
+        }
+
+        exercisesToSave.add(toInsert);
       } else {
-        // CONFLICT: Note exists locally and on cloud.
-        // You must decide on a conflict resolution strategy.
-        // E.g., Last-write-wins (check record.updated vs local timestamp)
+        // CONFLICT: Note exists locally and on cloud. 
+        // Checking: Last update
+        final cloudLastUpdated = DateTime.tryParse(record.data['updated']);
+
+        if (cloudLastUpdated != null && exists.updatedAt.isBefore(cloudLastUpdated)) {
+          exists
+            ..name = record.data['name']
+            ..description = record.data['description']
+            ..caloriesBurned = record.data['calories_burned']?.toDouble()
+            ..updatedAt = cloudLastUpdated;
+
+          // Download image from cloud and update the thumbnailLocal
+          final thumbnailField = record.data['thumbnail'];
+          if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
+            try {
+              final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
+              exists.thumbnailCloud = cloudUrl;
+              
+              final localPath = await imageStorageService.downloadImageFromCloud(
+                cloudUrl: cloudUrl,
+                directory: 'exercises',
+              );
+              
+              if (localPath != null) {
+                // Delete old local image if it exists
+                if (exists.thumbnailLocal != null) {
+                  await imageStorageService.deleteLocalImage(exists.thumbnailLocal!);
+                }
+                exists.thumbnailLocal = localPath;
+              }
+            } catch (e) {
+              print('Error downloading thumbnail from cloud: $e');
+              // Keep existing thumbnailLocal if download fails
+            }
+          }
+
+          exercisesToSave.add(exists);
+        }
       }
     }
 
     // Save all new notes from the cloud to the local DB
     await isar.writeTxn(() async {
-      await isar.exercises.putAll(notesToSave);
+      await isar.exercises.putAll(exercisesToSave);
     });
+
+
   }
 }

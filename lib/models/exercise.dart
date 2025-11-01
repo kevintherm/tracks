@@ -17,6 +17,9 @@ class Exercise {
   bool needSync;
   bool imported;
 
+  late DateTime createdAt;
+  late DateTime updatedAt;
+
   Exercise({
     required this.name,
     this.description,
@@ -26,5 +29,6 @@ class Exercise {
     this.pocketbaseId,
     this.needSync = true,
     this.imported = false,
-  });
+  }) : createdAt = DateTime.now(),
+       updatedAt = DateTime.now();
 }
