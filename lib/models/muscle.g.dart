@@ -26,6 +26,21 @@ const MuscleSchema = CollectionSchema(
       id: 1,
       name: r'name',
       type: IsarType.string,
+    ),
+    r'pocketbaseId': PropertySchema(
+      id: 2,
+      name: r'pocketbaseId',
+      type: IsarType.string,
+    ),
+    r'thumbnailCloud': PropertySchema(
+      id: 3,
+      name: r'thumbnailCloud',
+      type: IsarType.string,
+    ),
+    r'thumbnailLocal': PropertySchema(
+      id: 4,
+      name: r'thumbnailLocal',
+      type: IsarType.string,
     )
   },
   estimateSize: _muscleEstimateSize,
@@ -62,6 +77,24 @@ int _muscleEstimateSize(
     }
   }
   bytesCount += 3 + object.name.length * 3;
+  {
+    final value = object.pocketbaseId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.thumbnailCloud;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.thumbnailLocal;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -73,6 +106,9 @@ void _muscleSerialize(
 ) {
   writer.writeString(offsets[0], object.description);
   writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[2], object.pocketbaseId);
+  writer.writeString(offsets[3], object.thumbnailCloud);
+  writer.writeString(offsets[4], object.thumbnailLocal);
 }
 
 Muscle _muscleDeserialize(
@@ -85,7 +121,10 @@ Muscle _muscleDeserialize(
     description: reader.readStringOrNull(offsets[0]),
     id: id,
     name: reader.readString(offsets[1]),
+    thumbnailCloud: reader.readStringOrNull(offsets[3]),
+    thumbnailLocal: reader.readStringOrNull(offsets[4]),
   );
+  object.pocketbaseId = reader.readStringOrNull(offsets[2]);
   return object;
 }
 
@@ -100,6 +139,12 @@ P _muscleDeserializeProp<P>(
       return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -521,6 +566,448 @@ extension MuscleQueryFilter on QueryBuilder<Muscle, Muscle, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'pocketbaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'pocketbaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pocketbaseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'pocketbaseId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pocketbaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'pocketbaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'thumbnailCloud',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      thumbnailCloudIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'thumbnailCloud',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'thumbnailCloud',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'thumbnailCloud',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'thumbnailCloud',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailCloudIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'thumbnailCloud',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      thumbnailCloudIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'thumbnailCloud',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'thumbnailLocal',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      thumbnailLocalIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'thumbnailLocal',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'thumbnailLocal',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'thumbnailLocal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'thumbnailLocal',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> thumbnailLocalIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'thumbnailLocal',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      thumbnailLocalIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'thumbnailLocal',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension MuscleQueryObject on QueryBuilder<Muscle, Muscle, QFilterCondition> {}
@@ -609,6 +1096,42 @@ extension MuscleQuerySortBy on QueryBuilder<Muscle, Muscle, QSortBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByPocketbaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByPocketbaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByThumbnailCloud() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailCloud', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByThumbnailCloudDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailCloud', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByThumbnailLocal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailLocal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByThumbnailLocalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailLocal', Sort.desc);
+    });
+  }
 }
 
 extension MuscleQuerySortThenBy on QueryBuilder<Muscle, Muscle, QSortThenBy> {
@@ -647,6 +1170,42 @@ extension MuscleQuerySortThenBy on QueryBuilder<Muscle, Muscle, QSortThenBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByPocketbaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByPocketbaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByThumbnailCloud() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailCloud', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByThumbnailCloudDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailCloud', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByThumbnailLocal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailLocal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByThumbnailLocalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'thumbnailLocal', Sort.desc);
+    });
+  }
 }
 
 extension MuscleQueryWhereDistinct on QueryBuilder<Muscle, Muscle, QDistinct> {
@@ -661,6 +1220,29 @@ extension MuscleQueryWhereDistinct on QueryBuilder<Muscle, Muscle, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QDistinct> distinctByPocketbaseId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QDistinct> distinctByThumbnailCloud(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'thumbnailCloud',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QDistinct> distinctByThumbnailLocal(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'thumbnailLocal',
+          caseSensitive: caseSensitive);
     });
   }
 }
@@ -681,6 +1263,24 @@ extension MuscleQueryProperty on QueryBuilder<Muscle, Muscle, QQueryProperty> {
   QueryBuilder<Muscle, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Muscle, String?, QQueryOperations> pocketbaseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<Muscle, String?, QQueryOperations> thumbnailCloudProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'thumbnailCloud');
+    });
+  }
+
+  QueryBuilder<Muscle, String?, QQueryOperations> thumbnailLocalProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'thumbnailLocal');
     });
   }
 }

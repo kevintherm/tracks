@@ -33,13 +33,17 @@ class MuscleRepository {
     final muscleGroupRecords = await pb
         .collection(PBCollections.muscleGroups.value)
         .getFullList();
-    
+
     final Map<String, MuscleGroup> muscleGroupMap = {};
-    
+
     await isar.writeTxn(() async {
       for (final record in muscleGroupRecords) {
-        final muscleGroup = MuscleGroup(name: record.data['name']);
-        
+        final muscleGroup = MuscleGroup(
+          name: record.data['name'],
+          thumbnailCloud: record.data['thumbnail'],
+          pocketbaseId: record.id
+        );
+
         await isar.muscleGroups.put(muscleGroup);
         muscleGroupMap[record.id] = muscleGroup;
       }
@@ -48,14 +52,16 @@ class MuscleRepository {
     final muscleRecords = await pb
         .collection(PBCollections.muscles.value)
         .getFullList(expand: 'muscle_groups');
-    
+
     await isar.writeTxn(() async {
       for (final record in muscleRecords) {
         final muscle = Muscle(
           name: record.data['name'],
           description: record.data['description'],
+          thumbnailCloud: record.data['thumbnail'],
+          pocketbaseId: record.id
         );
-        
+
         await isar.muscles.put(muscle);
 
         final muscleGroupIds = record.data['muscle_groups'] as List<dynamic>?;

@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:tracks/models/muscle.dart';
 
 part 'exercise.g.dart';
 
@@ -20,6 +21,8 @@ class Exercise {
 
   late DateTime createdAt;
   late DateTime updatedAt;
+
+  final muscles = IsarLinks<Muscle>();
 
   Exercise({
     required this.name,

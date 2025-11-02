@@ -70,6 +70,41 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         // Note: We'll need to handle this differently since XFile expects a path
         // For now, we'll just keep the path and handle it in the image preview
       }
+      
+      // Load existing muscle relationships
+      _loadExistingMuscles();
+    }
+  }
+
+  Future<void> _loadExistingMuscles() async {
+    try {
+      // Load the muscle links
+      await widget.exercise!.muscles.load();
+      final linkedMuscles = widget.exercise!.muscles.toList();
+      
+      // Convert to ExerciseOption and add to selected
+      for (final muscle in linkedMuscles) {
+        final muscleOption = ExerciseOption(
+          id: muscle.id.toString(),
+          label: muscle.name,
+          subtitle: muscle.description,
+          imagePath: muscle.thumbnailLocal ?? muscle.thumbnailCloud,
+        );
+        
+        if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
+          setState(() {
+            _selectedOptions.add(muscleOption);
+            // Initialize with default muscle activation of 50%
+            _exerciseConfigs[muscleOption.id] = ExerciseConfig(
+              muscleActivation: 50,
+            );
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Toast(context).error(content: Text("Failed to load muscles: $e"));
+      }
     }
   }
 
@@ -250,7 +285,15 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                           imported: widget.exercise!.imported,
                         )..id = widget.exercise!.id;
 
-                        await exerciseRepo.updateExercise(updatedExercise);
+                        // Get selected muscle IDs and convert to Muscle objects
+                        final selectedMuscleIds = _selectedOptions
+                            .map((opt) => int.parse(opt.id))
+                            .toList();
+                        
+                        await exerciseRepo.updateExercise(
+                          updatedExercise,
+                          muscleIds: selectedMuscleIds,
+                        );
                         toast.success(content: const Text("Exercise updated!"));
                       } else {
                         // Create new exercise
@@ -261,7 +304,15 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                           thumbnailLocal: _thumbnailImage?.path,
                         );
 
-                        await exerciseRepo.createExercise(newExercise);
+                        // Get selected muscle IDs
+                        final selectedMuscleIds = _selectedOptions
+                            .map((opt) => int.parse(opt.id))
+                            .toList();
+
+                        await exerciseRepo.createExercise(
+                          newExercise,
+                          muscleIds: selectedMuscleIds,
+                        );
                         toast.success(content: const Text("Exercise created!"));
                       }
 

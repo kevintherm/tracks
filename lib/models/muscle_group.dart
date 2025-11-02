@@ -10,5 +10,7 @@ class MuscleGroup {
   late String? thumbnailCloud;
   late String? thumbnailLocal;
 
-  MuscleGroup({required this.name, this.thumbnailCloud, this.thumbnailLocal});
+  String? pocketbaseId;
+
+  MuscleGroup({required this.name, this.thumbnailCloud, this.thumbnailLocal, this.pocketbaseId});
 }

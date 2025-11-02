@@ -14,6 +14,12 @@ func init() {
 		if err != nil {
 			return err
 		}
+
+		musclesCollection, err := app.FindCollectionByNameOrId("muscles")
+		if err != nil {
+			return err
+		}
+
 		collection.Fields.Add(&core.RelationField{
 			Name:          "user",
 			Required:      true,
@@ -45,6 +51,12 @@ func init() {
 			Required:  false,
 			MaxSelect: 1,
 			MimeTypes: []string{"image/jpg", "image/jpeg", "image/png", "image/gif", "image/heic"},
+		})
+
+		collection.Fields.Add(&core.RelationField{
+			Name:         "muscles",
+			MaxSelect:    20,
+			CollectionId: musclesCollection.Id,
 		})
 
 		collection.Fields.Add(&core.AutodateField{

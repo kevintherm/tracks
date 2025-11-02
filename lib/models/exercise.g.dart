@@ -88,7 +88,14 @@ const ExerciseSchema = CollectionSchema(
       ],
     )
   },
-  links: {},
+  links: {
+    r'muscles': LinkSchema(
+      id: -1766480348000704127,
+      name: r'muscles',
+      target: r'Muscle',
+      single: false,
+    )
+  },
   embeddedSchemas: {},
   getId: _exerciseGetId,
   getLinks: _exerciseGetLinks,
@@ -207,11 +214,12 @@ Id _exerciseGetId(Exercise object) {
 }
 
 List<IsarLinkBase<dynamic>> _exerciseGetLinks(Exercise object) {
-  return [];
+  return [object.muscles];
 }
 
 void _exerciseAttach(IsarCollection<dynamic> col, Id id, Exercise object) {
   object.id = id;
+  object.muscles.attach(col, col.isar.collection<Muscle>(), r'muscles', id);
 }
 
 extension ExerciseQueryWhereSort on QueryBuilder<Exercise, Exercise, QWhere> {
@@ -1318,7 +1326,64 @@ extension ExerciseQueryObject
     on QueryBuilder<Exercise, Exercise, QFilterCondition> {}
 
 extension ExerciseQueryLinks
-    on QueryBuilder<Exercise, Exercise, QFilterCondition> {}
+    on QueryBuilder<Exercise, Exercise, QFilterCondition> {
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> muscles(
+      FilterQuery<Muscle> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'muscles');
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> musclesLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'muscles', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> musclesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'muscles', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> musclesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'muscles', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> musclesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'muscles', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      musclesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'muscles', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> musclesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'muscles', lower, includeLower, upper, includeUpper);
+    });
+  }
+}
 
 extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCaloriesBurned() {

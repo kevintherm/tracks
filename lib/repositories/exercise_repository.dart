@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/muscle.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
 import 'package:tracks/utils/consts.dart';
@@ -19,7 +20,7 @@ class ExerciseRepository {
     return isar.exercises.where().watch(fireImmediately: true);
   }
 
-  Future<void> createExercise(Exercise exercise) async {
+  Future<void> createExercise(Exercise exercise, {List<int>? muscleIds}) async {
     if (exercise.thumbnailLocal != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
@@ -36,6 +37,18 @@ class ExerciseRepository {
 
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
+
+      // Link muscles if provided
+      if (muscleIds != null && muscleIds.isNotEmpty) {
+        final muscles = await isar.muscles.getAll(muscleIds);
+        await exercise.muscles.save();
+        for (final muscle in muscles) {
+          if (muscle != null) {
+            exercise.muscles.add(muscle);
+          }
+        }
+        await exercise.muscles.save();
+      }
     });
 
     if (authService.isSyncEnabled) {
@@ -43,15 +56,15 @@ class ExerciseRepository {
     }
   }
 
-  Future<void> updateExercise(Exercise exercise) async {
+  Future<void> updateExercise(Exercise exercise, {List<int>? muscleIds}) async {
     // Get old exercise to compare
     final oldExercise = await isar.exercises.get(exercise.id);
-    
+
     // Handle thumbnail update if needed
     // Check if this is a NEW image (path changed or doesn't point to app directory yet)
     if (exercise.thumbnailLocal != null) {
       final isNewImage = oldExercise?.thumbnailLocal != exercise.thumbnailLocal;
-      
+
       if (isNewImage) {
         try {
           // Delete old image if exists
@@ -90,6 +103,25 @@ class ExerciseRepository {
     // Update local DB
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
+
+      // Update muscle relationships if provided
+      if (muscleIds != null) {
+        // Clear existing relationships
+        await exercise.muscles.load();
+        exercise.muscles.clear();
+        await exercise.muscles.save();
+
+        // Add new relationships
+        if (muscleIds.isNotEmpty) {
+          final muscles = await isar.muscles.getAll(muscleIds);
+          for (final muscle in muscles) {
+            if (muscle != null) {
+              exercise.muscles.add(muscle);
+            }
+          }
+          await exercise.muscles.save();
+        }
+      }
     });
 
     // Sync to cloud if enabled
@@ -146,6 +178,10 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
+              'muscles': exercise.muscles
+                  .map((e) => e.pocketbaseId)
+                  .where((id) => id != null)
+                  .toList(),
             },
           );
 
@@ -187,7 +223,11 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
-            }
+              'muscles': exercise.muscles
+                  .map((e) => e.pocketbaseId)
+                  .where((id) => id != null)
+                  .toList(),
+            },
           );
 
       // Handle thumbnail sync if exists
@@ -198,7 +238,9 @@ class ExerciseRepository {
             sourcePath: exercise.thumbnailLocal!,
             directory: 'exercises',
             collection: PBCollections.exercises.value,
-            pbRecord: await pb.collection(PBCollections.exercises.value).getOne(exercise.pocketbaseId!),
+            pbRecord: await pb
+                .collection(PBCollections.exercises.value)
+                .getOne(exercise.pocketbaseId!),
             fieldName: 'thumbnail',
             syncEnabled: true,
           );
@@ -206,13 +248,14 @@ class ExerciseRepository {
           // Update cloud URL
           if (imageResult['cloudUrl'] != null) {
             exercise.thumbnailCloud = imageResult['cloudUrl'];
-            
+
             // If local path changed (image was re-saved), update it
             if (imageResult['localPath'] != null) {
               exercise.thumbnailLocal = imageResult['localPath'];
             }
           }
         } catch (e) {
+          print('Failed updating to cloud $e');
           // Continue with sync even if image upload fails
         }
       }
@@ -264,8 +307,10 @@ class ExerciseRepository {
           needSync: false,
         );
 
-        toInsert.createdAt = DateTime.tryParse(record.data['created']) ?? DateTime.now();
-        toInsert.updatedAt = DateTime.tryParse(record.data['updated']) ?? DateTime.now();
+        toInsert.createdAt =
+            DateTime.tryParse(record.data['created']) ?? DateTime.now();
+        toInsert.updatedAt =
+            DateTime.tryParse(record.data['updated']) ?? DateTime.now();
 
         // Download thumbnail from cloud if exists
         final thumbnailField = record.data['thumbnail'];
@@ -273,12 +318,12 @@ class ExerciseRepository {
           try {
             final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
             toInsert.thumbnailCloud = cloudUrl;
-            
+
             final localPath = await imageStorageService.downloadImageFromCloud(
               cloudUrl: cloudUrl,
               directory: 'exercises',
             );
-            
+
             if (localPath != null) {
               toInsert.thumbnailLocal = localPath;
             }
@@ -289,11 +334,12 @@ class ExerciseRepository {
 
         exercisesToSave.add(toInsert);
       } else {
-        // CONFLICT: Note exists locally and on cloud. 
+        // CONFLICT: Note exists locally and on cloud.
         // Checking: Last update
         final cloudLastUpdated = DateTime.tryParse(record.data['updated']);
 
-        if (cloudLastUpdated != null && exists.updatedAt.isBefore(cloudLastUpdated)) {
+        if (cloudLastUpdated != null &&
+            exists.updatedAt.isBefore(cloudLastUpdated)) {
           exists
             ..name = record.data['name']
             ..description = record.data['description']
@@ -304,21 +350,26 @@ class ExerciseRepository {
           final thumbnailField = record.data['thumbnail'];
           if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
             try {
-              final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-              
+              final cloudUrl = pb.files
+                  .getUrl(record, thumbnailField)
+                  .toString();
+
               // Only download if the cloud URL is different from what we have
               if (exists.thumbnailCloud != cloudUrl) {
                 exists.thumbnailCloud = cloudUrl;
-                
-                final localPath = await imageStorageService.downloadImageFromCloud(
-                  cloudUrl: cloudUrl,
-                  directory: 'exercises',
-                );
-                
+
+                final localPath = await imageStorageService
+                    .downloadImageFromCloud(
+                      cloudUrl: cloudUrl,
+                      directory: 'exercises',
+                    );
+
                 if (localPath != null) {
                   // Delete old local image if it exists
                   if (exists.thumbnailLocal != null) {
-                    await imageStorageService.deleteLocalImage(exists.thumbnailLocal!);
+                    await imageStorageService.deleteLocalImage(
+                      exists.thumbnailLocal!,
+                    );
                   }
                   exists.thumbnailLocal = localPath;
                 }
@@ -340,7 +391,5 @@ class ExerciseRepository {
     await isar.writeTxn(() async {
       await isar.exercises.putAll(exercisesToSave);
     });
-
-
   }
 }

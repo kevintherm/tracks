@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+
 	app := pocketbase.New()
 
 	err := godotenv.Load()

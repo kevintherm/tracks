@@ -7,6 +7,8 @@ part 'muscle.g.dart';
 class Muscle {
   Id id = Isar.autoIncrement;
 
+  String? pocketbaseId;
+
   late String name;
   late String? description;
   late String? thumbnailCloud;
@@ -19,6 +21,7 @@ class Muscle {
     required this.name,
     this.description,
     this.thumbnailCloud,
-    this.thumbnailLocal
+    this.thumbnailLocal,
+    this.pocketbaseId
   });
 }
