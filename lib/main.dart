@@ -1,12 +1,13 @@
-import 'dart:developer';
-
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracks/auth_gate.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/muscle.dart';
+import 'package:tracks/models/muscle_group.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
@@ -33,12 +34,13 @@ void main() async {
   // }
 
   final isar = await Isar.open(
-    [ExerciseSchema],
+    [ExerciseSchema, MuscleGroupSchema, MuscleSchema],
     directory: dir.path,
     inspector: true,
   );
 
   // await SyncService.initialize();
+  // await DatabaseSeeder(isar).seedDatabase();
 
   runApp(
     MultiProvider(
@@ -49,6 +51,13 @@ void main() async {
         Provider<SharedPreferences>.value(value: prefs),
         Provider(
           create: (context) => ExerciseRepository(
+            context.read<Isar>(),
+            pb,
+            context.read<AuthService>(),
+          ),
+        ),
+        Provider(
+          create: (context) => MuscleRepository(
             context.read<Isar>(),
             pb,
             context.read<AuthService>(),

@@ -47,29 +47,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     // If not available, fall back to local user object
     if (userAvatar == null || userAvatar.isEmpty) {
-      userAvatar = user.photoPath;
-      userId = user.uid;
+      userAvatar = user.avatar;
+      userId = user.id;
     }
 
     if (userAvatar.isNotEmpty) {
-      // If it's a URL, use NetworkImage
-      if (userAvatar.startsWith('http')) {
-        return NetworkImage(userAvatar);
-      }
-      // If it's a PocketBase file reference, construct the URL
-      else {
-        final pbUrl =
-            PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
-        return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
-      }
+      final pbUrl = PocketBaseService.getPocketBaseUrl();
+      return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
     }
 
-    // Fall back to default avatar
-    if (defaultAvatar.startsWith('http')) {
-      return NetworkImage(defaultAvatar);
-    } else {
-      return AssetImage(defaultAvatar);
-    }
+    return AssetImage('assets/drawings/not-found.jpg');
   }
 
   void handleSaveChange(BuildContext context) {
@@ -172,7 +159,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       final updatedData = updatedRecord.toJson();
                       user = user.copyWith(
                         name: name,
-                        photoPath: updatedData['avatar'] ?? user.photoPath,
+                        avatar: updatedData['avatar'] ?? user.avatar,
                       );
                       profileImagePath = null;
                       messenger.showSnackBar(
@@ -268,7 +255,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 final updatedData = updatedRecord.toJson();
                 user = user.copyWith(
                   name: name,
-                  photoPath: updatedData['avatar'] ?? user.photoPath,
+                  avatar: updatedData['avatar'] ?? user.avatar,
                 );
                 profileImagePath = null;
                 hasUnsavedChanges = false;
@@ -506,7 +493,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   ) // Display selected image
                                 : _getAvatarImageProvider(),
                             key: ValueKey(
-                              user.photoPath,
+                              user.avatar,
                             ), // Force rebuild when avatar changes
                           ),
                           Positioned(

@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
 import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
@@ -16,6 +21,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late NavigationProvider navigationProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(() async {
+        log('[Sync] Starting muscle & muscle groups sync..');
+        await context.read<MuscleRepository>().performInitialSync();
+
+        log('[Sync] Starting exercise sync..');
+        await context.read<ExerciseRepository>().performInitialSync();
+      }());
+    });
+  }
 
   @override
   void didChangeDependencies() {

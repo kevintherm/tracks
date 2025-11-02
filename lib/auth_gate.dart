@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,14 +36,6 @@ class AuthGate extends StatelessWidget {
         if (user == null) {
           return const LoginWithEmail();
         } else {
-          
-          // RUN sync after login
-          unawaited(() async {
-            log('[Sync] Starting exercise sync..');
-            await context.read<ExerciseRepository>().performInitialSync();
-            log('[Sync] Exercise synchronized..');
-          }());
-
           return const HomePage();
         }
       },

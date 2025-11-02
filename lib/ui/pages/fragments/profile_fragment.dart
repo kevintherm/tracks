@@ -6,7 +6,6 @@ import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/pages/login_with_email_page.dart';
 import 'package:tracks/utils/app_colors.dart';
-import 'package:tracks/utils/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -114,25 +113,16 @@ class _ProfileFragmentState extends State<ProfileFragment> {
   }
 
   ImageProvider _getUserAvatarProvider(Map<String, dynamic>? user) {
-    if (user == null) return NetworkImage(defaultAvatar);
+    if (user == null) return AssetImage('assets/drawings/not-found.jpg');
 
     final userAvatar = user['avatar'] as String?;
     if (userAvatar != null && userAvatar.isNotEmpty) {
-      // If it's a URL, use NetworkImage
-      if (userAvatar.startsWith('http')) {
-        return NetworkImage(userAvatar);
-      }
-      // If it's a PocketBase file reference, construct the URL
-      else {
-        final userId = user['id'] as String? ?? '';
-        final pbUrl =
-            PocketBaseService.getPocketBaseUrl(); // Your PocketBase URL
-        return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
-      }
+      final userId = user['id'] as String? ?? '';
+      final pbUrl = PocketBaseService.getPocketBaseUrl();
+      return NetworkImage('$pbUrl/api/files/users/$userId/$userAvatar');
     }
 
-    // Fall back to default avatar
-    return NetworkImage(defaultAvatar);
+    return AssetImage('assets/drawings/not-found.jpg');
   }
 
   void _showSyncToggleSheet(BuildContext context) {

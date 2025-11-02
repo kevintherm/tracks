@@ -1,3 +1,6 @@
+- seed data on pocketbase
+- create muscle repo
+- sync muscle data
 - add a muscles and activation table 
 - sync data in background periodically
 
