@@ -10,7 +10,9 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/exercise_option.dart';
+import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/exercise_list_item.dart';
@@ -30,7 +32,7 @@ class ExerciseConfig {
 
 class CreateExercisePage extends StatefulWidget {
   final Exercise? exercise; // Optional exercise for editing
-  
+
   const CreateExercisePage({super.key, this.exercise});
 
   @override
@@ -50,14 +52,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   XFile? _thumbnailImage;
   bool _thumbnailRemoved = false; // Track if user explicitly removed thumbnail
 
-  // All available exercises in the system
-  final List<ExerciseOption> _allMuscles = [
-    const ExerciseOption(label: 'Long Head Bicep', id: '123'),
-    const ExerciseOption(label: 'Short Head Bicep', id: '1234'),
-    const ExerciseOption(label: 'Chest', id: '12345'),
-    const ExerciseOption(label: 'Lats', id: '123451'),
-    const ExerciseOption(label: 'Pier', id: '123452'),
-  ];
+  // Selected muscles and their configurations
   final List<ExerciseOption> _selectedOptions = [];
   final Map<String, ExerciseConfig> _exerciseConfigs = {};
 
@@ -69,7 +64,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       _nameController.text = widget.exercise!.name;
       _descriptionController.text = widget.exercise!.description ?? '';
       _caloriesController.text = widget.exercise!.caloriesBurned.toString();
-      
+
       // Load existing thumbnail if available
       if (widget.exercise!.thumbnailLocal != null) {
         // Note: We'll need to handle this differently since XFile expects a path
@@ -131,7 +126,8 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       if (image != null) {
         setState(() {
           _thumbnailImage = image;
-          _thumbnailRemoved = false; // Reset removal flag when new image is picked
+          _thumbnailRemoved =
+              false; // Reset removal flag when new image is picked
         });
       }
     } catch (e) {
@@ -170,174 +166,209 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     });
   }
 
+  void _removeSelectedMuscle(int index) {
+    setState(() {
+      final option = _selectedOptions[index];
+      _selectedOptions.removeAt(index);
+      _exerciseConfigs.remove(option.id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final exerciseRepo = context.read<ExerciseRepository>();
+    final muscleRepo = context.read<MuscleRepository>();
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            children: [
-              _AppBar(
-                title: widget.exercise != null ? "Edit Exercise" : "Create Exercise",
-                onSave: () async {
-                  final toast = Toast(context);
-                  final nav = Navigator.of(context);
+        child: StreamBuilder<List<Muscle>>(
+          stream: muscleRepo.watchAllMuscles(),
+          builder: (context, snapshot) {
+            // Map muscles to ExerciseOption
+            final allMuscles = snapshot.hasData
+                ? snapshot.data!
+                      .map(
+                        (muscle) => ExerciseOption(
+                          id: muscle.id.toString(),
+                          label: muscle.name,
+                          subtitle: muscle.description,
+                          imagePath: muscle.thumbnailLocal
+                        ),
+                      )
+                      .toList()
+                : <ExerciseOption>[];
 
-                  if (_nameController.text.trim().isEmpty) {
-                    Toast(
-                      context,
-                    ).error(content: const Text("Please enter a name"));
-                    return;
-                  }
+            return SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  _AppBar(
+                    title: widget.exercise != null
+                        ? "Edit Exercise"
+                        : "Create Exercise",
+                    onSave: () async {
+                      final toast = Toast(context);
+                      final nav = Navigator.of(context);
 
-                  final calories =
-                      double.tryParse(_caloriesController.text) ?? 0.0;
-                  final name = _nameController.text.trim();
-                  final description = _descriptionController.text.trim().isEmpty
-                      ? null
-                      : _descriptionController.text.trim();
+                      if (_nameController.text.trim().isEmpty) {
+                        Toast(
+                          context,
+                        ).error(content: const Text("Please enter a name"));
+                        return;
+                      }
 
-                  if (widget.exercise != null) {
-                    // Update existing exercise
-                    String? thumbnailPath;
-                    if (_thumbnailImage != null) {
-                      // New image selected
-                      thumbnailPath = _thumbnailImage!.path;
-                    } else if (_thumbnailRemoved) {
-                      // User explicitly removed the thumbnail
-                      thumbnailPath = null;
-                    } else {
-                      // Keep existing thumbnail
-                      thumbnailPath = widget.exercise!.thumbnailLocal;
-                    }
-                    
-                    final updatedExercise = Exercise(
-                      name: name,
-                      description: description,
-                      caloriesBurned: calories,
-                      thumbnailLocal: thumbnailPath,
-                      thumbnailCloud: widget.exercise!.thumbnailCloud,
-                      pocketbaseId: widget.exercise!.pocketbaseId,
-                      needSync: widget.exercise!.needSync,
-                      imported: widget.exercise!.imported,
-                    )..id = widget.exercise!.id;
+                      final calories =
+                          double.tryParse(_caloriesController.text) ?? 0.0;
+                      final name = _nameController.text.trim();
+                      final description =
+                          _descriptionController.text.trim().isEmpty
+                          ? null
+                          : _descriptionController.text.trim();
 
-                    await exerciseRepo.updateExercise(updatedExercise);
-                    toast.success(content: const Text("Exercise updated!"));
-                  } else {
-                    // Create new exercise
-                    final newExercise = Exercise(
-                      name: name,
-                      description: description,
-                      caloriesBurned: calories,
-                      thumbnailLocal: _thumbnailImage?.path,
-                    );
+                      if (widget.exercise != null) {
+                        // Update existing exercise
+                        String? thumbnailPath;
+                        if (_thumbnailImage != null) {
+                          // New image selected
+                          thumbnailPath = _thumbnailImage!.path;
+                        } else if (_thumbnailRemoved) {
+                          // User explicitly removed the thumbnail
+                          thumbnailPath = null;
+                        } else {
+                          // Keep existing thumbnail
+                          thumbnailPath = widget.exercise!.thumbnailLocal;
+                        }
 
-                    await exerciseRepo.createExercise(newExercise);
-                    toast.success(content: const Text("Exercise created!"));
-                  }
-                  
-                  nav.pop(true);
-                },
-              ),
+                        final updatedExercise = Exercise(
+                          name: name,
+                          description: description,
+                          caloriesBurned: calories,
+                          thumbnailLocal: thumbnailPath,
+                          thumbnailCloud: widget.exercise!.thumbnailCloud,
+                          pocketbaseId: widget.exercise!.pocketbaseId,
+                          needSync: widget.exercise!.needSync,
+                          imported: widget.exercise!.imported,
+                        )..id = widget.exercise!.id;
 
-              _ThumbnailSection(
-                thumbnailImage: _thumbnailImage,
-                existingThumbnailPath: widget.exercise?.thumbnailLocal,
-                thumbnailRemoved: _thumbnailRemoved,
-                onPickImage: _pickThumbnailImage,
-                onRemoveImage: _removeThumbnailImage,
-              ),
+                        await exerciseRepo.updateExercise(updatedExercise);
+                        toast.success(content: const Text("Exercise updated!"));
+                      } else {
+                        // Create new exercise
+                        final newExercise = Exercise(
+                          name: name,
+                          description: description,
+                          caloriesBurned: calories,
+                          thumbnailLocal: _thumbnailImage?.path,
+                        );
 
-              _ExerciseDetailsSection(
-                nameController: _nameController,
-                descriptionController: _descriptionController,
-                caloriesController: _caloriesController,
-              ),
+                        await exerciseRepo.createExercise(newExercise);
+                        toast.success(content: const Text("Exercise created!"));
+                      }
 
-              SectionCard(
-                title: "Targeted Muscles",
-                child: ExerciseSelectionSection<ExerciseOption>(
-                  allOptions: _allMuscles,
-                  selectedOptions: _selectedOptions,
-                  onToggle: _toggleExerciseSelection,
-                  getLabel: (option) => option.label,
-                  getId: (option) => option.id,
-                  itemBuilder: (option, isSelected, onChanged) {
-                    return ExerciseListItem(
-                      id: option.id,
-                      label: option.label,
-                      isSelected: isSelected,
-                      onChanged: onChanged,
-                      imagePath: option.imagePath,
-                      subtitle: option.subtitle,
-                    );
-                  },
-                  aiRecommendation: AiRecommendation(
-                    onUse: () {
-                      // TODO: Implement AI recommendation
-                    },
-                    buttonText: "Use!",
-                  ),
-                ),
-              ),
-
-              // Exercise Configuration Section
-              if (_selectedOptions.isNotEmpty)
-                SectionCard(
-                  title: "Configure Activation (${_selectedOptions.length})",
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _selectedOptions.length,
-                    itemBuilder: (context, index) {
-                      final option = _selectedOptions[index];
-                      final config =
-                          _exerciseConfigs[option.id] ?? ExerciseConfig();
-
-                      return _ConfigurableExerciseCard(
-                        key: ValueKey(option.id),
-                        option: option,
-                        muscleActivation: config.muscleActivation,
-                        onActivationChanged: (value) =>
-                            _updateExerciseConfig(option.id, value),
-                      );
+                      nav.pop(true);
                     },
                   ),
-                ),
 
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Looking for something else?",
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                  _ThumbnailSection(
+                    thumbnailImage: _thumbnailImage,
+                    existingThumbnailPath: widget.exercise?.thumbnailLocal,
+                    thumbnailRemoved: _thumbnailRemoved,
+                    onPickImage: _pickThumbnailImage,
+                    onRemoveImage: _removeThumbnailImage,
+                  ),
+
+                  _ExerciseDetailsSection(
+                    nameController: _nameController,
+                    descriptionController: _descriptionController,
+                    caloriesController: _caloriesController,
+                  ),
+
+                  SectionCard(
+                    title: "Targeted Muscles",
+                    child: ExerciseSelectionSection<ExerciseOption>(
+                      allOptions: allMuscles,
+                      selectedOptions: _selectedOptions,
+                      onToggle: _toggleExerciseSelection,
+                      getLabel: (option) => option.label,
+                      getId: (option) => option.id,
+                      itemBuilder: (option, isSelected, onChanged) {
+                        return ExerciseListItem(
+                          id: option.id,
+                          label: option.label,
+                          isSelected: isSelected,
+                          onChanged: onChanged,
+                          imagePath: option.imagePath,
+                          subtitle: option.subtitle,
+                        );
+                      },
+                      aiRecommendation: AiRecommendation(
+                        onUse: () {
+                          // TODO: Implement AI recommendation
+                        },
+                        buttonText: "Use!",
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
+                  ),
+
+                  // Exercise Configuration Section
+                  if (_selectedOptions.isNotEmpty)
+                    SectionCard(
+                      title:
+                          "Configure Activation (${_selectedOptions.length})",
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _selectedOptions.length,
+                        itemBuilder: (context, index) {
+                          final option = _selectedOptions[index];
+                          final config =
+                              _exerciseConfigs[option.id] ?? ExerciseConfig();
+
+                          return _ConfigurableExerciseCard(
+                            key: ValueKey(option.id),
+                            option: option,
+                            muscleActivation: config.muscleActivation,
+                            onActivationChanged: (value) =>
+                                _updateExerciseConfig(option.id, value),
+                            onDelete: () => _removeSelectedMuscle(index),
+                          );
+                        },
+                      ),
+                    ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Pressable(
-                          onTap: () {},
-                          child: Text(
-                            "Create via Import (JSON)",
-                            style: GoogleFonts.inter(color: Colors.grey[700]),
+                        Text(
+                          "Looking for something else?",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Pressable(
+                              onTap: () {},
+                              child: Text(
+                                "Create via Import (JSON)",
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -403,8 +434,8 @@ class _ThumbnailSection extends StatelessWidget {
       child: thumbnailImage != null
           ? _buildImagePreview(thumbnailImage!)
           : (existingThumbnailPath != null && !thumbnailRemoved)
-              ? _buildExistingImagePreview(existingThumbnailPath!)
-              : _buildUploadArea(color),
+          ? _buildExistingImagePreview(existingThumbnailPath!)
+          : _buildUploadArea(color),
     );
   }
 
@@ -421,7 +452,11 @@ class _ThumbnailSection extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Iconsax.gallery_slash_outline, size: 48, color: Colors.grey[600]),
+                    Icon(
+                      Iconsax.gallery_slash_outline,
+                      size: 48,
+                      color: Colors.grey[600],
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Failed to load image',
@@ -432,16 +467,14 @@ class _ThumbnailSection extends StatelessWidget {
               ),
             );
           }
-    
+
           if (!snapshot.hasData) {
             return Container(
               color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             );
           }
-    
+
           return Stack(
             children: [
               ClipRRect(
@@ -517,7 +550,11 @@ class _ThumbnailSection extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Iconsax.gallery_slash_outline, size: 48, color: Colors.grey[600]),
+                    Icon(
+                      Iconsax.gallery_slash_outline,
+                      size: 48,
+                      color: Colors.grey[600],
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Failed to load image',
@@ -528,16 +565,14 @@ class _ThumbnailSection extends StatelessWidget {
               ),
             );
           }
-    
+
           if (!snapshot.hasData) {
             return Container(
               color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             );
           }
-    
+
           return Stack(
             children: [
               ClipRRect(
@@ -705,16 +740,60 @@ class _ConfigurableExerciseCard extends StatelessWidget {
   final ExerciseOption option;
   final int muscleActivation;
   final ValueChanged<int> onActivationChanged;
+  final VoidCallback? onDelete;
 
   const _ConfigurableExerciseCard({
     super.key,
     required this.option,
     required this.muscleActivation,
     required this.onActivationChanged,
+    this.onDelete,
   });
+
+  Widget _buildMuscleImage(String imagePath) {
+    // Check if it's a local file path (starts with / or contains app_flutter)
+    if (imagePath.startsWith('/') || imagePath.contains('app_flutter')) {
+      final file = File(imagePath);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              'assets/drawings/not-found.jpg',
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            );
+          },
+        );
+      }
+    }
+    
+    // Use asset image
+    return Image.asset(
+      imagePath,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.asset(
+          'assets/drawings/not-found.jpg',
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Determine which image to display
+    final String imagePath = option.imagePath ?? 'assets/drawings/not-found.jpg';
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -730,23 +809,43 @@ class _ConfigurableExerciseCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/drawings/pushup.jpg',
-                    width: 80,
-                    height: 80,
-                  ),
+                  child: _buildMuscleImage(imagePath),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        option.label,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              option.label,
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (onDelete != null)
+                            Pressable(
+                              onTap: onDelete,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Iconsax.trash_outline,
+                                  size: 18,
+                                  color: Colors.red[400],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(

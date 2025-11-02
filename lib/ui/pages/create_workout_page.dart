@@ -74,6 +74,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     });
   }
 
+  void _onDelete(int index) {
+    setState(() {
+      final option = _selectedOptions[index];
+      _selectedOptions.removeAt(index);
+      _exerciseConfigs.remove(option.id);
+    });
+  }
+
   void _updateExerciseConfig(String exerciseId, int sets, int reps) {
     setState(() {
       _exerciseConfigs[exerciseId] = ExerciseConfig(sets: sets, reps: reps);
@@ -144,6 +152,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         selectedOptions: _selectedOptions,
                         configurations: _exerciseConfigs,
                         onReorder: _onReorder,
+                        onDelete: _onDelete,
                         getId: (option) => option.id,
                         getLabel: (option) => option.label,
                         defaultConfig: () => ExerciseConfig(),
@@ -152,7 +161,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         enableReorderAnimation: true,
                         showReorderToast: true,
                         autoScrollToReorderedItem: true,
-                        itemBuilder: (option, index, config, onReorderTap) {
+                        itemBuilder: (option, index, config, onReorderTap, onDeleteTap) {
                           return _ConfigurableExerciseCard(
                             key: ValueKey(option.id),
                             option: option,
@@ -171,6 +180,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                               value,
                             ),
                             onReorderTap: onReorderTap,
+                            onDeleteTap: onDeleteTap,
                           );
                         },
                       ),
@@ -319,6 +329,7 @@ class _ConfigurableExerciseCard extends StatelessWidget {
   final ValueChanged<int> onSetsChanged;
   final ValueChanged<int> onRepsChanged;
   final VoidCallback? onReorderTap;
+  final VoidCallback? onDeleteTap;
 
   const _ConfigurableExerciseCard({
     super.key,
@@ -330,6 +341,7 @@ class _ConfigurableExerciseCard extends StatelessWidget {
     required this.onSetsChanged,
     required this.onRepsChanged,
     this.onReorderTap,
+    this.onDeleteTap,
   });
 
   @override
@@ -366,13 +378,32 @@ class _ConfigurableExerciseCard extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              option.label,
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: Text(
+                                option.label,
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
+                            if (onDeleteTap != null)
+                              Pressable(
+                                onTap: onDeleteTap,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[50],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Iconsax.trash_outline,
+                                    size: 18,
+                                    color: Colors.red[400],
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
                             Pressable(
                               onTap: onReorderTap,
                               child: DottedBorder(

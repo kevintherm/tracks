@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:string_similarity/string_similarity.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
+import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
 class ExercisesPage extends StatefulWidget {
@@ -79,29 +79,12 @@ class _ExercisesPageState extends State<ExercisesPage> {
                   List<Exercise> filtered = exercises;
 
                   if (search.isNotEmpty) {
-                    final lowerSearch = search.toLowerCase();
-                    final threshold = 0.2;
-
-                    final prefixFiltered = exercises.where((e) {
-                      final name = e.name.toLowerCase();
-                      return name.startsWith(lowerSearch) ||
-                          name.contains(lowerSearch);
-                    });
-
-                    final scored = prefixFiltered.map(
-                      (e) => MapEntry(
-                        e,
-                        e.name.toLowerCase().similarityTo(lowerSearch),
-                      ),
+                    filtered = FuzzySearch.search(
+                      items: exercises,
+                      query: search,
+                      getSearchableText: (e) => e.name,
+                      threshold: 0.2,
                     );
-
-                    final scoredFiltered =
-                        scored
-                            .where((entry) => entry.value > threshold)
-                            .toList()
-                          ..sort((a, b) => b.value.compareTo(a.value));
-
-                    filtered = scoredFiltered.map((e) => e.key).toList();
                   } else {
                     filtered = exercises.toList()
                       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));

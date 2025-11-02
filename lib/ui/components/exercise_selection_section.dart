@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/utils/fuzzy_search.dart';
 
 const OutlineInputBorder kSearchBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(32)),
@@ -42,12 +43,12 @@ class _ExerciseSelectionSectionState<T>
 
   @override
   Widget build(BuildContext context) {
-    final filteredOptions = widget.allOptions.where((option) {
-      return widget
-          .getLabel(option)
-          .toLowerCase()
-          .contains(_searchQuery.toLowerCase());
-    }).toList();
+    final filteredOptions = FuzzySearch.search(
+      items: widget.allOptions,
+      query: _searchQuery,
+      getSearchableText: widget.getLabel,
+      threshold: 0.1,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,22 +87,34 @@ class _ExerciseSelectionSectionState<T>
         ],
 
         // Exercise List
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: filteredOptions.length,
-          itemBuilder: (context, index) {
-            final option = filteredOptions[index];
-            final isSelected = widget.selectedOptions.any(
-              (selected) => widget.getId(selected) == widget.getId(option),
-            );
+        SizedBox(
+          height: 350,
+          child: filteredOptions.isNotEmpty
+              ? ListView.builder(
+                  itemCount: filteredOptions.length,
+                  itemBuilder: (context, index) {
+                    final option = filteredOptions[index];
+                    final isSelected = widget.selectedOptions.any(
+                      (selected) =>
+                          widget.getId(selected) == widget.getId(option),
+                    );
 
-            return widget.itemBuilder(
-              option,
-              isSelected,
-              (value) => widget.onToggle(option, value),
-            );
-          },
+                    return widget.itemBuilder(
+                      option,
+                      isSelected,
+                      (value) => widget.onToggle(option, value),
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                    "No exercise available.",
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
         ),
       ],
     );

@@ -8,21 +8,24 @@ class ExerciseConfigurationSection<T, C> extends StatefulWidget {
   final List<T> selectedOptions;
   final Map<String, C> configurations;
   final void Function(int, int) onReorder;
+  final void Function(int)? onDelete;
   final String Function(T) getId;
   final String Function(T) getLabel;
-  final Widget Function(T, int, C, VoidCallback?) itemBuilder;
+  final Widget Function(T, int, C, VoidCallback?, VoidCallback?) itemBuilder;
   final C Function() defaultConfig;
   final ScrollController? scrollController;
   final bool enableReordering;
   final bool enableReorderAnimation;
   final bool showReorderToast;
   final bool autoScrollToReorderedItem;
+  final bool showDeleteConfirmation;
 
   const ExerciseConfigurationSection({
     super.key,
     required this.selectedOptions,
     required this.configurations,
     required this.onReorder,
+    this.onDelete,
     required this.getId,
     required this.getLabel,
     required this.itemBuilder,
@@ -32,6 +35,7 @@ class ExerciseConfigurationSection<T, C> extends StatefulWidget {
     this.enableReorderAnimation = true,
     this.showReorderToast = true,
     this.autoScrollToReorderedItem = true,
+    this.showDeleteConfirmation = true,
   });
 
   @override
@@ -118,6 +122,47 @@ class _ExerciseConfigurationSectionState<T, C> extends State<ExerciseConfigurati
     );
   }
 
+  void _handleDelete(BuildContext context, int index) {
+    if (widget.onDelete == null) return;
+    
+    final option = widget.selectedOptions[index];
+    final label = widget.getLabel(option);
+    
+    if (widget.showDeleteConfirmation) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Item'),
+          content: Text('Are you sure you want to remove "$label"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onDelete!(index);
+                Toast(context).success(
+                  content: Text('Removed $label'),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      widget.onDelete!(index);
+      Toast(context).success(
+        content: Text('Removed $label'),
+      );
+    }
+  }
+
   void _scrollToIndex(int index) {
     if (widget.scrollController == null || !widget.scrollController!.hasClients) return;
     
@@ -183,6 +228,7 @@ class _ExerciseConfigurationSectionState<T, C> extends State<ExerciseConfigurati
             index,
             config,
             widget.enableReordering ? () => _showReorderBottomSheet(context, index) : null,
+            widget.onDelete != null ? () => _handleDelete(context, index) : null,
           );
 
           // Only animate the reordered item

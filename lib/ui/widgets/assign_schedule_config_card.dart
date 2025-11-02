@@ -57,6 +57,7 @@ class AssignScheduleConfigCard extends StatelessWidget {
   final DateTime selectedDay;
   final ValueChanged<ExerciseConfig> onConfigChanged;
   final VoidCallback? onReorderTap;
+  final VoidCallback? onDeleteTap;
   final String? imagePath;
   final String? subtitle;
 
@@ -71,6 +72,7 @@ class AssignScheduleConfigCard extends StatelessWidget {
     required this.selectedDay,
     required this.onConfigChanged,
     this.onReorderTap,
+    this.onDeleteTap,
     this.imagePath,
     this.subtitle,
   });
@@ -183,6 +185,23 @@ class AssignScheduleConfigCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          if (onDeleteTap != null)
+                            Pressable(
+                              onTap: onDeleteTap,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Iconsax.trash_outline,
+                                  size: 18,
+                                  color: Colors.red[400],
+                                ),
+                              ),
+                            ),
                           const SizedBox(width: 8),
                           Pressable(
                             onTap: onReorderTap,

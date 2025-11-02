@@ -38,7 +38,7 @@ class ExerciseListItem extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
-                imagePath ?? 'assets/drawings/pushup.jpg',
+                imagePath ?? 'assets/drawings/not-found.jpg',
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,

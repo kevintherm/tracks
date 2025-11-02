@@ -56,6 +56,14 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
     });
   }
 
+  void _onDelete(int index) {
+    setState(() {
+      final option = selectedOptions[index];
+      selectedOptions.removeAt(index);
+      exerciseConfigs.remove(option.id);
+    });
+  }
+
   void _handleAiRecommendation() {
     // TODO: Implement AI recommendation logic
     Toast(context).success(content: const Text("AI Recommendation applied"));
@@ -183,6 +191,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                             selectedOptions.insert(newIndex, item);
                           });
                         },
+                        onDelete: _onDelete,
                         getId: (option) => option.id,
                         getLabel: (option) => option.label,
                         defaultConfig: () => ExerciseConfig(),
@@ -191,7 +200,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                         enableReorderAnimation: true,
                         showReorderToast: true,
                         autoScrollToReorderedItem: true,
-                        itemBuilder: (option, index, config, onReorderTap) {
+                        itemBuilder: (option, index, config, onReorderTap, onDeleteTap) {
                           return AssignScheduleConfigCard(
                             key: ValueKey(option.id),
                             exerciseId: option.id,
@@ -204,6 +213,7 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                             onConfigChanged: (newConfig) =>
                                 _updateExerciseConfig(option.id, newConfig),
                             onReorderTap: onReorderTap,
+                            onDeleteTap: onDeleteTap,
                             imagePath: option.imagePath,
                             subtitle: option.subtitle,
                           );
