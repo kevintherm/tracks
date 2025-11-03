@@ -88,7 +88,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           id: muscle.id.toString(),
           label: muscle.name,
           subtitle: muscle.description,
-          imagePath: muscle.thumbnailLocal ?? muscle.thumbnailCloud,
+          imagePath: muscle.thumbnailLocal,
         );
         
         if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
@@ -534,7 +534,7 @@ class _ThumbnailSection extends StatelessWidget {
                   snapshot.data!,
                   width: double.infinity,
                   height: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
               Positioned(

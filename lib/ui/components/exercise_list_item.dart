@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -23,6 +25,21 @@ class ExerciseListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasLocalImage = imagePath != null && File(imagePath!).existsSync();
+    final image = hasLocalImage
+        ? Image.memory(
+            File(imagePath!).readAsBytesSync(),
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          )
+        : Image.asset(
+            'assets/drawings/not-found.jpg',
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          );
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -35,15 +52,7 @@ class ExerciseListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         title: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                imagePath ?? 'assets/drawings/not-found.jpg',
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
+            ClipRRect(borderRadius: BorderRadius.circular(12), child: image),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
