@@ -31,7 +31,7 @@ class AuthUser {
     String? email,
   }) {
     return AuthUser(
-      id: uid ?? this.id,
+      id: uid ?? id,
       name: name ?? this.name,
       avatar: avatar ?? this.avatar,
       email: email ?? this.email,

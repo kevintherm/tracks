@@ -15,14 +15,8 @@ func init() {
 			return err
 		}
 
-		musclesCollection, err := app.FindCollectionByNameOrId("muscles")
-		if err != nil {
-			return err
-		}
-
 		collection.Fields.Add(&core.RelationField{
 			Name:          "user",
-			Required:      true,
 			CascadeDelete: true,
 			CollectionId:  usersCollection.Id,
 			MaxSelect:     1,
@@ -53,10 +47,16 @@ func init() {
 			MimeTypes: []string{"image/jpg", "image/jpeg", "image/png", "image/gif", "image/heic"},
 		})
 
-		collection.Fields.Add(&core.RelationField{
-			Name:         "muscles",
-			MaxSelect:    20,
-			CollectionId: musclesCollection.Id,
+		collection.Fields.Add(&core.FileField{
+			Name:      "guide_gifs",
+			Required:  false,
+			MaxSelect: 10,
+			MimeTypes: []string{"image/gif"},
+		})
+
+		collection.Fields.Add(&core.URLField{
+			Name:     "guide_video",
+			Required: false,
 		})
 
 		collection.Fields.Add(&core.AutodateField{

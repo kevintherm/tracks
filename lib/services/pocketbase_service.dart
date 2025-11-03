@@ -27,8 +27,8 @@ class PocketBaseService {
 
   static String getPocketBaseUrl() {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8090';
-      // return 'http://192.168.1.188:8090';
+      // return 'http://10.0.2.2:8090';
+      return 'http://192.168.1.188:8090';
     }
     return 'http://127.0.0.1:8090';
   }

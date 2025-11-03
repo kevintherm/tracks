@@ -1,420 +1,344 @@
-{
-  "muscle_groups": [
-    {
-      "id": 1,
-      "name": "Biceps"
-    },
-    {
-      "id": 2,
-      "name": "Shoulders (Deltoids)"
-    },
-    {
-      "id": 3,
-      "name": "Triceps"
-    },
-    {
-      "id": 4,
-      "name": "Chest (Pectorals)"
-    },
-    {
-      "id": 5,
-      "name": "Back"
-    },
-    {
-      "id": 6,
-      "name": "Quadriceps"
-    },
-    {
-      "id": 7,
-      "name": "Hamstrings"
-    },
-    {
-      "id": 8,
-      "name": "Glutes"
-    },
-    {
-      "id": 9,
-      "name": "Calves"
-    },
-    {
-      "id": 10,
-      "name": "Abdominals"
-    },
-    {
-      "id": 11,
-      "name": "Forearms"
-    },
-    {
-      "id": 12,
-      "name": "Obliques"
-    },
-    {
-      "id": 13,
-      "name": "Adductors (Inner Thigh)"
-    },
-    {
-      "id": 14,
-      "name": "Abductors (Hip/Outer Thigh)"
-    },
-    {
-      "id": 15,
-      "name": "Hip Flexors"
-    },
-    {
-      "id": 16,
-      "name": "Rotator Cuff"
-    },
-    {
-      "id": 17,
-      "name": "Neck"
-    },
-    {
-      "id": 18,
-      "name": "Serratus"
-    }
-  ],
-  "muscles": [
-    {
-      "id": 1,
-      "muscle_groups": [1],
-      "name": "Biceps Brachii (Short Head)",
-      "description": "Inner part of the upper arm muscle; involved in bending the elbow (flexion) and rotating the forearm palm-up (supination)."
-    },
-    {
-      "id": 2,
-      "muscle_groups": [1],
-      "name": "Biceps Brachii (Long Head)",
-      "description": "Outer part of the upper arm muscle; helps bend the elbow (flexion) and raise the arm forward (shoulder flexion)."
-    },
-    {
-      "id": 3,
-      "muscle_groups": [1],
-      "name": "Brachialis",
-      "description": "Located underneath the biceps in the upper arm; a primary mover for bending the elbow (flexion)."
-    },
-    {
-      "id": 4,
-      "muscle_groups": [2],
-      "name": "Anterior Deltoid",
-      "description": "Front section of the shoulder; responsible for lifting the arm forward (shoulder flexion) and horizontal adduction."
-    },
-    {
-      "id": 5,
-      "muscle_groups": [2],
-      "name": "Lateral Deltoid",
-      "description": "Side section of the shoulder; responsible for lifting the arm out to the side (shoulder abduction)."
-    },
-    {
-      "id": 6,
-      "muscle_groups": [2, 5],
-      "name": "Posterior Deltoid",
-      "description": "Rear section of the shoulder; responsible for pulling the arm backward (horizontal extension) and external rotation."
-    },
-    {
-      "id": 7,
-      "muscle_groups": [3],
-      "name": "Triceps Brachii (Long Head)",
-      "description": "Largest part of the triceps, on the back of the upper arm; straightens the elbow (extension) and helps pull the arm back."
-    },
-    {
-      "id": 8,
-      "muscle_groups": [3],
-      "name": "Triceps Brachii (Lateral Head)",
-      "description": "Outer part of the triceps on the back of the upper arm; straightens the elbow (extension)."
-    },
-    {
-      "id": 9,
-      "muscle_groups": [3],
-      "name": "Triceps Brachii (Medial Head)",
-      "description": "Located deep on the back of the upper arm; straightens the elbow (extension)."
-    },
-    {
-      "id": 10,
-      "muscle_groups": [4],
-      "name": "Pectoralis Major (Clavicular Head)",
-      "description": "The upper portion of the chest; involved in lifting the arm forward and across the body (e.g., incline press)."
-    },
-    {
-      "id": 11,
-      "muscle_groups": [4],
-      "name": "Pectoralis Major (Sternal Head)",
-      "description": "The large, fan-shaped mid and lower portion of the chest; brings the arm across the body (horizontal adduction) and down (e.g., bench press, dips)."
-    },
-    {
-      "id": 12,
-      "muscle_groups": [4],
-      "name": "Pectoralis Minor",
-      "description": "Small muscle located deep to the Pectoralis Major; helps pull the shoulder blade forward and down (protraction)."
-    },
-    {
-      "id": 13,
-      "muscle_groups": [5],
-      "name": "Latissimus Dorsi",
-      "description": "Large V-shaped muscle on the back; responsible for pulling motions (e.g., pull-ups, rows) by bringing the arm down and back."
-    },
-    {
-      "id": 14,
-      "muscle_groups": [5, 17],
-      "name": "Trapezius (Upper)",
-      "description": "Top part of the trapezius (neck to shoulders); primarily used for shrugging the shoulders up (elevation)."
-    },
-    {
-      "id": 15,
-      "muscle_groups": [5],
-      "name": "Trapezius (Middle)",
-      "description": "Middle part of the trapezius, between the shoulder blades; pulls the shoulder blades together (retraction)."
-    },
-    {
-      "id": 16,
-      "muscle_groups": [5],
-      "name": "Trapezius (Lower)",
-      "description": "Lower part of the trapezius in the mid-back; pulls the shoulder blades down (depression)."
-    },
-    {
-      "id": 17,
-      "muscle_groups": [5],
-      "name": "Rhomboids",
-      "description": "Located deep to the traps, between the shoulder blades; work with the mid-traps to pull the shoulder blades together (retraction)."
-    },
-    {
-      "id": 18,
-      "muscle_groups": [5],
-      "name": "Erector Spinae",
-      "description": "A group of muscles running along the spine; responsible for extending (straightening/bending back) the back."
-    },
-    {
-      "id": 19,
-      "muscle_groups": [5],
-      "name": "Teres Major",
-      "description": "Located on the upper, outer back near the armpit; assists the lats in pulling the arm down and back (adduction/extension)."
-    },
-    {
-      "id": 20,
-      "muscle_groups": [6, 15],
-      "name": "Rectus Femoris",
-      "description": "Central muscle of the quadriceps (front thigh); straightens the knee (extension) and flexes the hip."
-    },
-    {
-      "id": 21,
-      "muscle_groups": [6],
-      "name": "Vastus Lateralis",
-      "description": "Outer muscle of the quadriceps (front thigh); straightens the knee (extension)."
-    },
-    {
-      "id": 22,
-      "muscle_groups": [6],
-      "name": "Vastus Medialis",
-      "description": "Inner muscle of the quadriceps (front thigh), 'teardrop' shaped near the knee; straightens the knee (extension)."
-    },
-    {
-      "id": 23,
-      "muscle_groups": [6],
-      "name": "Vastus Intermedius",
-      "description": "Located deep in the quadriceps, beneath the Rectus Femoris; straightens the knee (extension)."
-    },
-    {
-      "id": 24,
-      "muscle_groups": [7],
-      "name": "Biceps Femoris",
-      "description": "Outer muscle of the hamstring (back of thigh); bends the knee (flexion) and extends the hip."
-    },
-    {
-      "id": 25,
-      "muscle_groups": [7],
-      "name": "Semitendinosus",
-      "description": "One of the inner muscles of the hamstring (back of thigh); bends the knee (flexion) and extends the hip."
-    },
-    {
-      "id": 26,
-      "muscle_groups": [7],
-      "name": "Semimembranosus",
-      "description": "The other inner muscle of the hamstring (back of thigh); bends the knee (flexion) and extends the hip."
-    },
-    {
-      "id": 27,
-      "muscle_groups": [8],
-      "name": "Gluteus Maximus",
-      "description": "The largest muscle of the buttocks; powerful hip extender (e.g., standing up from a squat, thrusting)."
-    },
-    {
-      "id": 28,
-      "muscle_groups": [8, 14],
-      "name": "Gluteus Medius",
-      "description": "Located on the upper, outer side of the buttocks; moves the leg sideways (abduction) and stabilizes the pelvis."
-    },
-    {
-      "id": 29,
-      "muscle_groups": [8, 14],
-      "name": "Gluteus Minimus",
-      "description": "Located deep to the Gluteus Medius; assists in moving the leg sideways (abduction) and stabilizing the pelvis."
-    },
-    {
-      "id": 30,
-      "muscle_groups": [9],
-      "name": "Gastrocnemius",
-      "description": "The larger, upper muscle of the calf; responsible for pointing the toes (plantarflexion), especially with a straight knee."
-    },
-    {
-      "id": 31,
-      "muscle_groups": [9],
-      "name": "Soleus",
-      "description": "Located underneath the Gastrocnemius in the calf; responsible for pointing the toes (plantarflexion), especially with a bent knee."
-    },
-    {
-      "id": 32,
-      "muscle_groups": [10],
-      "name": "Rectus Abdominis",
-      "description": "Front abdominal muscles ('six-pack'); responsible for bending the spine forward (flexion, e.g., crunches)."
-    },
-    {
-      "id": 33,
-      "muscle_groups": [10],
-      "name": "Transverse Abdominis",
-      "description": "Deepest abdominal muscle, acts like a corset; stabilizes the spine and compresses the abdomen (bracing)."
-    },
-    {
-      "id": 34,
-      "muscle_groups": [11],
-      "name": "Forearm Flexors",
-      "description": "Muscles on the underside (palm side) of the forearm; responsible for bending the wrist (flexion) and gripping."
-    },
-    {
-      "id": 35,
-      "muscle_groups": [11],
-      "name": "Forearm Extensors",
-      "description": "Muscles on the top (knuckle side) of the forearm; responsible for extending the wrist backward (extension)."
-    },
-    {
-      "id": 36,
-      "muscle_groups": [11, 1],
-      "name": "Brachioradialis",
-      "description": "Large muscle on the thumb-side of the forearm; assists in bending the elbow (flexion), especially with a neutral grip."
-    },
-    {
-      "id": 37,
-      "muscle_groups": [12],
-      "name": "External Obliques",
-      "description": "Outer layer of muscles on the sides of the abdomen; involved in twisting the torso (rotation) and bending sideways (lateral flexion)."
-    },
-    {
-      "id": 38,
-      "muscle_groups": [12],
-      "name": "Internal Obliques",
-      "description": "Located deep to the External Obliques; assist in twisting the torso (rotation) and bending sideways (lateral flexion)."
-    },
-    {
-      "id": 39,
-      "muscle_groups": [13],
-      "name": "Adductor Magnus",
-      "description": "Largest muscle of the inner thigh; pulls the leg toward the body's midline (adduction) and assists in hip extension."
-    },
-    {
-      "id": 40,
-      "muscle_groups": [13],
-      "name": "Adductor Longus",
-      "description": "Located in the upper, inner thigh; pulls the leg toward the body's midline (adduction)."
-    },
-    {
-      "id": 41,
-      "muscle_groups": [13],
-      "name": "Adductor Brevis",
-      "description": "Located deep in the upper, inner thigh; pulls the leg toward the body's midline (adduction)."
-    },
-    {
-      "id": 42,
-      "muscle_groups": [13, 15],
-      "name": "Pectineus",
-      "description": "Located at the top of the inner thigh (groin); pulls the leg in (adduction) and helps lift the knee (flexion)."
-    },
-    {
-      "id": 43,
-      "muscle_groups": [13],
-      "name": "Gracilis",
-      "description": "A long, thin muscle running along the inner thigh; pulls the leg in (adduction) and assists in bending the knee."
-    },
-    {
-      "id": 44,
-      "muscle_groups": [14, 8],
-      "name": "Tensor Fasciae Latae (TFL)",
-      "description": "Small muscle on the outside of the hip (near your pocket); moves the leg sideways (abduction) and forward (flexion)."
-    },
-    {
-      "id": 45,
-      "muscle_groups": [15],
-      "name": "Iliopsoas",
-      "description": "Deep hip flexor muscles connecting the spine to the thigh bone; primary muscle for lifting the knee (hip flexion)."
-    },
-    {
-      "id": 46,
-      "muscle_groups": [6, 15],
-      "name": "Sartorius",
-      "description": "Longest muscle in the body, crossing the front of the thigh; helps lift the knee and rotate the leg (e.g., sitting cross-legged)."
-    },
-    {
-      "id": 47,
-      "muscle_groups": [16, 2],
-      "name": "Supraspinatus",
-      "description": "Rotator cuff muscle located on top of the shoulder blade; helps initiate lifting the arm to the side (abduction)."
-    },
-    {
-      "id": 48,
-      "muscle_groups": [16, 5],
-      "name": "Infraspinatus",
-      "description": "Rotator cuff muscle on the back of the shoulder blade; primary mover for rotating the arm outward (external rotation)."
-    },
-    {
-      "id": 49,
-      "muscle_groups": [16, 5],
-      "name": "Teres Minor",
-      "description": "Small rotator cuff muscle below the Infraspinatus; assists in rotating the arm outward (external rotation)."
-    },
-    {
-      "id": 50,
-      "muscle_groups": [16, 2],
-      "name": "Subscapularis",
-      "description": "Rotator cuff muscle on the front (underside) of the shoulder blade; primary mover for rotating the arm inward (internal rotation)."
-    },
-    {
-      "id": 51,
-      "muscle_groups": [17],
-      "name": "Sternocleidomastoid",
-      "description": "Large muscle on the side of the neck; turns the head (rotation) and flexes the neck forward."
-    },
-    {
-      "id": 52,
-      "muscle_groups": [17, 5],
-      "name": "Levator Scapulae",
-      "description": "Muscle running from the neck to the shoulder blade; helps lift the shoulder blade (shrug) and bend the neck sideways."
-    },
-    {
-      "id": 53,
-      "muscle_groups": [17],
-      "name": "Splenius",
-      "description": "Muscles on the back of the neck; responsible for tilting the head backward (extension) and turning the head."
-    },
-    {
-      "id": 54,
-      "muscle_groups": [18, 4, 10],
-      "name": "Serratus Anterior",
-      "description": "Located on the side of the ribs ('boxer's muscle'); pulls the shoulder blade forward (protraction, e.g., punching motion)."
-    },
-    {
-      "id": 55,
-      "muscle_groups": [9],
-      "name": "Tibialis Anterior",
-      "description": "Muscle on the front of the shin; responsible for pulling the foot and toes upward (dorsiflexion)."
-    },
-    {
-      "id": 56,
-      "muscle_groups": [11],
-      "name": "Pronator Teres",
-      "description": "Located in the upper forearm; primary muscle for rotating the forearm so the palm faces down (pronation)."
-    },
-    {
-      "id": 57,
-      "muscle_groups": [11],
-      "name": "Supinator",
-      "description": "Located deep in the upper forearm; primary muscle for rotating the forearm so the palm faces up (supination)."
-    }
-  ]
-}
+[
+  {
+    "id": 1,
+    "name": "Biceps Brachii (Short Head)",
+    "description": "Inner part of the upper arm muscle; involved in bending the elbow (flexion) and rotating the forearm palm-up (supination).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Biceps_brachii_muscle_-_animation01.gif"
+  },
+  {
+    "id": 2,
+    "name": "Biceps Brachii (Long Head)",
+    "description": "Outer part of the upper arm muscle; helps bend the elbow (flexion) and raise the arm forward (shoulder flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Biceps_brachii_muscle_-_animation01.gif"
+  },
+  {
+    "id": 3,
+    "name": "Brachialis",
+    "description": "Located underneath the biceps in the upper arm; a primary mover for bending the elbow (flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/36/Brachialis_muscle_-_animation03.gif"
+  },
+  {
+    "id": 4,
+    "name": "Anterior Deltoid",
+    "description": "Front section of the shoulder; responsible for lifting the arm forward (shoulder flexion) and horizontal adduction.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/43/Deltoid_muscle_animation4.gif"
+  },
+  {
+    "id": 5,
+    "name": "Lateral Deltoid",
+    "description": "Side section of the shoulder; responsible for lifting the arm out to the side (shoulder abduction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/43/Deltoid_muscle_animation4.gif"
+  },
+  {
+    "id": 6,
+    "name": "Posterior Deltoid",
+    "description": "Rear section of the shoulder; responsible for pulling the arm backward (horizontal extension) and external rotation.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/43/Deltoid_muscle_animation4.gif"
+  },
+  {
+    "id": 7,
+    "name": "Triceps Brachii (Long Head)",
+    "description": "Largest part of the triceps, on the back of the upper arm; straightens the elbow (extension) and helps pull the arm back.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/73/Triceps_brachii_muscle_-_animation02.gif"
+  },
+  {
+    "id": 8,
+    "name": "Triceps Brachii (Lateral Head)",
+    "description": "Outer part of the triceps on the back of the upper arm; straightens the elbow (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/73/Triceps_brachii_muscle_-_animation02.gif"
+  },
+  {
+    "id": 9,
+    "name": "Triceps Brachii (Medial Head)",
+    "description": "Located deep on the back of the upper arm; straightens the elbow (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/73/Triceps_brachii_muscle_-_animation02.gif"
+  },
+  {
+    "id": 10,
+    "name": "Pectoralis Major (Clavicular Head)",
+    "description": "The upper portion of the chest; involved in lifting the arm forward and across the body (e.g., incline press).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Pectoralis_Major_Muscle.png"
+  },
+  {
+    "id": 11,
+    "name": "Pectoralis Major (Sternal Head)",
+    "description": "The large, fan-shaped mid and lower portion of the chest; brings the arm across the body (horizontal adduction) and down (e.g., bench press, dips).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Pectoralis_Major_Muscle.png"
+  },
+  {
+    "id": 12,
+    "name": "Pectoralis Minor",
+    "description": "Small muscle located deep to the Pectoralis Major; helps pull the shoulder blade forward and down (protraction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/37/Pectoralis_minor_muscle_animation_small.gif"
+  },
+  {
+    "id": 13,
+    "name": "Latissimus Dorsi",
+    "description": "Large V-shaped muscle on the back; responsible for pulling motions (e.g., pull-ups, rows) by bringing the arm down and back.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Latissimus_dorsi_muscle_animation.gif"
+  },
+  {
+    "id": 14,
+    "name": "Trapezius (Upper)",
+    "description": "Top part of the trapezius (neck to shoulders); primarily used for shrugging the shoulders up (elevation).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Trapezius_animation_small2.gif"
+  },
+  {
+    "id": 15,
+    "name": "Trapezius (Middle)",
+    "description": "Middle part of the trapezius, between the shoulder blades; pulls the shoulder blades together (retraction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Trapezius_animation_small2.gif"
+  },
+  {
+    "id": 16,
+    "name": "Trapezius (Lower)",
+    "description": "Lower part of the trapezius in the mid-back; pulls the shoulder blades down (depression).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Trapezius_animation_small2.gif"
+  },
+  {
+    "id": 17,
+    "name": "Rhomboids",
+    "description": "Located deep to the traps, between the shoulder blades; work with the mid-traps to pull the shoulder blades together (retraction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/70/Rhomboid_muscles_animation_small.gif"
+  },
+  {
+    "id": 18,
+    "name": "Erector Spinae",
+    "description": "A group of muscles running along the spine; responsible for extending (straightening/bending back) the back.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Gray389_-_Erector_spinae.png"
+  },
+  {
+    "id": 19,
+    "name": "Teres Major",
+    "description": "Located on the upper, outer back near the armpit; assists the lats in pulling the arm down and back (adduction/extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/76/Teres_major_muscle_animation2.gif"
+  },
+  {
+    "id": 20,
+    "name": "Rectus Femoris",
+    "description": "Central muscle of the quadriceps (front thigh); straightens the knee (extension) and flexes the hip.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/48/Rectus_femoris_3D.gif"
+  },
+  {
+    "id": 21,
+    "name": "Vastus Lateralis",
+    "description": "Outer muscle of the quadriceps (front thigh); straightens the knee (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Vastus_lateralis.gif"
+  },
+  {
+    "id": 22,
+    "name": "Vastus Medialis",
+    "description": "Inner muscle of the quadriceps (front thigh), 'teardrop' shaped near the knee; straightens the knee (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Vastus_medialis.gif"
+  },
+  {
+    "id": 23,
+    "name": "Vastus Intermedius",
+    "description": "Located deep in the quadriceps, beneath the Rectus Femoris; straightens the knee (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Vastus_intermedialis.gif"
+  },
+  {
+    "id": 24,
+    "name": "Biceps Femoris",
+    "description": "Outer muscle of the hamstring (back of thigh); bends the knee (flexion) and extends the hip.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Biceps_femoris.gif"
+  },
+  {
+    "id": 25,
+    "name": "Semitendinosus",
+    "description": "One of the inner muscles of the hamstring (back of thigh); bends the knee (flexion) and extends the hip.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Semitendinosus.png"
+  },
+  {
+    "id": 26,
+    "name": "Semimembranosus",
+    "description": "The other inner muscle of the hamstring (back of thigh); bends the knee (flexion) and extends the hip.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Semimembranosus.gif"
+  },
+  {
+    "id": 27,
+    "name": "Gluteus Maximus",
+    "description": "The largest muscle of the buttocks; powerful hip extender (e.g., standing up from a squat, thrusting).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Gluteus_maximus_3D.gif"
+  },
+  {
+    "id": 28,
+    "name": "Gluteus Medius",
+    "description": "Located on the upper, outer side of the buttocks; moves the leg sideways (abduction) and stabilizes the pelvis.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Gluteus_medius_muscle_-_animation01.gif"
+  },
+  {
+    "id": 29,
+    "name": "Gluteus Minimus",
+    "description": "Located deep to the Gluteus Medius; assists in moving the leg sideways (abduction) and stabilizing the pelvis.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Gluteus_minimus_muscle_-_animation01.gif"
+  },
+  {
+    "id": 30,
+    "name": "Gastrocnemius",
+    "description": "The larger, upper muscle of the calf; responsible for pointing the toes (plantarflexion), especially with a straight knee.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Gastrocnemius_muscle_-_animation.gif"
+  },
+  {
+    "id": 31,
+    "name": "Soleus",
+    "description": "Located underneath the Gastrocnemius in the calf; responsible for pointing the toes (plantarflexion), especially with a bent knee.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Soleus_muscle_-_animation.gif"
+  },
+  {
+    "id": 32,
+    "name": "Rectus Abdominis",
+    "description": "Front abdominal muscles ('six-pack'); responsible for bending the spine forward (flexion, e.g., crunches).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/95/Rectus_abdominis.png"
+  },
+  {
+    "id": 33,
+    "name": "Transverse Abdominis",
+    "description": "Deepest abdominal muscle, acts like a corset; stabilizes the spine and compresses the abdomen (bracing).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Transversus_abdominis.png"
+  },
+  {
+    "id": 34,
+    "name": "Forearm Flexors",
+    "description": "Muscles on the underside (palm side) of the forearm; responsible for bending the wrist (flexion) and gripping.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/57/1120_Muscles_that_Move_the_Forearm_Antebrach._Sup._Flex._Sin.png"
+  },
+  {
+    "id": 35,
+    "name": "Forearm Extensors",
+    "description": "Muscles on the top (knuckle side) of the forearm; responsible for extending the wrist backward (extension).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/59/Forearm_posterior_view.jpg"
+  },
+  {
+    "id": 36,
+    "name": "Brachioradialis",
+    "description": "Large muscle on the thumb-side of the forearm; assists in bending the elbow (flexion), especially with a neutral grip.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/09/Brachioradialis.png"
+  },
+  {
+    "id": 37,
+    "name": "External Obliques",
+    "description": "Outer layer of muscles on the sides of the abdomen; involved in twisting the torso (rotation) and bending sideways (lateral flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/de/External_oblique_posterior.PNG"
+  },
+  {
+    "id": 38,
+    "name": "Internal Obliques",
+    "description": "Located deep to the External Obliques; assist in twisting the torso (rotation) and bending sideways (lateral flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Gray395.png"
+  },
+  {
+    "id": 39,
+    "name": "Adductor Magnus",
+    "description": "Largest muscle of the inner thigh; pulls the leg toward the body's midline (adduction) and assists in hip extension.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Adductor_magnus.gif"
+  },
+  {
+    "id": 40,
+    "name": "Adductor Longus",
+    "description": "Located in the upper, inner thigh; pulls the leg toward the body's midline (adduction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/57/Adductor_longus.gif"
+  },
+  {
+    "id": 41,
+    "name": "Adductor Brevis",
+    "description": "Located deep in the upper, inner thigh; pulls the leg toward the body's midline (adduction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/55/Adductor_brevis.gif"
+  },
+  {
+    "id": 42,
+    "name": "Pectineus",
+    "description": "Located at the top of the inner thigh (groin); pulls the leg in (adduction) and helps lift the knee (flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Pectineus_3D.gif"
+  },
+  {
+    "id": 43,
+    "name": "Gracilis",
+    "description": "A long, thin muscle running along the inner thigh; pulls the leg in (adduction) and assists in bending the knee.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/02/Euglena_gracilis.jpg"
+  },
+  {
+    "id": 44,
+    "name": "Tensor Fasciae Latae (TFL)",
+    "description": "Small muscle on the outside of the hip (near your pocket); moves the leg sideways (abduction) and forward (flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Gray430_with_TensorFasciaLata.png"
+  },
+  {
+    "id": 45,
+    "name": "Iliopsoas",
+    "description": "Deep hip flexor muscles connecting the spine to the thigh bone; primary muscle for lifting the knee (hip flexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/86/Gray430-en.svg"
+  },
+  {
+    "id": 46,
+    "name": "Sartorius",
+    "description": "Longest muscle in the body, crossing the front of the thigh; helps lift the knee and rotate the leg (e.g., sitting cross-legged).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/87/Sartorius_Tor_8_2022.jpg"
+  },
+  {
+    "id": 47,
+    "name": "Supraspinatus",
+    "description": "Rotator cuff muscle located on top of the shoulder blade; helps initiate lifting the arm to the side (abduction).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/85/Supraspinatus_muscle_animation.gif"
+  },
+  {
+    "id": 48,
+    "name": "Infraspinatus",
+    "description": "Rotator cuff muscle on the back of the shoulder blade; primary mover for rotating the arm outward (external rotation).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Infraspinatus_muscle_animation.gif"
+  },
+  {
+    "id": 49,
+    "name": "Teres Minor",
+    "description": "Small rotator cuff muscle below the Infraspinatus; assists in rotating the arm outward (external rotation).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/41/Teres_minor_muscle_animation2.gif"
+  },
+  {
+    "id": 50,
+    "name": "Subscapularis",
+    "description": "Rotator cuff muscle on the front (underside) of the shoulder blade; primary mover for rotating the arm inward (internal rotation).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Subscapularis_muscle_animation3.gif"
+  },
+  {
+    "id": 51,
+    "name": "Sternocleidomastoid",
+    "description": "Large muscle on the side of the neck; turns the head (rotation) and flexes the neck forward.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Sternocleidomastoid.png"
+  },
+  {
+    "id": 52,
+    "name": "Levator Scapulae",
+    "description": "Muscle running from the neck to the shoulder blade; helps lift the shoulder blade (shrug) and bend the neck sideways.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/97/Levator_scapulae_muscle_animation_small.gif"
+  },
+  {
+    "id": 53,
+    "name": "Splenius",
+    "description": "Muscles on the back of the neck; responsible for tilting the head backward (extension) and turning the head.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/78/Musculus_splenius_capitis_et_cervicis_marked.png"
+  },
+  {
+    "id": 54,
+    "name": "Serratus Anterior",
+    "description": "Located on the side of the ribs ('boxer's muscle'); pulls the shoulder blade forward (protraction, e.g., punching motion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/31/Serratus_anterior_muscle_animation_small.gif"
+  },
+  {
+    "id": 55,
+    "name": "Tibialis Anterior",
+    "description": "Muscle on the front of the shin; responsible for pulling the foot and toes upward (dorsiflexion).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Tibialis_anterior_muscle_-_animation.gif"
+  },
+  {
+    "id": 56,
+    "name": "Pronator Teres",
+    "description": "Located in the upper forearm; primary muscle for rotating the forearm so the palm faces down (pronation).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/87/Pronator-teres.png"
+  },
+  {
+    "id": 57,
+    "name": "Supinator",
+    "description": "Located deep in the upper forearm; primary muscle for rotating the forearm so the palm faces up (supination).",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Gray_%E2%80%94_musculus_supinator.png"
+  }
+]

@@ -1,4 +1,5 @@
-- add a muscles and activation table 
+- add a muscles and activation table
+    - move to many to many table for a pivot table
 - sync data in background periodically
 
 #done

@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:developer';
 
-import 'package:tracks/repositories/exercise_repository.dart';
-import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
