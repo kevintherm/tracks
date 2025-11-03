@@ -289,8 +289,6 @@ class _ExercisesList extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
         itemCount: exercises.length,
         separatorBuilder: (context, index) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
@@ -331,6 +329,12 @@ class _ExerciseListItem extends StatelessWidget {
       key: ValueKey(exercise.id),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
+
+        if (exercise.imported) {
+          Toast(context).neutral(content: Text("Cannot modify or delete imported exercises."), duration: Duration(milliseconds: 500));
+          return false;
+        }
+
         if (direction == DismissDirection.endToStart) {
           await _showDeleteConfirmation(context);
           return false;

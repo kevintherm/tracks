@@ -27,13 +27,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(() async {
-        log('[Sync] Starting muscle & muscle groups sync..');
-        await context.read<MuscleRepository>().performInitialSync();
-
-        log('[Sync] Starting exercise sync..');
-        await context.read<ExerciseRepository>().performInitialSync();
-      }());
+      
     });
   }
 
@@ -76,6 +70,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    unawaited(() async {
+        log('[Sync] Starting muscle & muscle groups sync..');
+        await context.read<MuscleRepository>().performInitialSync();
+
+        log('[Sync] Starting exercise sync..');
+        await context.read<ExerciseRepository>().performInitialSync();
+      }());
     return Scaffold(
       body: SafeArea(child: pages[_selectedIndex]),
       bottomNavigationBar: NavigationBar(

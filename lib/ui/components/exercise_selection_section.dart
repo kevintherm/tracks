@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -47,7 +49,7 @@ class _ExerciseSelectionSectionState<T>
       items: widget.allOptions,
       query: _searchQuery,
       getSearchableText: widget.getLabel,
-      threshold: 0.1,
+      threshold: 0.0,
     );
 
     return Column(
@@ -91,7 +93,7 @@ class _ExerciseSelectionSectionState<T>
           height: 350,
           child: filteredOptions.isNotEmpty
               ? ListView.builder(
-                  itemCount: filteredOptions.length,
+                  itemCount: filteredOptions.length > 6 ? 6 : filteredOptions.length,
                   itemBuilder: (context, index) {
                     final option = filteredOptions[index];
                     final isSelected = widget.selectedOptions.any(

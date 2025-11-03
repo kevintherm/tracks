@@ -32,7 +32,7 @@ class Exercise {
     required this.caloriesBurned,
     this.pocketbaseId,
     this.needSync = true,
-    this.imported = false,
+    this.imported = true,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 }

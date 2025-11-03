@@ -35,6 +35,8 @@ class ExerciseRepository {
       }
     }
 
+    exercise.imported = false;
+
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
 
