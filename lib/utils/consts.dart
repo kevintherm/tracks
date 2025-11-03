@@ -53,6 +53,8 @@ Future<bool> showConfirmDialog(
 }
 
 enum PBCollections {
+  workoutExercises("workoutExercises"),
+  workouts("workouts"),
   exercises("exercises"),
   muscles("muscles"),
   exerciseMuscles("exercise_muscles");

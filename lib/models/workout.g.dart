@@ -37,23 +37,28 @@ const WorkoutSchema = CollectionSchema(
       name: r'needSync',
       type: IsarType.bool,
     ),
-    r'pocketbaseId': PropertySchema(
+    r'owned': PropertySchema(
       id: 4,
+      name: r'owned',
+      type: IsarType.bool,
+    ),
+    r'pocketbaseId': PropertySchema(
+      id: 5,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'thumbnailCloud': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'thumbnailCloud',
       type: IsarType.string,
     ),
     r'thumbnailLocal': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'thumbnailLocal',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -116,10 +121,11 @@ void _workoutSerialize(
   writer.writeString(offsets[1], object.description);
   writer.writeString(offsets[2], object.name);
   writer.writeBool(offsets[3], object.needSync);
-  writer.writeString(offsets[4], object.pocketbaseId);
-  writer.writeString(offsets[5], object.thumbnailCloud);
-  writer.writeString(offsets[6], object.thumbnailLocal);
-  writer.writeDateTime(offsets[7], object.updatedAt);
+  writer.writeBool(offsets[4], object.owned);
+  writer.writeString(offsets[5], object.pocketbaseId);
+  writer.writeString(offsets[6], object.thumbnailCloud);
+  writer.writeString(offsets[7], object.thumbnailLocal);
+  writer.writeDateTime(offsets[8], object.updatedAt);
 }
 
 Workout _workoutDeserialize(
@@ -132,13 +138,14 @@ Workout _workoutDeserialize(
     description: reader.readStringOrNull(offsets[1]),
     name: reader.readString(offsets[2]),
     needSync: reader.readBoolOrNull(offsets[3]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[4]),
-    thumbnailCloud: reader.readStringOrNull(offsets[5]),
-    thumbnailLocal: reader.readStringOrNull(offsets[6]),
+    owned: reader.readBoolOrNull(offsets[4]) ?? true,
+    pocketbaseId: reader.readStringOrNull(offsets[5]),
+    thumbnailCloud: reader.readStringOrNull(offsets[6]),
+    thumbnailLocal: reader.readStringOrNull(offsets[7]),
   );
   object.createdAt = reader.readDateTime(offsets[0]);
   object.id = id;
-  object.updatedAt = reader.readDateTime(offsets[7]);
+  object.updatedAt = reader.readDateTime(offsets[8]);
   return object;
 }
 
@@ -158,12 +165,14 @@ P _workoutDeserializeProp<P>(
     case 3:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -646,6 +655,16 @@ extension WorkoutQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'needSync',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterFilterCondition> ownedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'owned',
         value: value,
       ));
     });
@@ -1210,6 +1229,18 @@ extension WorkoutQuerySortBy on QueryBuilder<Workout, Workout, QSortBy> {
     });
   }
 
+  QueryBuilder<Workout, Workout, QAfterSortBy> sortByOwned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'owned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> sortByOwnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'owned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Workout, Workout, QAfterSortBy> sortByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.asc);
@@ -1321,6 +1352,18 @@ extension WorkoutQuerySortThenBy
     });
   }
 
+  QueryBuilder<Workout, Workout, QAfterSortBy> thenByOwned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'owned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> thenByOwnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'owned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Workout, Workout, QAfterSortBy> thenByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.asc);
@@ -1398,6 +1441,12 @@ extension WorkoutQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Workout, Workout, QDistinct> distinctByOwned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'owned');
+    });
+  }
+
   QueryBuilder<Workout, Workout, QDistinct> distinctByPocketbaseId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1457,6 +1506,12 @@ extension WorkoutQueryProperty
   QueryBuilder<Workout, bool, QQueryOperations> needSyncProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'needSync');
+    });
+  }
+
+  QueryBuilder<Workout, bool, QQueryOperations> ownedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'owned');
     });
   }
 

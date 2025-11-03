@@ -14,6 +14,7 @@ class Workout {
   String? thumbnailLocal;
 
   bool needSync;
+  bool owned;
 
   late DateTime createdAt;
   late DateTime updatedAt;
@@ -25,6 +26,7 @@ class Workout {
     this.thumbnailCloud,
     this.thumbnailLocal,
     this.needSync = true,
+    this.owned = true
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 }

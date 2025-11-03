@@ -8,14 +8,24 @@ part 'workout_exercises.g.dart';
 class WorkoutExercises {
   Id id = Isar.autoIncrement;
 
-  IsarLink<Workout> workout = IsarLink();
-  IsarLink<Exercise> exercise = IsarLink();
+  String? pocketbaseId;
 
-  int sets;
-  int reps;
+  final workout = IsarLink<Workout>();
+  final exercise = IsarLink<Exercise>();
+
+  late int sets;
+  late int reps;
+
+  bool needSync;
+
+  late DateTime createdAt;
+  late DateTime updatedAt;
 
   WorkoutExercises({
     this.sets = 3,
-    this.reps = 6
-  });
+    this.reps = 6,
+    this.pocketbaseId,
+    this.needSync = true,
+  }) : createdAt = DateTime.now(),
+       updatedAt = DateTime.now();
 }

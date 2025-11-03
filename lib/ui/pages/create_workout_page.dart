@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:tracks/models/exercise_option.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/exercise_configuration_section.dart';
 import 'package:tracks/ui/components/exercise_list_item.dart';
 import 'package:tracks/ui/components/exercise_selection_section.dart';
 import 'package:tracks/ui/components/section_card.dart';
+import 'package:tracks/ui/models/exercise_option.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
