@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracks/auth_gate.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/muscle.dart';
-import 'package:tracks/models/muscle_group.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
@@ -34,7 +33,7 @@ void main() async {
   // }
 
   final isar = await Isar.open(
-    [ExerciseSchema, MuscleGroupSchema, MuscleSchema],
+    [ExerciseSchema, MuscleSchema],
     directory: dir.path,
     inspector: true,
   );

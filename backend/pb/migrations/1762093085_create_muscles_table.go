@@ -62,16 +62,6 @@ func init() {
 			return err
 		}
 
-		collection, err = app.FindCollectionByNameOrId("muscle_groups")
-		if err != nil {
-			return err
-		}
-
-		err = app.Delete(collection)
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 }

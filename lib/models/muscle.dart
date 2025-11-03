@@ -1,5 +1,4 @@
 import 'package:isar/isar.dart';
-import 'package:tracks/models/muscle_group.dart';
 
 part 'muscle.g.dart';
 
@@ -13,8 +12,6 @@ class Muscle {
   late String? description;
   late String? thumbnailCloud;
   late String? thumbnailLocal;
-
-  final muscleGroups = IsarLinks<MuscleGroup>();
 
   Muscle({
     this.id = Isar.autoIncrement,

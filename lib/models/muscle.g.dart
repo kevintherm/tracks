@@ -49,14 +49,7 @@ const MuscleSchema = CollectionSchema(
   deserializeProp: _muscleDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {
-    r'muscleGroups': LinkSchema(
-      id: 1659671776403503701,
-      name: r'muscleGroups',
-      target: r'MuscleGroup',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {},
   getId: _muscleGetId,
   getLinks: _muscleGetLinks,
@@ -121,10 +114,10 @@ Muscle _muscleDeserialize(
     description: reader.readStringOrNull(offsets[0]),
     id: id,
     name: reader.readString(offsets[1]),
+    pocketbaseId: reader.readStringOrNull(offsets[2]),
     thumbnailCloud: reader.readStringOrNull(offsets[3]),
     thumbnailLocal: reader.readStringOrNull(offsets[4]),
   );
-  object.pocketbaseId = reader.readStringOrNull(offsets[2]);
   return object;
 }
 
@@ -155,13 +148,11 @@ Id _muscleGetId(Muscle object) {
 }
 
 List<IsarLinkBase<dynamic>> _muscleGetLinks(Muscle object) {
-  return [object.muscleGroups];
+  return [];
 }
 
 void _muscleAttach(IsarCollection<dynamic> col, Id id, Muscle object) {
   object.id = id;
-  object.muscleGroups
-      .attach(col, col.isar.collection<MuscleGroup>(), r'muscleGroups', id);
 }
 
 extension MuscleQueryWhereSort on QueryBuilder<Muscle, Muscle, QWhere> {
@@ -1012,65 +1003,7 @@ extension MuscleQueryFilter on QueryBuilder<Muscle, Muscle, QFilterCondition> {
 
 extension MuscleQueryObject on QueryBuilder<Muscle, Muscle, QFilterCondition> {}
 
-extension MuscleQueryLinks on QueryBuilder<Muscle, Muscle, QFilterCondition> {
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> muscleGroups(
-      FilterQuery<MuscleGroup> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'muscleGroups');
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> muscleGroupsLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'muscleGroups', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> muscleGroupsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'muscleGroups', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> muscleGroupsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'muscleGroups', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      muscleGroupsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'muscleGroups', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      muscleGroupsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'muscleGroups', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> muscleGroupsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'muscleGroups', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+extension MuscleQueryLinks on QueryBuilder<Muscle, Muscle, QFilterCondition> {}
 
 extension MuscleQuerySortBy on QueryBuilder<Muscle, Muscle, QSortBy> {
   QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByDescription() {

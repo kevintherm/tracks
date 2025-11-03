@@ -55,7 +55,7 @@ Future<bool> showConfirmDialog(
 enum PBCollections {
   exercises("exercises"),
   muscles("muscles"),
-  muscleGroups("muscle_groups");
+  exerciseMuscles("exercise_muscles");
 
   final String value;
   const PBCollections(this.value);
