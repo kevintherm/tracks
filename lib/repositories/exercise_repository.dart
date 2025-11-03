@@ -505,9 +505,78 @@ class ExerciseRepository {
       }
     }
 
-    // Save all new notes from the cloud to the local DB
+    // Save all new exercises from the cloud to the local DB
     await isar.writeTxn(() async {
       await isar.exercises.putAll(exercisesToSave);
     });
+
+    // 3. Sync exercise_muscles junction table
+    try {
+      final pbExerciseMuscles = await pb
+          .collection(PBCollections.exerciseMuscles.value)
+          .getFullList(expand: 'exercise,muscle');
+
+      await isar.writeTxn(() async {
+        for (final record in pbExerciseMuscles) {
+          // Find the local exercise by pocketbaseId
+          final exercisePbId = record.data['exercise'];
+          final musclePbId = record.data['muscle'];
+          final activation = record.data['activation'] as int? ?? 50;
+
+          if (exercisePbId == null || musclePbId == null) continue;
+
+          // Get local exercise and muscle
+          final localExercise = await isar.exercises
+              .filter()
+              .pocketbaseIdEqualTo(exercisePbId)
+              .findFirst();
+
+          final localMuscle = await isar.muscles
+              .filter()
+              .pocketbaseIdEqualTo(musclePbId)
+              .findFirst();
+
+          if (localExercise != null && localMuscle != null) {
+            // Check if this junction already exists locally
+            final existingJunction = await isar.exerciseMuscles
+                .filter()
+                .exercise((q) => q.idEqualTo(localExercise.id))
+                .and()
+                .muscle((q) => q.idEqualTo(localMuscle.id))
+                .findFirst();
+
+            if (existingJunction == null) {
+              // Create new junction
+              final junction = ExerciseMuscles(
+                activation: activation,
+                pocketbaseId: record.id,
+                needSync: false,
+              );
+
+              junction.exercise.value = localExercise;
+              junction.muscle.value = localMuscle;
+
+              await isar.exerciseMuscles.put(junction);
+              await junction.exercise.save();
+              await junction.muscle.save();
+            } else {
+              // Update existing junction if cloud is newer
+              final cloudUpdated = DateTime.tryParse(record.data['updated'] ?? '');
+              if (cloudUpdated != null && existingJunction.updatedAt.isBefore(cloudUpdated)) {
+                existingJunction.activation = activation;
+                existingJunction.pocketbaseId = record.id;
+                existingJunction.needSync = false;
+                existingJunction.updatedAt = cloudUpdated;
+
+                await isar.exerciseMuscles.put(existingJunction);
+              }
+            }
+          }
+        }
+      });
+    } catch (e) {
+      // Continue even if exercise_muscles sync fails
+      print('Failed to sync exercise_muscles: $e');
+    }
   }
 }

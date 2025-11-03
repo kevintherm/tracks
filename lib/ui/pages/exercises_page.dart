@@ -287,7 +287,7 @@ class _ExercisesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: ListView.separated(
         itemCount: exercises.length,
         separatorBuilder: (context, index) => const SizedBox(height: 8),
