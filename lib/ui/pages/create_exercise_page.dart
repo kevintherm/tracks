@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:isar/isar.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/exercise_option.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
@@ -78,27 +80,36 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
   Future<void> _loadExistingMuscles() async {
     try {
-      // Load the muscle links
-      await widget.exercise!.muscles.load();
-      final linkedMuscles = widget.exercise!.muscles.toList();
+      final isar = context.read<Isar>();
+      
+      // Load muscle relationships from junction table
+      final junctions = await isar.exerciseMuscles
+          .filter()
+          .exercise((q) => q.idEqualTo(widget.exercise!.id))
+          .findAll();
       
       // Convert to ExerciseOption and add to selected
-      for (final muscle in linkedMuscles) {
-        final muscleOption = ExerciseOption(
-          id: muscle.id.toString(),
-          label: muscle.name,
-          subtitle: muscle.description,
-          imagePath: muscle.thumbnailLocal,
-        );
+      for (final junction in junctions) {
+        await junction.muscle.load();
+        final muscle = junction.muscle.value;
         
-        if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
-          setState(() {
-            _selectedOptions.add(muscleOption);
-            // Initialize with default muscle activation of 50%
-            _exerciseConfigs[muscleOption.id] = ExerciseConfig(
-              muscleActivation: 50,
-            );
-          });
+        if (muscle != null) {
+          final muscleOption = ExerciseOption(
+            id: muscle.id.toString(),
+            label: muscle.name,
+            subtitle: muscle.description,
+            imagePath: muscle.thumbnailLocal,
+          );
+          
+          if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
+            setState(() {
+              _selectedOptions.add(muscleOption);
+              // Load existing activation value
+              _exerciseConfigs[muscleOption.id] = ExerciseConfig(
+                muscleActivation: junction.activation,
+              );
+            });
+          }
         }
       }
     } catch (e) {
@@ -289,13 +300,17 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     imported: widget.exercise!.imported,
                   )..id = widget.exercise!.id;
 
-                  final selectedMuscleIds = _selectedOptions
-                      .map((opt) => int.parse(opt.id))
-                      .toList();
+                  // Build map of muscle ID to activation percentage
+                  final muscleActivations = <int, int>{};
+                  for (final opt in _selectedOptions) {
+                    final muscleId = int.parse(opt.id);
+                    final activation = _exerciseConfigs[opt.id]?.muscleActivation ?? 50;
+                    muscleActivations[muscleId] = activation;
+                  }
 
                   await exerciseRepo.updateExercise(
                     updatedExercise,
-                    muscleIds: selectedMuscleIds,
+                    muscleActivations: muscleActivations,
                   );
                   toast.success(content: const Text("Exercise updated!"));
                 } else {
@@ -307,13 +322,17 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     thumbnailLocal: _thumbnailImage?.path,
                   );
 
-                  final selectedMuscleIds = _selectedOptions
-                      .map((opt) => int.parse(opt.id))
-                      .toList();
+                  // Build map of muscle ID to activation percentage
+                  final muscleActivations = <int, int>{};
+                  for (final opt in _selectedOptions) {
+                    final muscleId = int.parse(opt.id);
+                    final activation = _exerciseConfigs[opt.id]?.muscleActivation ?? 50;
+                    muscleActivations[muscleId] = activation;
+                  }
 
                   await exerciseRepo.createExercise(
                     newExercise,
-                    muscleIds: selectedMuscleIds,
+                    muscleActivations: muscleActivations,
                   );
                   toast.success(content: const Text("Exercise created!"));
                 }

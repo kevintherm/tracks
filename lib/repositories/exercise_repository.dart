@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
@@ -20,7 +21,31 @@ class ExerciseRepository {
     return isar.exercises.where().watch(fireImmediately: true);
   }
 
-  Future<void> createExercise(Exercise exercise, {List<int>? muscleIds}) async {
+  // Get muscles for a specific exercise with activation levels
+  Future<List<Map<String, dynamic>>> getMusclesForExercise(
+    int exerciseId,
+  ) async {
+    final junctions = await isar.exerciseMuscles
+        .filter()
+        .exercise((q) => q.idEqualTo(exerciseId))
+        .findAll();
+
+    final results = <Map<String, dynamic>>[];
+    for (final junction in junctions) {
+      await junction.muscle.load();
+      final muscle = junction.muscle.value;
+      if (muscle != null) {
+        results.add({'muscle': muscle, 'activation': junction.activation});
+      }
+    }
+    return results;
+  }
+
+  Future<void> createExercise(
+    Exercise exercise, {
+    Map<int, int>?
+    muscleActivations, // Map of muscleId -> activation percentage
+  }) async {
     if (exercise.thumbnailLocal != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
@@ -40,16 +65,24 @@ class ExerciseRepository {
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
 
-      // Link muscles if provided
-      if (muscleIds != null && muscleIds.isNotEmpty) {
-        final muscles = await isar.muscles.getAll(muscleIds);
-        await exercise.muscles.save();
-        for (final muscle in muscles) {
+      // Create junction table entries if muscles provided
+      if (muscleActivations != null && muscleActivations.isNotEmpty) {
+        for (final entry in muscleActivations.entries) {
+          final muscleId = entry.key;
+          final activation = entry.value;
+
+          final muscle = await isar.muscles.get(muscleId);
           if (muscle != null) {
-            exercise.muscles.add(muscle);
+            final exerciseMuscle = ExerciseMuscles(activation: activation);
+
+            exerciseMuscle.exercise.value = exercise;
+            exerciseMuscle.muscle.value = muscle;
+
+            await isar.exerciseMuscles.put(exerciseMuscle);
+            await exerciseMuscle.exercise.save();
+            await exerciseMuscle.muscle.save();
           }
         }
-        await exercise.muscles.save();
       }
     });
 
@@ -58,7 +91,11 @@ class ExerciseRepository {
     }
   }
 
-  Future<void> updateExercise(Exercise exercise, {List<int>? muscleIds}) async {
+  Future<void> updateExercise(
+    Exercise exercise, {
+    Map<int, int>?
+    muscleActivations, // Map of muscleId -> activation percentage
+  }) async {
     // Get old exercise to compare
     final oldExercise = await isar.exercises.get(exercise.id);
 
@@ -107,21 +144,35 @@ class ExerciseRepository {
       await isar.exercises.put(exercise);
 
       // Update muscle relationships if provided
-      if (muscleIds != null) {
-        // Clear existing relationships
-        await exercise.muscles.load();
-        exercise.muscles.clear();
-        await exercise.muscles.save();
+      if (muscleActivations != null) {
+        // Delete all existing junction entries for this exercise
+        final existingJunctions = await isar.exerciseMuscles
+            .filter()
+            .exercise((q) => q.idEqualTo(exercise.id))
+            .findAll();
 
-        // Add new relationships
-        if (muscleIds.isNotEmpty) {
-          final muscles = await isar.muscles.getAll(muscleIds);
-          for (final muscle in muscles) {
+        for (final junction in existingJunctions) {
+          await isar.exerciseMuscles.delete(junction.id);
+        }
+
+        // Create new junction entries
+        if (muscleActivations.isNotEmpty) {
+          for (final entry in muscleActivations.entries) {
+            final muscleId = entry.key;
+            final activation = entry.value;
+
+            final muscle = await isar.muscles.get(muscleId);
             if (muscle != null) {
-              exercise.muscles.add(muscle);
+              final exerciseMuscle = ExerciseMuscles(activation: activation);
+
+              exerciseMuscle.exercise.value = exercise;
+              exerciseMuscle.muscle.value = muscle;
+
+              await isar.exerciseMuscles.put(exerciseMuscle);
+              await exerciseMuscle.exercise.save();
+              await exerciseMuscle.muscle.save();
             }
           }
-          await exercise.muscles.save();
         }
       }
     });
@@ -172,6 +223,25 @@ class ExerciseRepository {
   // Upload a single exercise to the cloud
   Future<void> _syncExerciseToCloud(Exercise exercise) async {
     try {
+      // Get muscles and activations from junction table
+      final junctions = await isar.exerciseMuscles
+          .filter()
+          .exercise((q) => q.idEqualTo(exercise.id))
+          .findAll();
+
+      // Load muscle data for each junction
+      final muscleData = <Map<String, dynamic>>[];
+      for (final junction in junctions) {
+        await junction.muscle.load();
+        final muscle = junction.muscle.value;
+        if (muscle?.pocketbaseId != null) {
+          muscleData.add({
+            'muscle': muscle!.pocketbaseId,
+            'activation': junction.activation,
+          });
+        }
+      }
+
       final record = await pb
           .collection(PBCollections.exercises.value)
           .create(
@@ -180,12 +250,23 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
-              'muscles': exercise.muscles
-                  .map((e) => e.pocketbaseId)
-                  .where((id) => id != null)
-                  .toList(),
             },
           );
+
+      // Create exercise_muscles records in cloud
+      if (muscleData.isNotEmpty) {
+        for (final data in muscleData) {
+          await pb
+              .collection(PBCollections.exerciseMuscles.value)
+              .create(
+                body: {
+                  'exercise': record.id,
+                  'muscle': data['muscle'],
+                  'activation': data['activation'],
+                },
+              );
+        }
+      }
 
       if (exercise.thumbnailLocal != null) {
         final imageResult = await imageStorageService.saveImage(
@@ -215,6 +296,12 @@ class ExerciseRepository {
   // Update an existing exercise on the cloud
   Future<void> _updateExerciseOnCloud(Exercise exercise) async {
     try {
+      // Get muscles and activations from junction table
+      final junctions = await isar.exerciseMuscles
+          .filter()
+          .exercise((q) => q.idEqualTo(exercise.id))
+          .findAll();
+
       // Update the record
       await pb
           .collection(PBCollections.exercises.value)
@@ -225,12 +312,40 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
-              'muscles': exercise.muscles
-                  .map((e) => e.pocketbaseId)
-                  .where((id) => id != null)
-                  .toList(),
             },
           );
+
+      // Delete existing exercise_muscles records in cloud
+      try {
+        final existingJunctions = await pb
+            .collection(PBCollections.exerciseMuscles.value)
+            .getFullList(filter: 'exercise = "${exercise.pocketbaseId}"');
+
+        for (final junction in existingJunctions) {
+          await pb
+              .collection(PBCollections.exerciseMuscles.value)
+              .delete(junction.id);
+        }
+      } catch (e) {
+        // Continue even if deletion fails
+      }
+
+      // Create new exercise_muscles records in cloud
+      for (final junction in junctions) {
+        await junction.muscle.load();
+        final muscle = junction.muscle.value;
+        if (muscle?.pocketbaseId != null) {
+          await pb
+              .collection(PBCollections.exerciseMuscles.value)
+              .create(
+                body: {
+                  'exercise': exercise.pocketbaseId,
+                  'muscle': muscle!.pocketbaseId,
+                  'activation': junction.activation,
+                },
+              );
+        }
+      }
 
       // Handle thumbnail sync if exists
       if (exercise.thumbnailLocal != null) {
@@ -307,6 +422,7 @@ class ExerciseRepository {
           caloriesBurned: record.data['calories_burned'].toDouble() ?? 0,
           pocketbaseId: record.id,
           needSync: false,
+          imported: record.data['user'] != authService.currentUser?['id'],
         );
 
         toInsert.createdAt =
