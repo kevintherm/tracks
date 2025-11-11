@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -9,8 +8,6 @@ const OutlineInputBorder kSearchBorder = OutlineInputBorder(
   borderSide: BorderSide.none,
 );
 
-/// Generic exercise selection widget with search and AI recommendation
-/// T is the type of exercise option (must have id and label)
 class SelectConfig<T> extends StatefulWidget {
   final List<T> allOptions;
   final List<T> selectedOptions;
@@ -20,6 +17,7 @@ class SelectConfig<T> extends StatefulWidget {
   final Widget Function(T, bool, ValueChanged<bool>) itemBuilder;
   final Widget? aiRecommendation;
   final String searchHint;
+  final int limitItems;
 
   const SelectConfig({
     super.key,
@@ -31,15 +29,14 @@ class SelectConfig<T> extends StatefulWidget {
     required this.itemBuilder,
     this.aiRecommendation,
     this.searchHint = "Search",
+    this.limitItems = 6,
   });
 
   @override
-  State<SelectConfig<T>> createState() =>
-      _SelectConfigState<T>();
+  _SelectConfigState<T> createState() => _SelectConfigState<T>();
 }
 
-class _SelectConfigState<T>
-    extends State<SelectConfig<T>> {
+class _SelectConfigState<T> extends State<SelectConfig<T>> {
   String _searchQuery = '';
 
   @override
@@ -87,12 +84,14 @@ class _SelectConfigState<T>
           const SizedBox(height: 16),
         ],
 
-        // Exercise List
+        // List Item
         SizedBox(
           height: 350,
           child: filteredOptions.isNotEmpty
               ? ListView.builder(
-                  itemCount: filteredOptions.length > 6 ? 6 : filteredOptions.length,
+                  itemCount: filteredOptions.length > widget.limitItems
+                      ? widget.limitItems
+                      : filteredOptions.length,
                   itemBuilder: (context, index) {
                     final option = filteredOptions[index];
                     final isSelected = widget.selectedOptions.any(

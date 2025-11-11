@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tracks/utils/consts.dart';
 
 /// Generic exercise list item widget with checkbox
 /// Displays exercise image, name, and subtitle with selection state
@@ -25,21 +24,6 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasLocalImage = imagePath != null && File(imagePath!).existsSync();
-    final image = hasLocalImage
-        ? Image.memory(
-            File(imagePath!).readAsBytesSync(),
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          )
-        : Image.asset(
-            'assets/drawings/not-found.jpg',
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          );
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -52,7 +36,7 @@ class ListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         title: Row(
           children: [
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: image),
+            ClipRRect(borderRadius: BorderRadius.circular(12), child: getImage(imagePath)),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -67,7 +51,9 @@ class ListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle ?? "Average of 8 sets per week",
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: isSelected ? 6 : 3,
+                    subtitle ?? "Description not available.",
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,

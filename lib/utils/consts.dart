@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
@@ -50,6 +51,28 @@ Future<bool> showConfirmDialog(
         ),
       ) ??
       false;
+}
+
+Widget getImage(String? imagePath) {
+  final hasLocalImage = imagePath != null && File(imagePath).existsSync();
+
+  Image image = Image.asset(
+    'assets/drawings/not-found.jpg',
+    width: 100,
+    height: 100,
+    fit: BoxFit.cover,
+  );
+
+  if (hasLocalImage) {
+    image = Image.file(
+      File(imagePath),
+      width: 100,
+      height: 100,
+      fit: BoxFit.cover,
+    );
+  }
+
+  return image;
 }
 
 enum PBCollections {

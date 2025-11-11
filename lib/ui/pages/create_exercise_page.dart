@@ -230,12 +230,10 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         child: StreamBuilder<List<Muscle>>(
           stream: muscleRepo.watchAllMuscles(),
           builder: (context, snapshot) {
-            // Only build muscle options once when data changes
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Map muscles to ExerciseOption - cached to prevent rebuilds
             final allMuscles = snapshot.data!
                 .map(
                   (muscle) => SelectConfigOption(
@@ -431,7 +429,7 @@ class _ExerciseForm extends StatelessWidget {
                 onUse: () {
                   // TODO: Implement AI recommendation
                 },
-                buttonText: "Use!",
+                buttonText: "Use",
               ),
             ),
           ),
