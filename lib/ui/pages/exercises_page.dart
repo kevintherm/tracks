@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -8,6 +6,7 @@ import 'package:tracks/models/exercise.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -75,7 +74,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                     );
                   }
 
-                  final exercises = snapshot.data ?? [];
+                  final List<Exercise> exercises = snapshot.data ?? [];
                   List<Exercise> filtered = exercises;
 
                   if (search.isNotEmpty) {
@@ -83,7 +82,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       items: exercises,
                       query: search,
                       getSearchableText: (e) => e.name,
-                      threshold: 0.2,
+                      threshold: 0.1,
                     );
                   } else {
                     filtered = exercises.toList()
@@ -267,7 +266,10 @@ class _SearchBar extends StatelessWidget {
                     },
                     child: Text(
                       'Clear',
-                      style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[700]),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
                 ],
@@ -329,9 +331,11 @@ class _ExerciseListItem extends StatelessWidget {
       key: ValueKey(exercise.id),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
-
         if (exercise.imported) {
-          Toast(context).neutral(content: Text("Cannot modify or delete imported exercises."), duration: Duration(milliseconds: 500));
+          Toast(context).neutral(
+            content: Text("Cannot modify or delete imported exercises."),
+            duration: Duration(milliseconds: 500),
+          );
           return false;
         }
 
@@ -477,25 +481,15 @@ class _ExerciseCard extends StatelessWidget {
 
   const _ExerciseCard({required this.exercise});
 
+  String get muscleExcerpt {
+    final muscles = List.of(exercise.musclesWithActivation)
+      ..sort((a, b) => b.activation.compareTo(a.activation));
+
+    return muscles.map((e) => e.muscle.name).join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasLocalImage =
-        exercise.thumbnailLocal != null &&
-        File(exercise.thumbnailLocal!).existsSync();
-    final image = hasLocalImage
-        ? Image.memory(
-            File(exercise.thumbnailLocal!).readAsBytesSync(),
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          )
-        : Image.asset(
-            'assets/drawings/not-found.jpg',
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          );
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
@@ -509,7 +503,7 @@ class _ExerciseCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: image,
+                  child: getImage(exercise.thumbnailLocal),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -536,10 +530,11 @@ class _ExerciseCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      _ExerciseStat(
-                        icon: MingCute.barbell_line,
-                        label: "Chest, Triceps, Shoulders",
-                      ),
+                      if (muscleExcerpt.isNotEmpty)
+                        _ExerciseStat(
+                          icon: MingCute.barbell_line,
+                          label: muscleExcerpt,
+                        ),
                     ],
                   ),
                 ),
@@ -565,12 +560,17 @@ class _ExerciseStat extends StatelessWidget {
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.grey[600],
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 175),
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey[600],
+            ),
           ),
         ),
       ],

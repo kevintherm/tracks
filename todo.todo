@@ -1,4 +1,3 @@
-- fix flickering images on select n config component
 - workout
     - list page
     - create update workout page
@@ -54,6 +53,7 @@ session page
     - create schedule page
 
 #done
+- fix flickering images on select n config component
 - add a muscles and activation table
     - move to many to many table for a pivot table- sync muscle data
 - create muscle repo

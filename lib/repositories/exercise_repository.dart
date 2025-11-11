@@ -407,8 +407,14 @@ class ExerciseRepository {
         .collection(PBCollections.exercises.value)
         .getFullList();
     final List<Exercise> exercisesToSave = [];
+    final List<ExerciseMuscles> exerciseMusclesToSave = [];
 
     for (final record in pbRecords) {
+      // get muscles in exercises
+      final muscles = await pb
+          .collection(PBCollections.exerciseMuscles.value)
+          .getFullList(filter: "exercise = '${record.id}'", expand: 'muscle');
+
       // Check if we already have this exercise locally
       final exists = await isar.exercises
           .filter()
@@ -448,6 +454,23 @@ class ExerciseRepository {
           } catch (e) {
             // Continue without thumbnail
           }
+        }
+
+        // Sync exercise_muscles
+        for (final muscle in muscles) {
+          final muscleLocal = await isar.muscles
+              .filter()
+              .pocketbaseIdEqualTo(muscle.id)
+              .findFirst();
+
+          if (muscleLocal == null) continue;
+
+          final exerciseMuscle =
+              ExerciseMuscles(activation: muscle.data['activation'])
+                ..exercise.value = exists
+                ..muscle.value = muscleLocal;
+
+          exerciseMusclesToSave.add(exerciseMuscle);
         }
 
         exercisesToSave.add(toInsert);
@@ -508,6 +531,7 @@ class ExerciseRepository {
     // Save all new exercises from the cloud to the local DB
     await isar.writeTxn(() async {
       await isar.exercises.putAll(exercisesToSave);
+      await isar.exerciseMuscles.putAll(exerciseMusclesToSave);
     });
 
     // 3. Sync exercise_muscles junction table
@@ -561,8 +585,11 @@ class ExerciseRepository {
               await junction.muscle.save();
             } else {
               // Update existing junction if cloud is newer
-              final cloudUpdated = DateTime.tryParse(record.data['updated'] ?? '');
-              if (cloudUpdated != null && existingJunction.updatedAt.isBefore(cloudUpdated)) {
+              final cloudUpdated = DateTime.tryParse(
+                record.data['updated'] ?? '',
+              );
+              if (cloudUpdated != null &&
+                  existingJunction.updatedAt.isBefore(cloudUpdated)) {
                 existingJunction.activation = activation;
                 existingJunction.pocketbaseId = record.id;
                 existingJunction.needSync = false;

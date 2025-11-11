@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(() async {
-        log('[Sync] Starting muscle & muscle groups sync..');
+        log('[Sync] Starting muscle sync..');
         await context.read<MuscleRepository>().performInitialSync();
 
         log('[Sync] Starting exercise sync..');
