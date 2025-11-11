@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Generic exercise list item widget with checkbox
 /// Displays exercise image, name, and subtitle with selection state
-class ExerciseListItem extends StatelessWidget {
+class ListItem extends StatelessWidget {
   final String id;
   final String label;
   final bool isSelected;
@@ -13,7 +13,7 @@ class ExerciseListItem extends StatelessWidget {
   final String? imagePath;
   final String? subtitle;
 
-  const ExerciseListItem({
+  const ListItem({
     super.key,
     required this.id,
     required this.label,

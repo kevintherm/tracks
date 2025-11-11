@@ -5,11 +5,11 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/components/exercise_configuration_section.dart';
-import 'package:tracks/ui/components/exercise_list_item.dart';
-import 'package:tracks/ui/components/exercise_selection_section.dart';
+import 'package:tracks/ui/components/select_config/config_section.dart';
+import 'package:tracks/ui/components/select_config/list_item.dart';
+import 'package:tracks/ui/components/select_config/select_config.dart';
 import 'package:tracks/ui/components/section_card.dart';
-import 'package:tracks/ui/models/exercise_option.dart';
+import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -35,14 +35,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   final ScrollController _scrollController = ScrollController();
 
   // All available exercises in the system
-  final List<ExerciseOption> _allExercises = [
-    const ExerciseOption(label: 'Apple', id: '123'),
-    const ExerciseOption(label: 'Banana', id: '1234'),
-    const ExerciseOption(label: 'Mango', id: '12345'),
-    const ExerciseOption(label: 'Cherry', id: '123451'),
-    const ExerciseOption(label: 'Pier', id: '123452'),
+  final List<SelectConfigOption> _allExercises = [
+    const SelectConfigOption(label: 'Apple', id: '123'),
+    const SelectConfigOption(label: 'Banana', id: '1234'),
+    const SelectConfigOption(label: 'Mango', id: '12345'),
+    const SelectConfigOption(label: 'Cherry', id: '123451'),
+    const SelectConfigOption(label: 'Pier', id: '123452'),
   ];
-  final List<ExerciseOption> _selectedOptions = [];
+  final List<SelectConfigOption> _selectedOptions = [];
   final Map<String, ExerciseConfig> _exerciseConfigs = {};
 
   @override
@@ -53,7 +53,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   // --- List Management Methods ---
 
-  void _toggleExerciseSelection(ExerciseOption option, bool isSelected) {
+  void _toggleExerciseSelection(SelectConfigOption option, bool isSelected) {
     setState(() {
       if (isSelected) {
         if (!_selectedOptions.contains(option)) {
@@ -115,14 +115,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               // Exercise Selection Section
               SectionCard(
                 title: "Select Exercises",
-                child: ExerciseSelectionSection<ExerciseOption>(
+                child: SelectConfig<SelectConfigOption>(
                   allOptions: _allExercises,
                   selectedOptions: _selectedOptions,
                   onToggle: _toggleExerciseSelection,
                   getLabel: (option) => option.label,
                   getId: (option) => option.id,
                   itemBuilder: (option, isSelected, onChanged) {
-                    return ExerciseListItem(
+                    return ListItem(
                       id: option.id,
                       label: option.label,
                       isSelected: isSelected,
@@ -145,8 +145,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 SectionCard(
                   title: "Configure Exercises (${_selectedOptions.length})",
                   child:
-                      ExerciseConfigurationSection<
-                        ExerciseOption,
+                      ConfigSection<
+                        SelectConfigOption,
                         ExerciseConfig
                       >(
                         selectedOptions: _selectedOptions,
@@ -321,7 +321,7 @@ class _WorkoutDetailsSection extends StatelessWidget {
 
 // --- Configurable Exercise Card ---
 class _ConfigurableExerciseCard extends StatelessWidget {
-  final ExerciseOption option;
+  final SelectConfigOption option;
   final int order;
   final int dragIndex;
   final int sets;

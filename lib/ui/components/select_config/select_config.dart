@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +11,7 @@ const OutlineInputBorder kSearchBorder = OutlineInputBorder(
 
 /// Generic exercise selection widget with search and AI recommendation
 /// T is the type of exercise option (must have id and label)
-class ExerciseSelectionSection<T> extends StatefulWidget {
+class SelectConfig<T> extends StatefulWidget {
   final List<T> allOptions;
   final List<T> selectedOptions;
   final void Function(T, bool) onToggle;
@@ -22,7 +21,7 @@ class ExerciseSelectionSection<T> extends StatefulWidget {
   final Widget? aiRecommendation;
   final String searchHint;
 
-  const ExerciseSelectionSection({
+  const SelectConfig({
     super.key,
     required this.allOptions,
     required this.selectedOptions,
@@ -35,12 +34,12 @@ class ExerciseSelectionSection<T> extends StatefulWidget {
   });
 
   @override
-  State<ExerciseSelectionSection<T>> createState() =>
-      _ExerciseSelectionSectionState<T>();
+  State<SelectConfig<T>> createState() =>
+      _SelectConfigState<T>();
 }
 
-class _ExerciseSelectionSectionState<T>
-    extends State<ExerciseSelectionSection<T>> {
+class _SelectConfigState<T>
+    extends State<SelectConfig<T>> {
   String _searchQuery = '';
 
   @override

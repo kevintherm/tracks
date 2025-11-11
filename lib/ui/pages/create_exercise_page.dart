@@ -16,10 +16,10 @@ import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/components/exercise_list_item.dart';
-import 'package:tracks/ui/components/exercise_selection_section.dart';
+import 'package:tracks/ui/components/select_config/list_item.dart';
+import 'package:tracks/ui/components/select_config/select_config.dart';
 import 'package:tracks/ui/components/section_card.dart';
-import 'package:tracks/ui/models/exercise_option.dart';
+import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -55,7 +55,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   bool _thumbnailRemoved = false; // Track if user explicitly removed thumbnail
 
   // Selected muscles and their configurations
-  final List<ExerciseOption> _selectedOptions = [];
+  final List<SelectConfigOption> _selectedOptions = [];
   final Map<String, ExerciseConfig> _exerciseConfigs = {};
 
   @override
@@ -94,7 +94,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         final muscle = junction.muscle.value;
         
         if (muscle != null) {
-          final muscleOption = ExerciseOption(
+          final muscleOption = SelectConfigOption(
             id: muscle.id.toString(),
             label: muscle.name,
             subtitle: muscle.description,
@@ -190,7 +190,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     });
   }
 
-  void _toggleExerciseSelection(ExerciseOption option, bool isSelected) {
+  void _toggleExerciseSelection(SelectConfigOption option, bool isSelected) {
     setState(() {
       if (isSelected) {
         if (!_selectedOptions.contains(option)) {
@@ -238,7 +238,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
             // Map muscles to ExerciseOption - cached to prevent rebuilds
             final allMuscles = snapshot.data!
                 .map(
-                  (muscle) => ExerciseOption(
+                  (muscle) => SelectConfigOption(
                     id: muscle.id.toString(),
                     label: muscle.name,
                     subtitle: muscle.description,
@@ -349,7 +349,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
 // Separate stateless widget to prevent rebuilds
 class _ExerciseForm extends StatelessWidget {
-  final List<ExerciseOption> allMuscles;
+  final List<SelectConfigOption> allMuscles;
   final ExerciseRepository exerciseRepo;
   final Exercise? exercise;
   final TextEditingController nameController;
@@ -357,11 +357,11 @@ class _ExerciseForm extends StatelessWidget {
   final TextEditingController caloriesController;
   final XFile? thumbnailImage;
   final bool thumbnailRemoved;
-  final List<ExerciseOption> selectedOptions;
+  final List<SelectConfigOption> selectedOptions;
   final Map<String, ExerciseConfig> exerciseConfigs;
   final VoidCallback onPickImage;
   final VoidCallback onRemoveImage;
-  final void Function(ExerciseOption, bool) onToggleSelection;
+  final void Function(SelectConfigOption, bool) onToggleSelection;
   final void Function(String, int) onUpdateConfig;
   final void Function(int) onRemoveMuscle;
   final VoidCallback onSave;
@@ -411,14 +411,14 @@ class _ExerciseForm extends StatelessWidget {
 
           SectionCard(
             title: "Targeted Muscles",
-            child: ExerciseSelectionSection<ExerciseOption>(
+            child: SelectConfig<SelectConfigOption>(
               allOptions: allMuscles,
               selectedOptions: selectedOptions,
               onToggle: onToggleSelection,
               getLabel: (option) => option.label,
               getId: (option) => option.id,
               itemBuilder: (option, isSelected, onChanged) {
-                return ExerciseListItem(
+                return ListItem(
                   id: option.id,
                   label: option.label,
                   isSelected: isSelected,
@@ -856,7 +856,7 @@ class _ExerciseDetailsSection extends StatelessWidget {
 
 // --- Configurable Exercise Card ---
 class _ConfigurableExerciseCard extends StatelessWidget {
-  final ExerciseOption option;
+  final SelectConfigOption option;
   final int muscleActivation;
   final ValueChanged<int> onActivationChanged;
   final VoidCallback? onDelete;

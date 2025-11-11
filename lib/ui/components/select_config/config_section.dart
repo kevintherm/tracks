@@ -4,7 +4,7 @@ import 'package:tracks/utils/toast.dart';
 /// Generic reorderable configuration section
 /// T is the type of exercise option (must have id)
 /// C is the type of configuration
-class ExerciseConfigurationSection<T, C> extends StatefulWidget {
+class ConfigSection<T, C> extends StatefulWidget {
   final List<T> selectedOptions;
   final Map<String, C> configurations;
   final void Function(int, int) onReorder;
@@ -20,7 +20,7 @@ class ExerciseConfigurationSection<T, C> extends StatefulWidget {
   final bool autoScrollToReorderedItem;
   final bool showDeleteConfirmation;
 
-  const ExerciseConfigurationSection({
+  const ConfigSection({
     super.key,
     required this.selectedOptions,
     required this.configurations,
@@ -39,10 +39,10 @@ class ExerciseConfigurationSection<T, C> extends StatefulWidget {
   });
 
   @override
-  State<ExerciseConfigurationSection<T, C>> createState() => _ExerciseConfigurationSectionState<T, C>();
+  State<ConfigSection<T, C>> createState() => _ConfigSectionState<T, C>();
 }
 
-class _ExerciseConfigurationSectionState<T, C> extends State<ExerciseConfigurationSection<T, C>> {
+class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
   final Map<String, GlobalKey> _itemKeys = {};
   final Map<int, GlobalKey> _positionKeys = {};
   String? _lastReorderedItemId;
@@ -54,7 +54,7 @@ class _ExerciseConfigurationSectionState<T, C> extends State<ExerciseConfigurati
   }
 
   @override
-  void didUpdateWidget(ExerciseConfigurationSection<T, C> oldWidget) {
+  void didUpdateWidget(ConfigSection<T, C> oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateKeys();
   }

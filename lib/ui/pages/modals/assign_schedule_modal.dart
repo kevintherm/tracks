@@ -4,11 +4,11 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:tracks/ui/components/ai_recommendation.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/components/exercise_configuration_section.dart';
-import 'package:tracks/ui/components/exercise_list_item.dart';
-import 'package:tracks/ui/components/exercise_selection_section.dart';
+import 'package:tracks/ui/components/select_config/config_section.dart';
+import 'package:tracks/ui/components/select_config/list_item.dart';
+import 'package:tracks/ui/components/select_config/select_config.dart';
 import 'package:tracks/ui/components/section_card.dart';
-import 'package:tracks/ui/models/exercise_option.dart';
+import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/ui/widgets/assign_schedule_config_card.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -27,16 +27,16 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
 
   final Map<String, ExerciseConfig> exerciseConfigs = {};
 
-  List<ExerciseOption> allOptions = [
-    const ExerciseOption(label: 'Apple', id: '123'),
-    const ExerciseOption(label: 'Banana', id: '1234'),
-    const ExerciseOption(label: 'Mango', id: '12345'),
-    const ExerciseOption(label: 'Cherry', id: '123451'),
-    const ExerciseOption(label: 'Pier', id: '123452'),
+  List<SelectConfigOption> allOptions = [
+    const SelectConfigOption(label: 'Apple', id: '123'),
+    const SelectConfigOption(label: 'Banana', id: '1234'),
+    const SelectConfigOption(label: 'Mango', id: '12345'),
+    const SelectConfigOption(label: 'Cherry', id: '123451'),
+    const SelectConfigOption(label: 'Pier', id: '123452'),
   ];
-  List<ExerciseOption> selectedOptions = [];
+  List<SelectConfigOption> selectedOptions = [];
 
-  void _toggleExerciseSelection(ExerciseOption option, bool isSelected) {
+  void _toggleExerciseSelection(SelectConfigOption option, bool isSelected) {
     setState(() {
       if (isSelected) {
         if (!selectedOptions.contains(option)) {
@@ -147,14 +147,14 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
 
               SectionCard(
                 title: "Workouts",
-                child: ExerciseSelectionSection<ExerciseOption>(
+                child: SelectConfig<SelectConfigOption>(
                   allOptions: allOptions,
                   selectedOptions: selectedOptions,
                   onToggle: _toggleExerciseSelection,
                   getLabel: (option) => option.label,
                   getId: (option) => option.id,
                   itemBuilder: (option, isSelected, onChanged) {
-                    return ExerciseListItem(
+                    return ListItem(
                       id: option.id,
                       label: option.label,
                       isSelected: isSelected,
@@ -179,8 +179,8 @@ class _AssignScheduleModalState extends State<AssignScheduleModal> {
                           fontStyle: FontStyle.italic,
                         ),
                       )
-                    : ExerciseConfigurationSection<
-                        ExerciseOption,
+                    : ConfigSection<
+                        SelectConfigOption,
                         ExerciseConfig
                       >(
                         selectedOptions: selectedOptions,

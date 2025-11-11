@@ -1,12 +1,12 @@
 /// Base exercise option model
 /// Can be used across different contexts (workout creation, schedule assignment, etc.)
-class ExerciseOption {
+class SelectConfigOption {
   final String id;
   final String label;
   final String? imagePath;
   final String? subtitle;
 
-  const ExerciseOption({
+  const SelectConfigOption({
     required this.id,
     required this.label,
     this.imagePath,
@@ -16,7 +16,7 @@ class ExerciseOption {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExerciseOption &&
+      other is SelectConfigOption &&
           runtimeType == other.runtimeType &&
           id == other.id;
 
