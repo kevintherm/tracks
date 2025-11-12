@@ -13,15 +13,12 @@ import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
-// --- Models (for Type Safety) ---
-class ExerciseConfig {
+class WorkoutConfig {
   int sets;
   int reps;
 
-  ExerciseConfig({this.sets = 3, this.reps = 8});
+  WorkoutConfig({this.sets = 3, this.reps = 8});
 }
-
-// --- Page Widget ---
 
 class CreateWorkoutPage extends StatefulWidget {
   const CreateWorkoutPage({super.key});
@@ -34,16 +31,9 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   bool _useFirstExerciseThumbnail = false;
   final ScrollController _scrollController = ScrollController();
 
-  // All available exercises in the system
-  final List<SelectConfigOption> _allExercises = [
-    const SelectConfigOption(label: 'Apple', id: '123'),
-    const SelectConfigOption(label: 'Banana', id: '1234'),
-    const SelectConfigOption(label: 'Mango', id: '12345'),
-    const SelectConfigOption(label: 'Cherry', id: '123451'),
-    const SelectConfigOption(label: 'Pier', id: '123452'),
-  ];
+  final List<SelectConfigOption> _allExercises = [];
   final List<SelectConfigOption> _selectedOptions = [];
-  final Map<String, ExerciseConfig> _exerciseConfigs = {};
+  final Map<String, WorkoutConfig> _exerciseConfigs = {};
 
   @override
   void dispose() {
@@ -58,7 +48,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       if (isSelected) {
         if (!_selectedOptions.contains(option)) {
           _selectedOptions.add(option);
-          _exerciseConfigs[option.id] = ExerciseConfig();
+          _exerciseConfigs[option.id] = WorkoutConfig();
         }
       } else {
         _selectedOptions.remove(option);
@@ -84,7 +74,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _updateExerciseConfig(String exerciseId, int sets, int reps) {
     setState(() {
-      _exerciseConfigs[exerciseId] = ExerciseConfig(sets: sets, reps: reps);
+      _exerciseConfigs[exerciseId] = WorkoutConfig(sets: sets, reps: reps);
     });
   }
 
@@ -147,7 +137,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                   child:
                       ConfigSection<
                         SelectConfigOption,
-                        ExerciseConfig
+                        WorkoutConfig
                       >(
                         selectedOptions: _selectedOptions,
                         configurations: _exerciseConfigs,
@@ -155,7 +145,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         onDelete: _onDelete,
                         getId: (option) => option.id,
                         getLabel: (option) => option.label,
-                        defaultConfig: () => ExerciseConfig(),
+                        defaultConfig: () => WorkoutConfig(),
                         scrollController: _scrollController,
                         enableReordering: true,
                         enableReorderAnimation: true,

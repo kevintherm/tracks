@@ -406,14 +406,14 @@ class ExerciseRepository {
     final pbRecords = await pb
         .collection(PBCollections.exercises.value)
         .getFullList();
+    final pbExerciseMuscles = await pb
+          .collection(PBCollections.exerciseMuscles.value)
+          .getFullList(expand: 'muscle');
+
     final List<Exercise> exercisesToSave = [];
     final List<ExerciseMuscles> exerciseMusclesToSave = [];
 
     for (final record in pbRecords) {
-      // get muscles in exercises
-      final muscles = await pb
-          .collection(PBCollections.exerciseMuscles.value)
-          .getFullList(filter: "exercise = '${record.id}'", expand: 'muscle');
 
       // Check if we already have this exercise locally
       final exists = await isar.exercises
@@ -457,6 +457,7 @@ class ExerciseRepository {
         }
 
         // Sync exercise_muscles
+        final muscles = pbExerciseMuscles.where((element) => element.data['exercise'] == record.id);
         for (final muscle in muscles) {
           final muscleLocal = await isar.muscles
               .filter()
@@ -522,6 +523,32 @@ class ExerciseRepository {
             // Cloud has no thumbnail - keep local one if it exists
             // Don't delete local thumbnail unless explicitly removed from cloud
           }
+
+          // Sync exercise_muscles
+        final muscles = pbExerciseMuscles.where((element) => element.data['exercise'] == record.id);
+        for (final muscle in muscles) {
+          final muscleLocal = await isar.muscles
+              .filter()
+              .pocketbaseIdEqualTo(muscle.id)
+              .findFirst();
+
+          if (muscleLocal == null) continue;
+
+          final relationExists = await isar.exerciseMuscles
+              .filter()
+              .exercise((q) => q.idEqualTo(exists.id))
+              .muscle((q) => q.idEqualTo(muscleLocal.id))
+              .findFirst();
+
+          if (relationExists != null) continue;
+
+          final exerciseMuscle =
+              ExerciseMuscles(activation: muscle.data['activation'])
+                ..exercise.value = exists
+                ..muscle.value = muscleLocal;
+
+          exerciseMusclesToSave.add(exerciseMuscle);
+        }
 
           exercisesToSave.add(exists);
         }

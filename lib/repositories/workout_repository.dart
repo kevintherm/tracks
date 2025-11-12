@@ -52,6 +52,10 @@ class WorkoutRepository {
     return results;
   }
 
+  IsarCollection<Workout> getWorkouts() {
+    return isar.workouts;
+  }
+
   Future<void> createWorkout(
     Workout workout, {
     required Map<int, WorkoutConfig>
