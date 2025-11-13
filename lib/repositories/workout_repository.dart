@@ -108,7 +108,7 @@ class WorkoutRepository {
     });
 
     if (authService.isSyncEnabled) {
-      _syncWorkoutToCloud(workout);
+      _uploadWorkoutToCloud(workout);
     }
   }
 
@@ -193,7 +193,7 @@ class WorkoutRepository {
       if (workout.pocketbaseId != null) {
         await _updateWorkoutOnCloud(workout);
       } else {
-        await _syncWorkoutToCloud(workout);
+        await _uploadWorkoutToCloud(workout);
       }
     }
   }
@@ -242,9 +242,10 @@ class WorkoutRepository {
   // --- SYNC LOGIC ---
 
   // Upload a single workout to the cloud
-  Future<void> _syncWorkoutToCloud(Workout workout) async {
+  Future<void> _uploadWorkoutToCloud(Workout workout) async {
+    if (!authService.isSyncEnabled) return;
+
     try {
-      // Get exercises from junction table
       final junctions = await isar.workoutExercises
           .filter()
           .workout((q) => q.idEqualTo(workout.id))
@@ -260,38 +261,44 @@ class WorkoutRepository {
             },
           );
 
-      // Create workout_exercises junction records in cloud
-      if (junctions.isNotEmpty) {
-        for (final junction in junctions) {
-          await junction.exercise.load();
-          final exercise = junction.exercise.value;
+      for (final junction in junctions) {
+        await junction.exercise.load();
+        final exercise = junction.exercise.value;
 
-          if (exercise?.pocketbaseId != null) {
-            await pb
-                .collection(PBCollections.workoutExercises.value)
-                .create(
-                  body: {
-                    'workout': record.id,
-                    'exercise': exercise!.pocketbaseId,
-                    'reps': junction.reps,
-                    'sets': junction.sets,
-                  },
-                );
-          }
+        if (exercise?.pocketbaseId != null) {
+          final junctionRecord = await pb
+              .collection(PBCollections.workoutExercises.value)
+              .create(
+                body: {
+                  'workout': record.id,
+                  'exercise': exercise!.pocketbaseId,
+                  'reps': junction.reps,
+                  'sets': junction.sets,
+                },
+              );
+
+          // Update local junction with pocketbaseId
+          junction.pocketbaseId = junctionRecord.id;
+          junction.needSync = false;
         }
       }
 
       if (workout.thumbnailLocal != null) {
-        final imageResult = await imageStorageService.saveImage(
-          sourcePath: workout.thumbnailLocal!,
-          directory: 'workouts',
-          collection: PBCollections.workouts.value,
-          pbRecord: record,
-          fieldName: 'thumbnail',
-          syncEnabled: true,
-        );
+        try {
+          final imageResult = await imageStorageService.saveImage(
+            sourcePath: workout.thumbnailLocal!,
+            directory: 'workouts',
+            collection: PBCollections.workouts.value,
+            pbRecord: record,
+            fieldName: 'thumbnail',
+            syncEnabled: true,
+          );
 
-        workout.thumbnailCloud = imageResult['cloudUrl'];
+          workout.thumbnailCloud = imageResult['cloudUrl'];
+        } catch (e) {
+          print('Failed to upload workout thumbnail to cloud: $e');
+          // Continue without thumbnail sync
+        }
       }
 
       workout.pocketbaseId = record.id;
@@ -299,14 +306,21 @@ class WorkoutRepository {
 
       await isar.writeTxn(() async {
         await isar.workouts.put(workout);
+        // Update junctions with pocketbaseId
+        for (final junction in junctions) {
+          await isar.workoutExercises.put(junction);
+        }
       });
     } catch (e) {
-      // Workout remains marked as needsSync = true
+      print('Failed to upload workout to cloud: $e');
+      // Workout remains marked as needSync = true
     }
   }
 
   // Update an existing workout on the cloud
   Future<void> _updateWorkoutOnCloud(Workout workout) async {
+    if (!authService.isSyncEnabled) return;
+
     try {
       // Get exercises from junction table
       final junctions = await isar.workoutExercises
@@ -315,7 +329,7 @@ class WorkoutRepository {
           .findAll();
 
       // Update the workout record
-      await pb
+      final record = await pb
           .collection(PBCollections.workouts.value)
           .update(
             workout.pocketbaseId!,
@@ -341,12 +355,12 @@ class WorkoutRepository {
         // Continue even if deletion fails
       }
 
-      // Create new workout_exercises records in cloud
+      // Create new workout_exercises records in cloud and update local
       for (final junction in junctions) {
         await junction.exercise.load();
         final exercise = junction.exercise.value;
         if (exercise?.pocketbaseId != null) {
-          await pb
+          final junctionRecord = await pb
               .collection(PBCollections.workoutExercises.value)
               .create(
                 body: {
@@ -356,6 +370,10 @@ class WorkoutRepository {
                   'reps': junction.reps,
                 },
               );
+
+          // Update local junction with pocketbaseId
+          junction.pocketbaseId = junctionRecord.id;
+          junction.needSync = false;
         }
       }
 
@@ -366,9 +384,7 @@ class WorkoutRepository {
             sourcePath: workout.thumbnailLocal!,
             directory: 'workouts',
             collection: PBCollections.workouts.value,
-            pbRecord: await pb
-                .collection(PBCollections.workouts.value)
-                .getOne(workout.pocketbaseId!),
+            pbRecord: record,
             fieldName: 'thumbnail',
             syncEnabled: true,
           );
@@ -382,6 +398,7 @@ class WorkoutRepository {
           }
         } catch (e) {
           print('Failed updating workout thumbnail to cloud: $e');
+          // Continue without thumbnail sync
         }
       }
 
@@ -390,9 +407,14 @@ class WorkoutRepository {
 
       await isar.writeTxn(() async {
         await isar.workouts.put(workout);
+        // Update junctions with pocketbaseId
+        for (final junction in junctions) {
+          await isar.workoutExercises.put(junction);
+        }
       });
     } catch (e) {
-      // Workout remains marked as needsSync = true
+      print('Failed to update workout on cloud: $e');
+      // Workout remains marked as needSync = true
     }
   }
 
@@ -406,7 +428,7 @@ class WorkoutRepository {
         .pocketbaseIdIsNull()
         .findAll();
     for (final workout in localWorkouts) {
-      await _syncWorkoutToCloud(workout);
+      await _uploadWorkoutToCloud(workout);
     }
 
     // 2. Download cloud-only workouts

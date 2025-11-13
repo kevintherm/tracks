@@ -82,7 +82,7 @@ File? getFile(String? filePath) {
 }
 
 enum PBCollections {
-  workoutExercises("workoutExercises"),
+  workoutExercises("workout_exercises"),
   workouts("workouts"),
   exercises("exercises"),
   muscles("muscles"),

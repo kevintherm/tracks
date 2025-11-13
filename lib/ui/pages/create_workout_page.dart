@@ -211,13 +211,20 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   Future<void> _saveExercise() async {
     final toast = Toast(context);
     final nav = Navigator.of(context);
+    final workoutRepo = context.read<WorkoutRepository>();
+
+    final selectedExercises = await _getConfigParams();
 
     if (_nameController.text.trim().isEmpty) {
       toast.error(content: const Text("Please enter a name"));
       return;
     }
 
-    final workoutRepo = context.read<WorkoutRepository>();
+    if (selectedExercises.isEmpty) {
+      toast.error(content: const Text("A workout must contain at least 1 exercise."));
+      return;
+    }
+
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim().isEmpty
         ? null
@@ -243,8 +250,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           needSync: widget.workout!.needSync,
         )..id = widget.workout!.id;
 
-        final selectedExercises = await _getConfigParams();
-
         await workoutRepo.updateWorkout(
           workout: updatedWorkout,
           exercises: selectedExercises,
@@ -259,8 +264,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           description: description,
           thumbnailLocal: _thumbnailImage?.path,
         );
-
-        final selectedExercises = await _getConfigParams();
 
         await workoutRepo.createWorkout(
           workout: newWorkout,
@@ -522,7 +525,10 @@ class _ThumbnailSection extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Colors.grey[300],
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey[300],
+              ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -620,7 +626,10 @@ class _ThumbnailSection extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Colors.grey[300],
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey[300],
+              ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

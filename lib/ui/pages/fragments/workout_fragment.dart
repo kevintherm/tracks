@@ -157,14 +157,14 @@ class _ActionButtons extends StatelessWidget {
     return Row(
       children: [
         Tooltip(
-          message: "Import Exercises",
+          message: "Explore Workouts",
           child: Pressable(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      const Placeholder(child: Text("Import Exercises")),
+                      const Placeholder(child: Text("Explore Workouts")),
                 ),
               );
             },
@@ -173,7 +173,7 @@ class _ActionButtons extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Tooltip(
-          message: 'Create New Exercise',
+          message: 'Create New Workout',
           child: Pressable(
             onTap: () {
               Navigator.push(
@@ -311,7 +311,7 @@ class _ExerciseListItem extends StatelessWidget {
     if (confirmed == true) {
       await workoutRepo.deleteWorkout(workout);
       if (context.mounted) {
-        Toast(context).success(content: const Text("Exercise deleted"));
+        Toast(context).success(content: const Text("Workout deleted"));
       }
     }
   }
@@ -465,9 +465,11 @@ class _WorkoutCard extends StatelessWidget {
   const _WorkoutCard({required this.workout});
 
   String get exercisesExcerpt {
-    final muscles = List.of(workout.exercises);
+    final muscles = List.of(workout.exercises).map((e) => e.name);
 
-    return muscles.map((e) => e.name).join(', ');
+    return muscles.length > 3
+        ? '${muscles.length} Exercises'
+        : muscles.join(', ');
   }
 
   @override
@@ -530,6 +532,7 @@ class _ExerciseStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 4),
@@ -538,7 +541,7 @@ class _ExerciseStat extends StatelessWidget {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+            maxLines: 2,
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w400,
