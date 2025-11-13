@@ -75,6 +75,12 @@ Widget getImage(String? imagePath) {
   return image;
 }
 
+File? getFile(String? filePath) {
+  final exists = filePath != null && File(filePath).existsSync();
+  
+  return exists ? File(filePath) : null;
+}
+
 enum PBCollections {
   workoutExercises("workoutExercises"),
   workouts("workouts"),

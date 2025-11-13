@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/utils/consts.dart';
@@ -20,14 +23,19 @@ class ExercisesPage extends StatefulWidget {
 class _ExercisesPageState extends State<ExercisesPage> {
   final searchController = TextEditingController();
   String search = "";
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
 
     searchController.addListener(() {
-      setState(() {
-        search = searchController.text;
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+      _debounce = Timer(const Duration(milliseconds: 150), () {
+        setState(() {
+          search = searchController.text;
+        });
       });
     });
   }
@@ -35,6 +43,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
   @override
   void dispose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -42,82 +51,84 @@ class _ExercisesPageState extends State<ExercisesPage> {
   Widget build(BuildContext context) {
     final exerciseRepo = context.read<ExerciseRepository>();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _ExercisesAppBar(),
-
-            _SearchBar(controller: searchController),
-
-            Expanded(
-              child: StreamBuilder<List<Exercise>>(
-                stream: exerciseRepo.watchAllExercises(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Something went wrong: ${snapshot.error}',
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontStyle: FontStyle.italic,
+    return BlurAway(
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _ExercisesAppBar(),
+      
+              _SearchBar(controller: searchController),
+      
+              Expanded(
+                child: StreamBuilder<List<Exercise>>(
+                  stream: exerciseRepo.watchAllExercises(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
+      
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Something went wrong: ${snapshot.error}',
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-
-                  final List<Exercise> exercises = snapshot.data ?? [];
-                  List<Exercise> filtered = exercises;
-
-                  if (search.isNotEmpty) {
-                    filtered = FuzzySearch.search(
-                      items: exercises,
-                      query: search,
-                      getSearchableText: (e) => e.name,
-                      threshold: 0.1,
-                    );
-                  } else {
-                    filtered = exercises.toList()
-                      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-                  }
-
-                  if (exercises.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "No exercise available.",
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontStyle: FontStyle.italic,
+                      );
+                    }
+      
+                    final List<Exercise> exercises = snapshot.data ?? [];
+                    List<Exercise> filtered = exercises;
+      
+                    if (search.isNotEmpty) {
+                      filtered = FuzzySearch.search(
+                        items: exercises,
+                        query: search,
+                        getSearchableText: (e) => e.name,
+                        threshold: 0.1,
+                      );
+                    } else {
+                      filtered = exercises.toList()
+                        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+                    }
+      
+                    if (exercises.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No exercise available.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
-                      ),
-                    );
-                  }
-
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "No matching exercise found.",
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontStyle: FontStyle.italic,
+                      );
+                    }
+      
+                    if (filtered.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No matching exercise found.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
-                      ),
-                    );
-                  }
-
-                  return _ExercisesList(exercises: filtered);
-                },
+                      );
+                    }
+      
+                    return _ExercisesList(exercises: filtered);
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -254,9 +265,17 @@ class _SearchBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Searching for `${controller.text}`',
-                    style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 250),
+                    child: Text(
+                      'Searching for `${controller.text}`',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
 
                   Pressable(

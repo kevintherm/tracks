@@ -10,6 +10,7 @@ import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,6 @@ void main() async {
   final authService = AuthService(prefs);
 
   final dir = await getApplicationDocumentsDirectory();
-
   final isar = await Isar.open(
     [
       ExerciseSchema,
@@ -46,9 +46,11 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        
         Provider<AuthService>.value(value: authService),
         Provider<Isar>.value(value: isar),
         Provider<SharedPreferences>.value(value: prefs),
+        
         Provider(
           create: (context) => ExerciseRepository(
             context.read<Isar>(),
@@ -58,6 +60,13 @@ void main() async {
         ),
         Provider(
           create: (context) => MuscleRepository(
+            context.read<Isar>(),
+            pb,
+            context.read<AuthService>(),
+          ),
+        ),
+        Provider(
+          create: (context) => WorkoutRepository(
             context.read<Isar>(),
             pb,
             context.read<AuthService>(),
@@ -78,23 +87,31 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Tracks',
       themeMode: ThemeMode.light,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.lightPrimary),
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-        scaffoldBackgroundColor: Colors.grey[100],
-        cardColor: Colors.white,
-        cardTheme: CardThemeData(color: Colors.white),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-        ),
-        textTheme: GoogleFonts.interTextTheme(
-          ThemeData(brightness: Brightness.dark).textTheme,
-        ),
-      ),
+      theme: _buildLightTheme(context),
+      darkTheme: _buildDarkTheme(context),
       home: const AuthGate(),
+    );
+  }
+
+  ThemeData _buildLightTheme(BuildContext context) {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.lightPrimary),
+      textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+      scaffoldBackgroundColor: Colors.grey[100],
+      cardColor: Colors.white,
+      cardTheme: const CardThemeData(color: Colors.white),
+    );
+  }
+
+  ThemeData _buildDarkTheme(BuildContext context) {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+      ),
+      textTheme: GoogleFonts.interTextTheme(
+        ThemeData(brightness: Brightness.dark).textTheme,
+      ),
     );
   }
 }

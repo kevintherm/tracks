@@ -24,6 +24,10 @@ class ExerciseRepository {
     imageStorageService = ImageStorageService(pb, authService);
   }
 
+  IsarCollection<Exercise> get collection {
+    return isar.exercises;
+  }
+
   Stream<List<Exercise>> watchAllExercises() {
     return isar.exercises.where().watch(fireImmediately: true);
   }
@@ -76,12 +80,10 @@ class ExerciseRepository {
         final muscle = entry.muscle;
         final activation = entry.activation;
 
-        final exerciseMuscle = ExerciseMuscles(
-          activation: activation,
-          needSync: true,
-        )
-          ..exercise.value = exercise
-          ..muscle.value = muscle;
+        final exerciseMuscle =
+            ExerciseMuscles(activation: activation, needSync: true)
+              ..exercise.value = exercise
+              ..muscle.value = muscle;
 
         await isar.exerciseMuscles.put(exerciseMuscle);
         await exerciseMuscle.exercise.save();
@@ -405,7 +407,7 @@ class ExerciseRepository {
         .filter()
         .pocketbaseIdIsNull()
         .findAll();
-    
+
     for (final exercise in localExercises) {
       await _uploadExerciseToCloud(exercise);
     }
@@ -457,7 +459,7 @@ class ExerciseRepository {
         await isar.writeTxn(() async {
           // First save all exercises to generate IDs
           await isar.exercises.putAll(exercisesToSave);
-          
+
           // Then save exercise-muscle relationships and link them
           for (final junction in exerciseMusclesToSave) {
             await isar.exerciseMuscles.put(junction);
@@ -573,7 +575,7 @@ class ExerciseRepository {
   /// Update thumbnail for existing exercise if cloud version changed
   Future<void> _updateThumbnail(dynamic record, Exercise exists) async {
     final thumbnailField = record.data['thumbnail'];
-    
+
     if (thumbnailField == null || thumbnailField.toString().isEmpty) {
       return; // Cloud has no thumbnail - keep local one
     }
@@ -631,13 +633,14 @@ class ExerciseRepository {
       final createdAt = DateTime.tryParse(muscle.data['created'] ?? '');
       final updatedAt = DateTime.tryParse(muscle.data['updated'] ?? '');
 
-      final exerciseMuscle = ExerciseMuscles(
-        activation: activation,
-        pocketbaseId: pocketbaseId,
-        needSync: false,
-      )
-        ..exercise.value = exercise
-        ..muscle.value = muscleLocal;
+      final exerciseMuscle =
+          ExerciseMuscles(
+              activation: activation,
+              pocketbaseId: pocketbaseId,
+              needSync: false,
+            )
+            ..exercise.value = exercise
+            ..muscle.value = muscleLocal;
 
       if (createdAt != null) exerciseMuscle.createdAt = createdAt;
       if (updatedAt != null) exerciseMuscle.updatedAt = updatedAt;
@@ -694,13 +697,14 @@ class ExerciseRepository {
       final createdAt = DateTime.tryParse(muscle.data['created'] ?? '');
       final updatedAt = DateTime.tryParse(muscle.data['updated'] ?? '');
 
-      final exerciseMuscle = ExerciseMuscles(
-        activation: activation,
-        pocketbaseId: pocketbaseId,
-        needSync: false,
-      )
-        ..exercise.value = exists
-        ..muscle.value = muscleLocal;
+      final exerciseMuscle =
+          ExerciseMuscles(
+              activation: activation,
+              pocketbaseId: pocketbaseId,
+              needSync: false,
+            )
+            ..exercise.value = exists
+            ..muscle.value = muscleLocal;
 
       if (createdAt != null) exerciseMuscle.createdAt = createdAt;
       if (updatedAt != null) exerciseMuscle.updatedAt = updatedAt;

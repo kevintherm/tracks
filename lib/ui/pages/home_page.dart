@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
 import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
@@ -78,16 +79,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(child: pages[_selectedIndex]),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (value) {
-          setState(() {
-            navigationProvider.setSelectedIndex(value);
-          });
-        },
-        destinations: _navigationItems,
+    return BlurAway(
+      child: Scaffold(
+        body: SafeArea(child: pages[_selectedIndex]),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (value) {
+            setState(() {
+              navigationProvider.setSelectedIndex(value);
+            });
+          },
+          destinations: _navigationItems,
+        ),
       ),
     );
   }

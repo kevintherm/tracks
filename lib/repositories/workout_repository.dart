@@ -7,6 +7,18 @@ import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
 import 'package:tracks/utils/consts.dart';
 
+class WorkoutConfigParam {
+  Exercise exercise;
+  int reps;
+  int sets;
+
+  WorkoutConfigParam({
+    required this.exercise,
+    required this.sets,
+    required this.reps,
+  });
+}
+
 class WorkoutConfig {
   int reps;
   int sets;
@@ -56,10 +68,9 @@ class WorkoutRepository {
     return isar.workouts;
   }
 
-  Future<void> createWorkout(
-    Workout workout, {
-    required Map<int, WorkoutConfig>
-    exercises, // Map of exerciseId -> sets, reps
+  Future<void> createWorkout({
+    required Workout workout,
+    required List<WorkoutConfigParam> exercises,
   }) async {
     if (workout.thumbnailLocal != null) {
       try {
@@ -80,23 +91,18 @@ class WorkoutRepository {
 
       // Create junction table entries if exercises provided
       if (exercises.isNotEmpty) {
-        for (final entry in exercises.entries) {
-          final exerciseId = entry.key;
-          final sets = entry.value.sets;
-          final reps = entry.value.reps;
+        for (final entry in exercises) {
+          final exercise = entry.exercise;
+          final sets = entry.sets;
+          final reps = entry.reps;
 
-          final exercise = await isar.exercises.get(exerciseId);
+          final workoutExercise = WorkoutExercises(sets: sets, reps: reps)
+            ..workout.value = workout
+            ..exercise.value = exercise;
 
-          if (exercise != null) {
-            final workoutExercise = WorkoutExercises(sets: sets, reps: reps);
-
-            workoutExercise.workout.value = workout;
-            workoutExercise.exercise.value = exercise;
-
-            await isar.workoutExercises.put(workoutExercise);
-            await workoutExercise.workout.save();
-            await workoutExercise.exercise.save();
-          }
+          await isar.workoutExercises.put(workoutExercise);
+          await workoutExercise.workout.save();
+          await workoutExercise.exercise.save();
         }
       }
     });
@@ -106,9 +112,9 @@ class WorkoutRepository {
     }
   }
 
-  Future<void> updateWorkout(
-    Workout workout, {
-    Map<int, WorkoutConfig>? exercises, // Map of exerciseId -> sets, reps
+  Future<void> updateWorkout({
+    required Workout workout,
+    required List<WorkoutConfigParam> exercises,
   }) async {
     // Get old workout to compare
     final oldWorkout = await isar.workouts.get(workout.id);
@@ -156,9 +162,7 @@ class WorkoutRepository {
     await isar.writeTxn(() async {
       await isar.workouts.put(workout);
 
-      // Update exercise relationships if provided
-      if (exercises != null) {
-        // Delete all existing junction entries for this workout
+      if (exercises.isNotEmpty) {
         final existingJunctions = await isar.workoutExercises
             .filter()
             .workout((q) => q.idEqualTo(workout.id))
@@ -168,28 +172,18 @@ class WorkoutRepository {
           await isar.workoutExercises.delete(junction.id);
         }
 
-        // Create new junction entries
-        if (exercises.isNotEmpty) {
-          for (final entry in exercises.entries) {
-            final exerciseId = entry.key;
-            final sets = entry.value.sets;
-            final reps = entry.value.reps;
+        for (final entry in exercises) {
+          final exercise = entry.exercise;
+          final sets = entry.sets;
+          final reps = entry.reps;
 
-            final exercise = await isar.exercises.get(exerciseId);
-            if (exercise != null) {
-              final workoutExercise = WorkoutExercises(
-                sets: sets,
-                reps: reps,
-              );
+          final workoutExercise = WorkoutExercises(sets: sets, reps: reps)
+            ..workout.value = workout
+            ..exercise.value = exercise;
 
-              workoutExercise.workout.value = workout;
-              workoutExercise.exercise.value = exercise;
-
-              await isar.workoutExercises.put(workoutExercise);
-              await workoutExercise.workout.save();
-              await workoutExercise.exercise.save();
-            }
-          }
+          await isar.workoutExercises.put(workoutExercise);
+          await workoutExercise.workout.save();
+          await workoutExercise.exercise.save();
         }
       }
     });
@@ -225,11 +219,11 @@ class WorkoutRepository {
           .filter()
           .workout((q) => q.idEqualTo(workout.id))
           .findAll();
-      
+
       for (final junction in junctions) {
         await isar.workoutExercises.delete(junction.id);
       }
-      
+
       // Delete the workout
       await isar.workouts.delete(workout.id);
     });
@@ -271,7 +265,7 @@ class WorkoutRepository {
         for (final junction in junctions) {
           await junction.exercise.load();
           final exercise = junction.exercise.value;
-          
+
           if (exercise?.pocketbaseId != null) {
             await pb
                 .collection(PBCollections.workoutExercises.value)
