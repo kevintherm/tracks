@@ -52,7 +52,7 @@ class ListItem extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     overflow: TextOverflow.ellipsis,
-                    maxLines: isSelected ? 6 : 3,
+                    maxLines: 2,
                     subtitle ?? "Description not available.",
                     style: GoogleFonts.inter(
                       fontSize: 12,

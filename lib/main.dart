@@ -27,14 +27,6 @@ void main() async {
 
   final dir = await getApplicationDocumentsDirectory();
 
-  // OPTIONAL: Uncomment to reset database on app start (for development)
-  // await Isar.getInstance()?.close();
-  // final dbPath = '${dir.path}/default.isar';
-  // final file = File(dbPath);
-  // if (await file.exists()) {
-  //   await file.delete();
-  // }
-
   final isar = await Isar.open(
     [
       ExerciseSchema,

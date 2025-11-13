@@ -10,7 +10,6 @@ import 'package:isar/isar.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
-import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
@@ -23,17 +22,8 @@ import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
-// --- Models (for Type Safety) ---
-class ExerciseConfig {
-  int muscleActivation;
-
-  ExerciseConfig({this.muscleActivation = 30});
-}
-
-// --- Page Widget ---
-
 class CreateExercisePage extends StatefulWidget {
-  final Exercise? exercise; // Optional exercise for editing
+  final Exercise? exercise;
 
   const CreateExercisePage({super.key, this.exercise});
 
@@ -42,74 +32,57 @@ class CreateExercisePage extends StatefulWidget {
 }
 
 class _CreateExercisePageState extends State<CreateExercisePage> {
-  final ScrollController _scrollController = ScrollController();
   final ImagePicker _imagePicker = ImagePicker();
-
-  // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _caloriesController = TextEditingController();
 
-  // Thumbnail image
   XFile? _thumbnailImage;
-  bool _thumbnailRemoved = false; // Track if user explicitly removed thumbnail
+  bool _thumbnailRemoved = false;
 
-  // Selected muscles and their configurations
   final List<SelectConfigOption> _selectedOptions = [];
-  final Map<String, ExerciseConfig> _exerciseConfigs = {};
+  final Map<String, int> _muscleActivations = {};
 
   @override
   void initState() {
     super.initState();
-    // If editing, populate the form
     if (widget.exercise != null) {
       _nameController.text = widget.exercise!.name;
       _descriptionController.text = widget.exercise!.description ?? '';
       _caloriesController.text = widget.exercise!.caloriesBurned.toString();
-
-      // Load existing thumbnail if available
-      if (widget.exercise!.thumbnailLocal != null) {
-        // Note: We'll need to handle this differently since XFile expects a path
-        // For now, we'll just keep the path and handle it in the image preview
-      }
-      
-      // Load existing muscle relationships
-      _loadExistingMuscles();
+      _loadExistingMuscles(widget.exercise!);
     }
   }
 
-  Future<void> _loadExistingMuscles() async {
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _caloriesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadExistingMuscles(Exercise exercise) async {
     try {
-      final isar = context.read<Isar>();
-      
-      // Load muscle relationships from junction table
-      final junctions = await isar.exerciseMuscles
-          .filter()
-          .exercise((q) => q.idEqualTo(widget.exercise!.id))
-          .findAll();
-      
-      // Convert to ExerciseOption and add to selected
-      for (final junction in junctions) {
-        await junction.muscle.load();
-        final muscle = junction.muscle.value;
-        
-        if (muscle != null) {
-          final muscleOption = SelectConfigOption(
-            id: muscle.id.toString(),
-            label: muscle.name,
-            subtitle: muscle.description,
-            imagePath: muscle.thumbnailLocal,
-          );
-          
-          if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
-            setState(() {
-              _selectedOptions.add(muscleOption);
-              // Load existing activation value
-              _exerciseConfigs[muscleOption.id] = ExerciseConfig(
-                muscleActivation: junction.activation,
-              );
-            });
-          }
+      final musclesParam = exercise.musclesWithActivation;
+
+      for (final entry in musclesParam) {
+        final muscle = entry.muscle;
+        final activation = entry.activation;
+
+        final muscleOption = SelectConfigOption(
+          id: muscle.id.toString(),
+          label: muscle.name,
+          subtitle: muscle.description,
+          imagePath: muscle.thumbnailLocal,
+        );
+
+        // Apply to selected options
+        if (!_selectedOptions.any((opt) => opt.id == muscleOption.id)) {
+          setState(() {
+            _selectedOptions.add(muscleOption);
+            _muscleActivations[muscleOption.id] = activation;
+          });
         }
       }
     } catch (e) {
@@ -119,41 +92,29 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _caloriesController.dispose();
-    super.dispose();
-  }
-
-  // --- List Management Methods ---
-
   Future<void> _pickThumbnailImage() async {
-    // Show dialog to choose between camera and gallery
-    final ImageSource? source = await showDialog<ImageSource>(
+    final toast = Toast(context);
+
+    final ImageSource? source = await showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Choose Image Source',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Iconsax.camera_outline),
-                title: Text('Camera', style: GoogleFonts.inter()),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Iconsax.gallery_outline),
-                title: Text('Gallery', style: GoogleFonts.inter()),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-            ],
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.photo_library),
+                  title: Text('Choose from Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text('Take a Photo'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -172,14 +133,11 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       if (image != null) {
         setState(() {
           _thumbnailImage = image;
-          _thumbnailRemoved =
-              false; // Reset removal flag when new image is picked
+          _thumbnailRemoved = false;
         });
       }
     } catch (e) {
-      if (mounted) {
-        Toast(context).error(content: Text("Failed to pick image: $e"));
-      }
+      toast.error(content: Text("Failed to pick image: $e"));
     }
   }
 
@@ -190,25 +148,23 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     });
   }
 
-  void _toggleExerciseSelection(SelectConfigOption option, bool isSelected) {
+  void _toggleMuscleSelection(SelectConfigOption option, bool isSelected) {
     setState(() {
       if (isSelected) {
         if (!_selectedOptions.contains(option)) {
           _selectedOptions.add(option);
-          _exerciseConfigs[option.id] = ExerciseConfig();
+          _muscleActivations[option.id] = 50; // default 50%
         }
       } else {
         _selectedOptions.remove(option);
-        _exerciseConfigs.remove(option.id);
+        _muscleActivations.remove(option.id);
       }
     });
   }
 
-  void _updateExerciseConfig(String exerciseId, int muscleActivation) {
+  void _updateMuscleActivation(String muscleId, int activation) {
     setState(() {
-      _exerciseConfigs[exerciseId] = ExerciseConfig(
-        muscleActivation: muscleActivation,
-      );
+      _muscleActivations[muscleId] = activation;
     });
   }
 
@@ -216,13 +172,105 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     setState(() {
       final option = _selectedOptions[index];
       _selectedOptions.removeAt(index);
-      _exerciseConfigs.remove(option.id);
+      _muscleActivations.remove(option.id);
     });
+  }
+
+  Future<void> _saveExercise() async {
+    final toast = Toast(context);
+    final nav = Navigator.of(context);
+
+    if (_nameController.text.trim().isEmpty) {
+      toast.error(content: const Text("Please enter a name"));
+      return;
+    }
+
+    final exerciseRepo = context.read<ExerciseRepository>();
+    final isar = context.read<Isar>();
+    final calories = double.tryParse(_caloriesController.text) ?? 0.0;
+    final name = _nameController.text.trim();
+    final description = _descriptionController.text.trim().isEmpty
+        ? null
+        : _descriptionController.text.trim();
+
+    try {
+      if (widget.exercise != null) {
+
+        String? thumbnailPath;
+        if (_thumbnailImage != null) {
+          thumbnailPath = _thumbnailImage!.path;
+        } else if (_thumbnailRemoved) {
+          thumbnailPath = null;
+        } else {
+          thumbnailPath = widget.exercise!.thumbnailLocal;
+        }
+
+        final updatedExercise = Exercise(
+          name: name,
+          description: description,
+          caloriesBurned: calories,
+          thumbnailLocal: thumbnailPath,
+          thumbnailCloud: widget.exercise!.thumbnailCloud,
+          pocketbaseId: widget.exercise!.pocketbaseId,
+          needSync: widget.exercise!.needSync,
+          imported: widget.exercise!.imported,
+        )..id = widget.exercise!.id;
+
+        final muscleActivations = <MuscleActivationParam>[];
+        for (final opt in _selectedOptions) {
+          final muscleId = int.parse(opt.id);
+          final muscle = await isar.muscles.get(muscleId);
+          if (muscle != null) {
+            final activation = _muscleActivations[opt.id] ?? 50;
+            muscleActivations.add(
+              MuscleActivationParam(muscle: muscle, activation: activation),
+            );
+          }
+        }
+
+        await exerciseRepo.updateExercise(
+          exercise: updatedExercise,
+          muscles: muscleActivations,
+        );
+        toast.success(content: const Text("Exercise updated!"));
+
+      } else {
+
+        final newExercise = Exercise(
+          name: name,
+          description: description,
+          caloriesBurned: calories,
+          thumbnailLocal: _thumbnailImage?.path,
+        );
+
+        final muscleActivations = <MuscleActivationParam>[];
+        for (final opt in _selectedOptions) {
+          final muscleId = int.parse(opt.id);
+          final muscle = await isar.muscles.get(muscleId);
+          if (muscle != null) {
+            final activation = _muscleActivations[opt.id] ?? 50;
+            muscleActivations.add(
+              MuscleActivationParam(muscle: muscle, activation: activation),
+            );
+          }
+        }
+
+        await exerciseRepo.createExercise(
+          exercise: newExercise,
+          muscles: muscleActivations,
+        );
+        toast.success(content: const Text("Exercise created!"));
+        
+      }
+
+      nav.pop(true);
+    } catch (e) {
+      toast.error(content: Text("Failed to save exercise: $e"));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final exerciseRepo = context.read<ExerciseRepository>();
     final muscleRepo = context.read<MuscleRepository>();
 
     return Scaffold(
@@ -245,98 +293,184 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 )
                 .toList();
 
-            return _ExerciseForm(
-              allMuscles: allMuscles,
-              exerciseRepo: exerciseRepo,
-              exercise: widget.exercise,
-              nameController: _nameController,
-              descriptionController: _descriptionController,
-              caloriesController: _caloriesController,
-              thumbnailImage: _thumbnailImage,
-              thumbnailRemoved: _thumbnailRemoved,
-              selectedOptions: _selectedOptions,
-              exerciseConfigs: _exerciseConfigs,
-              onPickImage: _pickThumbnailImage,
-              onRemoveImage: _removeThumbnailImage,
-              onToggleSelection: _toggleExerciseSelection,
-              onUpdateConfig: _updateExerciseConfig,
-              onRemoveMuscle: _removeSelectedMuscle,
-              onSave: () async {
-                final toast = Toast(context);
-                final nav = Navigator.of(context);
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // App Bar
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Pressable(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(
+                            Iconsax.arrow_left_2_outline,
+                            size: 24,
+                          ),
+                        ),
+                        Text(
+                          widget.exercise != null
+                              ? "Edit Exercise"
+                              : "Create Exercise",
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Pressable(
+                          onTap: _saveExercise,
+                          child: const Icon(
+                            Iconsax.tick_square_outline,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                if (_nameController.text.trim().isEmpty) {
-                  Toast(context).error(content: const Text("Please enter a name"));
-                  return;
-                }
+                  // Thumbnail Section
+                  _ThumbnailSection(
+                    thumbnailImage: _thumbnailImage,
+                    existingThumbnailPath: widget.exercise?.thumbnailLocal,
+                    thumbnailRemoved: _thumbnailRemoved,
+                    onPickImage: _pickThumbnailImage,
+                    onRemoveImage: _removeThumbnailImage,
+                  ),
 
-                final calories = double.tryParse(_caloriesController.text) ?? 0.0;
-                final name = _nameController.text.trim();
-                final description = _descriptionController.text.trim().isEmpty
-                    ? null
-                    : _descriptionController.text.trim();
+                  // Exercise Details Section
+                  SectionCard(
+                    title: "Exercise Details",
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _descriptionController,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            alignLabelWithHint: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _caloriesController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*$'),
+                            ),
+                          ],
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(MingCute.fire_line),
+                            labelText: 'Calories Burned (Kkal/Set)',
+                            alignLabelWithHint: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                if (widget.exercise != null) {
-                  // Update existing exercise
-                  String? thumbnailPath;
-                  if (_thumbnailImage != null) {
-                    thumbnailPath = _thumbnailImage!.path;
-                  } else if (_thumbnailRemoved) {
-                    thumbnailPath = null;
-                  } else {
-                    thumbnailPath = widget.exercise!.thumbnailLocal;
-                  }
+                  // Targeted Muscles Section
+                  SectionCard(
+                    title: "Targeted Muscles",
+                    child: SelectConfig<SelectConfigOption>(
+                      allOptions: allMuscles,
+                      selectedOptions: _selectedOptions,
+                      onToggle: _toggleMuscleSelection,
+                      getLabel: (option) => option.label,
+                      getId: (option) => option.id,
+                      itemBuilder: (option, isSelected, onChanged) {
+                        return ListItem(
+                          id: option.id,
+                          label: option.label,
+                          isSelected: isSelected,
+                          onChanged: onChanged,
+                          imagePath: option.imagePath,
+                          subtitle: option.subtitle,
+                        );
+                      },
+                      aiRecommendation: AiRecommendation(
+                        onUse: () {},
+                        buttonText: "Use",
+                      ),
+                    ),
+                  ),
 
-                  final updatedExercise = Exercise(
-                    name: name,
-                    description: description,
-                    caloriesBurned: calories,
-                    thumbnailLocal: thumbnailPath,
-                    thumbnailCloud: widget.exercise!.thumbnailCloud,
-                    pocketbaseId: widget.exercise!.pocketbaseId,
-                    needSync: widget.exercise!.needSync,
-                    imported: widget.exercise!.imported,
-                  )..id = widget.exercise!.id;
+                  // Muscle Configuration Section
+                  if (_selectedOptions.isNotEmpty)
+                    SectionCard(
+                      title:
+                          "Configure Activation (${_selectedOptions.length})",
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _selectedOptions.length,
+                        itemBuilder: (context, index) {
+                          final option = _selectedOptions[index];
+                          final activation =
+                              _muscleActivations[option.id] ?? 50;
 
-                  // Build map of muscle ID to activation percentage
-                  final muscleActivations = <int, int>{};
-                  for (final opt in _selectedOptions) {
-                    final muscleId = int.parse(opt.id);
-                    final activation = _exerciseConfigs[opt.id]?.muscleActivation ?? 50;
-                    muscleActivations[muscleId] = activation;
-                  }
+                          return _ConfigurableExerciseCard(
+                            key: ValueKey(option.id),
+                            option: option,
+                            muscleActivation: activation,
+                            onActivationChanged: (value) =>
+                                _updateMuscleActivation(option.id, value),
+                            onDelete: () => _removeSelectedMuscle(index),
+                          );
+                        },
+                      ),
+                    ),
 
-                  await exerciseRepo.updateExercise(
-                    updatedExercise,
-                    muscleActivations: muscleActivations,
-                  );
-                  toast.success(content: const Text("Exercise updated!"));
-                } else {
-                  // Create new exercise
-                  final newExercise = Exercise(
-                    name: name,
-                    description: description,
-                    caloriesBurned: calories,
-                    thumbnailLocal: _thumbnailImage?.path,
-                  );
-
-                  // Build map of muscle ID to activation percentage
-                  final muscleActivations = <int, int>{};
-                  for (final opt in _selectedOptions) {
-                    final muscleId = int.parse(opt.id);
-                    final activation = _exerciseConfigs[opt.id]?.muscleActivation ?? 50;
-                    muscleActivations[muscleId] = activation;
-                  }
-
-                  await exerciseRepo.createExercise(
-                    newExercise,
-                    muscleActivations: muscleActivations,
-                  );
-                  toast.success(content: const Text("Exercise created!"));
-                }
-
-                nav.pop(true);
-              },
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Looking for something else?",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Pressable(
+                              onTap: () {},
+                              child: Text(
+                                "Create via Import (JSON)",
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -345,188 +479,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   }
 }
 
-// Separate stateless widget to prevent rebuilds
-class _ExerciseForm extends StatelessWidget {
-  final List<SelectConfigOption> allMuscles;
-  final ExerciseRepository exerciseRepo;
-  final Exercise? exercise;
-  final TextEditingController nameController;
-  final TextEditingController descriptionController;
-  final TextEditingController caloriesController;
-  final XFile? thumbnailImage;
-  final bool thumbnailRemoved;
-  final List<SelectConfigOption> selectedOptions;
-  final Map<String, ExerciseConfig> exerciseConfigs;
-  final VoidCallback onPickImage;
-  final VoidCallback onRemoveImage;
-  final void Function(SelectConfigOption, bool) onToggleSelection;
-  final void Function(String, int) onUpdateConfig;
-  final void Function(int) onRemoveMuscle;
-  final VoidCallback onSave;
-
-  const _ExerciseForm({
-    required this.allMuscles,
-    required this.exerciseRepo,
-    required this.exercise,
-    required this.nameController,
-    required this.descriptionController,
-    required this.caloriesController,
-    required this.thumbnailImage,
-    required this.thumbnailRemoved,
-    required this.selectedOptions,
-    required this.exerciseConfigs,
-    required this.onPickImage,
-    required this.onRemoveImage,
-    required this.onToggleSelection,
-    required this.onUpdateConfig,
-    required this.onRemoveMuscle,
-    required this.onSave,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _AppBar(
-            title: exercise != null ? "Edit Exercise" : "Create Exercise",
-            onSave: onSave,
-          ),
-
-          _ThumbnailSection(
-            thumbnailImage: thumbnailImage,
-            existingThumbnailPath: exercise?.thumbnailLocal,
-            thumbnailRemoved: thumbnailRemoved,
-            onPickImage: onPickImage,
-            onRemoveImage: onRemoveImage,
-          ),
-
-          _ExerciseDetailsSection(
-            nameController: nameController,
-            descriptionController: descriptionController,
-            caloriesController: caloriesController,
-          ),
-
-          SectionCard(
-            title: "Targeted Muscles",
-            child: SelectConfig<SelectConfigOption>(
-              allOptions: allMuscles,
-              selectedOptions: selectedOptions,
-              onToggle: onToggleSelection,
-              getLabel: (option) => option.label,
-              getId: (option) => option.id,
-              itemBuilder: (option, isSelected, onChanged) {
-                return ListItem(
-                  id: option.id,
-                  label: option.label,
-                  isSelected: isSelected,
-                  onChanged: onChanged,
-                  imagePath: option.imagePath,
-                  subtitle: option.subtitle,
-                );
-              },
-              aiRecommendation: AiRecommendation(
-                onUse: () {
-                  // TODO: Implement AI recommendation
-                },
-                buttonText: "Use",
-              ),
-            ),
-          ),
-
-          // Exercise Configuration Section
-          if (selectedOptions.isNotEmpty)
-            SectionCard(
-              title: "Configure Activation (${selectedOptions.length})",
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: selectedOptions.length,
-                itemBuilder: (context, index) {
-                  final option = selectedOptions[index];
-                  final config = exerciseConfigs[option.id] ?? ExerciseConfig();
-
-                  return _ConfigurableExerciseCard(
-                    key: ValueKey(option.id),
-                    option: option,
-                    muscleActivation: config.muscleActivation,
-                    onActivationChanged: (value) => onUpdateConfig(option.id, value),
-                    onDelete: () => onRemoveMuscle(index),
-                  );
-                },
-              ),
-            ),
-
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Looking for something else?",
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Pressable(
-                      onTap: () {},
-                      child: Text(
-                        "Create via Import (JSON)",
-                        style: GoogleFonts.inter(
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// --- Extracted Page Sections ---
-
-class _AppBar extends StatelessWidget {
-  final VoidCallback onSave;
-  final String title;
-
-  const _AppBar({required this.onSave, this.title = "New Exercise"});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Pressable(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(Iconsax.arrow_left_2_outline, size: 24),
-          ),
-          Text(
-            title,
-            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          Pressable(
-            onTap: onSave,
-            child: const Icon(Iconsax.tick_square_outline, size: 24),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
+// Thumbnail Section Widget
 class _ThumbnailSection extends StatelessWidget {
   final XFile? thumbnailImage;
   final String? existingThumbnailPath;
@@ -792,67 +745,7 @@ class _ThumbnailSection extends StatelessWidget {
   }
 }
 
-class _ExerciseDetailsSection extends StatelessWidget {
-  final TextEditingController nameController;
-  final TextEditingController descriptionController;
-  final TextEditingController caloriesController;
-
-  const _ExerciseDetailsSection({
-    required this.nameController,
-    required this.descriptionController,
-    required this.caloriesController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SectionCard(
-      title: "Exercise Details",
-      child: Column(
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-              labelText: 'Name',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: descriptionController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: 'Description',
-              alignLabelWithHint: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: caloriesController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-            ],
-            decoration: InputDecoration(
-              prefixIcon: Icon(MingCute.fire_line),
-              labelText: 'Calories Burned (Kkal/Set)',
-              alignLabelWithHint: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// --- Configurable Exercise Card ---
+// Configurable Exercise Card
 class _ConfigurableExerciseCard extends StatelessWidget {
   final SelectConfigOption option;
   final int muscleActivation;
@@ -882,9 +775,8 @@ class _ConfigurableExerciseCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                // Cached image widget that won't rebuild
-                _CachedMuscleImage(
-                  imagePath: option.imagePath ?? 'assets/drawings/not-found.jpg',
+                _buildMuscleImage(
+                  option.imagePath ?? 'assets/drawings/not-found.jpg',
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -924,7 +816,7 @@ class _ConfigurableExerciseCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Average of 8 sets per week",
+                        option.subtitle ?? '',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -1001,29 +893,8 @@ class _ConfigurableExerciseCard extends StatelessWidget {
       ),
     );
   }
-}
-
-// Separate stateful widget to cache the image and prevent rebuilds
-class _CachedMuscleImage extends StatefulWidget {
-  final String imagePath;
-
-  const _CachedMuscleImage({required this.imagePath});
-
-  @override
-  State<_CachedMuscleImage> createState() => _CachedMuscleImageState();
-}
-
-class _CachedMuscleImageState extends State<_CachedMuscleImage> {
-  late Widget _imageWidget;
-
-  @override
-  void initState() {
-    super.initState();
-    _imageWidget = _buildMuscleImage(widget.imagePath);
-  }
 
   Widget _buildMuscleImage(String imagePath) {
-    // Check if it's a local file path (starts with / or contains app_flutter)
     if (imagePath.startsWith('/') || imagePath.contains('app_flutter')) {
       final file = File(imagePath);
       if (file.existsSync()) {
@@ -1047,7 +918,6 @@ class _CachedMuscleImageState extends State<_CachedMuscleImage> {
       }
     }
 
-    // Use asset image
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: Image.asset(
@@ -1065,10 +935,5 @@ class _CachedMuscleImageState extends State<_CachedMuscleImage> {
         },
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _imageWidget;
   }
 }

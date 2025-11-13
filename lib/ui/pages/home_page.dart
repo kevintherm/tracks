@@ -33,6 +33,8 @@ class _HomePageState extends State<HomePage> {
 
         log('[Sync] Starting exercise sync..');
         await context.read<ExerciseRepository>().performInitialSync();
+
+        log('[Sync] Sync complete..');
       }());
     });
   }

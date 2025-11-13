@@ -7,6 +7,13 @@ import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/image_storage_service.dart';
 import 'package:tracks/utils/consts.dart';
 
+class MuscleActivationParam {
+  Muscle muscle;
+  int activation;
+
+  MuscleActivationParam({required this.muscle, required this.activation});
+}
+
 class ExerciseRepository {
   final Isar isar;
   final PocketBase pb;
@@ -21,7 +28,6 @@ class ExerciseRepository {
     return isar.exercises.where().watch(fireImmediately: true);
   }
 
-  // Get muscles for a specific exercise with activation levels
   Future<List<Map<String, dynamic>>> getMusclesForExercise(
     int exerciseId,
   ) async {
@@ -41,10 +47,9 @@ class ExerciseRepository {
     return results;
   }
 
-  Future<void> createExercise(
-    Exercise exercise, {
-    Map<int, int>?
-    muscleActivations, // Map of muscleId -> activation percentage
+  Future<void> createExercise({
+    required Exercise exercise,
+    required List<MuscleActivationParam> muscles,
   }) async {
     if (exercise.thumbnailLocal != null) {
       try {
@@ -56,47 +61,43 @@ class ExerciseRepository {
 
         exercise.thumbnailLocal = imageResult['localPath'];
       } catch (e) {
+        print('Failed to save exercise thumbnail: $e');
         exercise.thumbnailLocal = null;
       }
     }
 
     exercise.imported = false;
+    exercise.needSync = true;
 
     await isar.writeTxn(() async {
       await isar.exercises.put(exercise);
 
-      // Create junction table entries if muscles provided
-      if (muscleActivations != null && muscleActivations.isNotEmpty) {
-        for (final entry in muscleActivations.entries) {
-          final muscleId = entry.key;
-          final activation = entry.value;
+      for (final entry in muscles) {
+        final muscle = entry.muscle;
+        final activation = entry.activation;
 
-          final muscle = await isar.muscles.get(muscleId);
-          if (muscle != null) {
-            final exerciseMuscle = ExerciseMuscles(activation: activation);
+        final exerciseMuscle = ExerciseMuscles(
+          activation: activation,
+          needSync: true,
+        )
+          ..exercise.value = exercise
+          ..muscle.value = muscle;
 
-            exerciseMuscle.exercise.value = exercise;
-            exerciseMuscle.muscle.value = muscle;
-
-            await isar.exerciseMuscles.put(exerciseMuscle);
-            await exerciseMuscle.exercise.save();
-            await exerciseMuscle.muscle.save();
-          }
-        }
+        await isar.exerciseMuscles.put(exerciseMuscle);
+        await exerciseMuscle.exercise.save();
+        await exerciseMuscle.muscle.save();
       }
     });
 
     if (authService.isSyncEnabled) {
-      _syncExerciseToCloud(exercise);
+      await _uploadExerciseToCloud(exercise);
     }
   }
 
-  Future<void> updateExercise(
-    Exercise exercise, {
-    Map<int, int>?
-    muscleActivations, // Map of muscleId -> activation percentage
+  Future<void> updateExercise({
+    required Exercise exercise,
+    required List<MuscleActivationParam> muscles,
   }) async {
-    // Get old exercise to compare
     final oldExercise = await isar.exercises.get(exercise.id);
 
     // Handle thumbnail update if needed
@@ -106,27 +107,24 @@ class ExerciseRepository {
 
       if (isNewImage) {
         try {
-          // Delete old image if exists
           if (oldExercise?.thumbnailLocal != null) {
             await imageStorageService.deleteImage(
               localPath: oldExercise!.thumbnailLocal,
               collection: PBCollections.exercises.value,
               recordId: oldExercise.pocketbaseId,
               fieldName: 'thumbnail',
-              syncEnabled: false, // Just delete local, cloud will be replaced
+              syncEnabled: false,
             );
           }
 
-          // Save new image to local storage
           final imageResult = await imageStorageService.saveImage(
             sourcePath: exercise.thumbnailLocal!,
             directory: 'exercises',
-            syncEnabled: false, // We'll sync separately
+            syncEnabled: false,
           );
 
           exercise.thumbnailLocal = imageResult['localPath'];
         } catch (e) {
-          // Keep old thumbnail path if new one fails
           if (oldExercise?.thumbnailLocal != null) {
             exercise.thumbnailLocal = oldExercise!.thumbnailLocal;
           }
@@ -134,7 +132,6 @@ class ExerciseRepository {
       }
     }
 
-    // Mark as needing sync if cloud ID exists
     if (exercise.pocketbaseId != null) {
       exercise.needSync = true;
     }
@@ -144,47 +141,35 @@ class ExerciseRepository {
       await isar.exercises.put(exercise);
 
       // Update muscle relationships if provided
-      if (muscleActivations != null) {
-        // Delete all existing junction entries for this exercise
-        final existingJunctions = await isar.exerciseMuscles
-            .filter()
-            .exercise((q) => q.idEqualTo(exercise.id))
-            .findAll();
+      final existingJunctions = await isar.exerciseMuscles
+          .filter()
+          .exercise((q) => q.idEqualTo(exercise.id))
+          .findAll();
 
-        for (final junction in existingJunctions) {
-          await isar.exerciseMuscles.delete(junction.id);
-        }
+      for (final junction in existingJunctions) {
+        await isar.exerciseMuscles.delete(junction.id);
+      }
 
-        // Create new junction entries
-        if (muscleActivations.isNotEmpty) {
-          for (final entry in muscleActivations.entries) {
-            final muscleId = entry.key;
-            final activation = entry.value;
+      // Create new junction entries
+      for (final entry in muscles) {
+        final muscle = entry.muscle;
+        final activation = entry.activation;
 
-            final muscle = await isar.muscles.get(muscleId);
-            if (muscle != null) {
-              final exerciseMuscle = ExerciseMuscles(activation: activation);
+        final exerciseMuscle = ExerciseMuscles(activation: activation)
+          ..exercise.value = exercise
+          ..muscle.value = muscle;
 
-              exerciseMuscle.exercise.value = exercise;
-              exerciseMuscle.muscle.value = muscle;
-
-              await isar.exerciseMuscles.put(exerciseMuscle);
-              await exerciseMuscle.exercise.save();
-              await exerciseMuscle.muscle.save();
-            }
-          }
-        }
+        await isar.exerciseMuscles.put(exerciseMuscle);
+        await exerciseMuscle.exercise.save();
+        await exerciseMuscle.muscle.save();
       }
     });
 
     // Sync to cloud if enabled
-    if (authService.isSyncEnabled) {
-      if (exercise.pocketbaseId != null) {
-        await _updateExerciseOnCloud(exercise);
-      } else {
-        // If no cloud ID yet, create it
-        await _syncExerciseToCloud(exercise);
-      }
+    if (exercise.pocketbaseId != null) {
+      await _updateExerciseOnCloud(exercise);
+    } else {
+      await _uploadExerciseToCloud(exercise);
     }
   }
 
@@ -221,7 +206,9 @@ class ExerciseRepository {
   // --- SYNC LOGIC ---
 
   // Upload a single exercise to the cloud
-  Future<void> _syncExerciseToCloud(Exercise exercise) async {
+  Future<void> _uploadExerciseToCloud(Exercise exercise) async {
+    if (!authService.isSyncEnabled) return;
+
     try {
       // Get muscles and activations from junction table
       final junctions = await isar.exerciseMuscles
@@ -230,15 +217,18 @@ class ExerciseRepository {
           .findAll();
 
       // Load muscle data for each junction
-      final muscleData = <Map<String, dynamic>>[];
+      final List<MuscleActivationParam> musclesParam = [];
       for (final junction in junctions) {
         await junction.muscle.load();
         final muscle = junction.muscle.value;
-        if (muscle?.pocketbaseId != null) {
-          muscleData.add({
-            'muscle': muscle!.pocketbaseId,
-            'activation': junction.activation,
-          });
+
+        if (muscle != null && muscle.pocketbaseId != null) {
+          musclesParam.add(
+            MuscleActivationParam(
+              muscle: muscle,
+              activation: junction.activation,
+            ),
+          );
         }
       }
 
@@ -253,32 +243,43 @@ class ExerciseRepository {
             },
           );
 
-      // Create exercise_muscles records in cloud
-      if (muscleData.isNotEmpty) {
-        for (final data in muscleData) {
-          await pb
-              .collection(PBCollections.exerciseMuscles.value)
-              .create(
-                body: {
-                  'exercise': record.id,
-                  'muscle': data['muscle'],
-                  'activation': data['activation'],
-                },
-              );
-        }
+      // Create exercise_muscles records in cloud and update junction table
+      for (final data in musclesParam) {
+        final junction = junctions.firstWhere(
+          (j) => j.muscle.value?.id == data.muscle.id,
+        );
+
+        final junctionRecord = await pb
+            .collection(PBCollections.exerciseMuscles.value)
+            .create(
+              body: {
+                'exercise': record.id,
+                'muscle': data.muscle.pocketbaseId,
+                'activation': data.activation,
+              },
+            );
+
+        // Update local junction with pocketbaseId
+        junction.pocketbaseId = junctionRecord.id;
+        junction.needSync = false;
       }
 
       if (exercise.thumbnailLocal != null) {
-        final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailLocal!,
-          directory: 'exercises',
-          collection: PBCollections.exercises.value,
-          pbRecord: record,
-          fieldName: 'thumbnail',
-          syncEnabled: true,
-        );
+        try {
+          final imageResult = await imageStorageService.saveImage(
+            sourcePath: exercise.thumbnailLocal!,
+            directory: 'exercises',
+            collection: PBCollections.exercises.value,
+            pbRecord: record,
+            fieldName: 'thumbnail',
+            syncEnabled: true,
+          );
 
-        exercise.thumbnailCloud = imageResult['cloudUrl'];
+          exercise.thumbnailCloud = imageResult['cloudUrl'];
+        } catch (e) {
+          print('Failed to upload exercise thumbnail to cloud: $e');
+          // Continue without thumbnail sync
+        }
       }
 
       exercise.pocketbaseId = record.id;
@@ -286,15 +287,21 @@ class ExerciseRepository {
 
       await isar.writeTxn(() async {
         await isar.exercises.put(exercise);
+        // Update junctions with pocketbaseId
+        for (final junction in junctions) {
+          await isar.exerciseMuscles.put(junction);
+        }
       });
     } catch (e) {
-      // Exercise remains marked as needsSync = true
-      // You can run a background job later to sync all exercises where needsSync == true
+      print('Failed to upload exercise to cloud: $e');
+      // Exercise remains marked as needSync = true
     }
   }
 
   // Update an existing exercise on the cloud
   Future<void> _updateExerciseOnCloud(Exercise exercise) async {
+    if (!authService.isSyncEnabled) return;
+
     try {
       // Get muscles and activations from junction table
       final junctions = await isar.exerciseMuscles
@@ -315,17 +322,41 @@ class ExerciseRepository {
             },
           );
 
+      // Handle thumbnail sync if exists
+      if (exercise.thumbnailLocal != null) {
+        try {
+          final imageResult = await imageStorageService.saveImage(
+            sourcePath: exercise.thumbnailLocal!,
+            directory: 'exercises',
+            collection: PBCollections.exercises.value,
+            pbRecord: await pb
+                .collection(PBCollections.exercises.value)
+                .getOne(exercise.pocketbaseId!),
+            fieldName: 'thumbnail',
+            syncEnabled: true,
+          );
+
+          if (imageResult['cloudUrl'] != null) {
+            exercise.thumbnailCloud = imageResult['cloudUrl'];
+
+            if (imageResult['localPath'] != null) {
+              exercise.thumbnailLocal = imageResult['localPath'];
+            }
+          }
+        } catch (e) {
+          // Continue with sync even if image upload fails
+        }
+      }
+
+      exercise.needSync = false;
+
       // Delete existing exercise_muscles records in cloud
       try {
-        final existingJunctions = await pb
-            .collection(PBCollections.exerciseMuscles.value)
-            .getFullList(filter: 'exercise = "${exercise.pocketbaseId}"');
-
-        for (final junction in existingJunctions) {
-          await pb
-              .collection(PBCollections.exerciseMuscles.value)
-              .delete(junction.id);
-        }
+        await pb.send(
+          '/collections/${PBCollections.exerciseMuscles.value}/records',
+          method: 'DELETE',
+          query: {'filter': 'exercise = "${exercise.pocketbaseId}"'},
+        );
       } catch (e) {
         // Continue even if deletion fails
       }
@@ -334,6 +365,7 @@ class ExerciseRepository {
       for (final junction in junctions) {
         await junction.muscle.load();
         final muscle = junction.muscle.value;
+
         if (muscle?.pocketbaseId != null) {
           await pb
               .collection(PBCollections.exerciseMuscles.value)
@@ -346,39 +378,6 @@ class ExerciseRepository {
               );
         }
       }
-
-      // Handle thumbnail sync if exists
-      if (exercise.thumbnailLocal != null) {
-        try {
-          // Upload the thumbnail to cloud
-          final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnailLocal!,
-            directory: 'exercises',
-            collection: PBCollections.exercises.value,
-            pbRecord: await pb
-                .collection(PBCollections.exercises.value)
-                .getOne(exercise.pocketbaseId!),
-            fieldName: 'thumbnail',
-            syncEnabled: true,
-          );
-
-          // Update cloud URL
-          if (imageResult['cloudUrl'] != null) {
-            exercise.thumbnailCloud = imageResult['cloudUrl'];
-
-            // If local path changed (image was re-saved), update it
-            if (imageResult['localPath'] != null) {
-              exercise.thumbnailLocal = imageResult['localPath'];
-            }
-          }
-        } catch (e) {
-          print('Failed updating to cloud $e');
-          // Continue with sync even if image upload fails
-        }
-      }
-
-      // Success! Mark as synced
-      exercise.needSync = false;
 
       // Write update to local DB
       await isar.writeTxn(() async {
@@ -393,244 +392,320 @@ class ExerciseRepository {
   Future<void> performInitialSync() async {
     if (!authService.isSyncEnabled) return;
 
-    // 1. Upload local-only data
+    // 1. Upload local-only exercises to cloud
+    await _uploadLocalExercises();
+
+    // 2. Download and merge cloud exercises
+    await _downloadAndMergeCloudExercises();
+  }
+
+  /// Upload all local exercises that don't have a pocketbaseId yet
+  Future<void> _uploadLocalExercises() async {
     final localExercises = await isar.exercises
         .filter()
         .pocketbaseIdIsNull()
         .findAll();
+    
     for (final exercise in localExercises) {
-      await _syncExerciseToCloud(exercise);
+      await _uploadExerciseToCloud(exercise);
     }
+  }
 
-    // 2. Download cloud-only data
-    final pbRecords = await pb
-        .collection(PBCollections.exercises.value)
-        .getFullList();
-    final pbExerciseMuscles = await pb
+  /// Download cloud exercises and merge with local data
+  Future<void> _downloadAndMergeCloudExercises() async {
+    try {
+      // Fetch all cloud data
+      final pbRecords = await pb
+          .collection(PBCollections.exercises.value)
+          .getFullList();
+      final pbExerciseMuscles = await pb
           .collection(PBCollections.exerciseMuscles.value)
           .getFullList(expand: 'muscle');
 
-    final List<Exercise> exercisesToSave = [];
-    final List<ExerciseMuscles> exerciseMusclesToSave = [];
+      final List<Exercise> exercisesToSave = [];
+      final List<ExerciseMuscles> exerciseMusclesToSave = [];
 
-    for (final record in pbRecords) {
+      // Process each cloud exercise
+      for (final record in pbRecords) {
+        final exists = await isar.exercises
+            .filter()
+            .pocketbaseIdEqualTo(record.id)
+            .findFirst();
 
-      // Check if we already have this exercise locally
-      final exists = await isar.exercises
-          .filter()
-          .pocketbaseIdEqualTo(record.id)
-          .findFirst();
-
-      if (exists == null) {
-        final toInsert = Exercise(
-          name: record.data['name'],
-          description: record.data['description'],
-          caloriesBurned: record.data['calories_burned'].toDouble() ?? 0,
-          pocketbaseId: record.id,
-          needSync: false,
-          imported: record.data['user'] != authService.currentUser?['id'],
-        );
-
-        toInsert.createdAt =
-            DateTime.tryParse(record.data['created']) ?? DateTime.now();
-        toInsert.updatedAt =
-            DateTime.tryParse(record.data['updated']) ?? DateTime.now();
-
-        // Download thumbnail from cloud if exists
-        final thumbnailField = record.data['thumbnail'];
-        if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-          try {
-            final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-            toInsert.thumbnailCloud = cloudUrl;
-
-            final localPath = await imageStorageService.downloadImageFromCloud(
-              cloudUrl: cloudUrl,
-              directory: 'exercises',
-            );
-
-            if (localPath != null) {
-              toInsert.thumbnailLocal = localPath;
-            }
-          } catch (e) {
-            // Continue without thumbnail
-          }
-        }
-
-        // Sync exercise_muscles
-        final muscles = pbExerciseMuscles.where((element) => element.data['exercise'] == record.id);
-        for (final muscle in muscles) {
-          final muscleLocal = await isar.muscles
-              .filter()
-              .pocketbaseIdEqualTo(muscle.id)
-              .findFirst();
-
-          if (muscleLocal == null) continue;
-
-          final exerciseMuscle =
-              ExerciseMuscles(activation: muscle.data['activation'])
-                ..exercise.value = exists
-                ..muscle.value = muscleLocal;
-
-          exerciseMusclesToSave.add(exerciseMuscle);
-        }
-
-        exercisesToSave.add(toInsert);
-      } else {
-        // CONFLICT: Note exists locally and on cloud.
-        // Checking: Last update
-        final cloudLastUpdated = DateTime.tryParse(record.data['updated']);
-
-        if (cloudLastUpdated != null &&
-            exists.updatedAt.isBefore(cloudLastUpdated)) {
-          exists
-            ..name = record.data['name']
-            ..description = record.data['description']
-            ..caloriesBurned = record.data['calories_burned']?.toDouble()
-            ..updatedAt = cloudLastUpdated;
-
-          // Download image from cloud and update the thumbnailLocal
-          final thumbnailField = record.data['thumbnail'];
-          if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-            try {
-              final cloudUrl = pb.files
-                  .getUrl(record, thumbnailField)
-                  .toString();
-
-              // Only download if the cloud URL is different from what we have
-              if (exists.thumbnailCloud != cloudUrl) {
-                exists.thumbnailCloud = cloudUrl;
-
-                final localPath = await imageStorageService
-                    .downloadImageFromCloud(
-                      cloudUrl: cloudUrl,
-                      directory: 'exercises',
-                    );
-
-                if (localPath != null) {
-                  // Delete old local image if it exists
-                  if (exists.thumbnailLocal != null) {
-                    await imageStorageService.deleteLocalImage(
-                      exists.thumbnailLocal!,
-                    );
-                  }
-                  exists.thumbnailLocal = localPath;
-                }
-              }
-            } catch (e) {
-              // Keep existing thumbnailLocal if download fails
-            }
-          } else {
-            // Cloud has no thumbnail - keep local one if it exists
-            // Don't delete local thumbnail unless explicitly removed from cloud
-          }
-
-          // Sync exercise_muscles
-        final muscles = pbExerciseMuscles.where((element) => element.data['exercise'] == record.id);
-        for (final muscle in muscles) {
-          final muscleLocal = await isar.muscles
-              .filter()
-              .pocketbaseIdEqualTo(muscle.id)
-              .findFirst();
-
-          if (muscleLocal == null) continue;
-
-          final relationExists = await isar.exerciseMuscles
-              .filter()
-              .exercise((q) => q.idEqualTo(exists.id))
-              .muscle((q) => q.idEqualTo(muscleLocal.id))
-              .findFirst();
-
-          if (relationExists != null) continue;
-
-          final exerciseMuscle =
-              ExerciseMuscles(activation: muscle.data['activation'])
-                ..exercise.value = exists
-                ..muscle.value = muscleLocal;
-
-          exerciseMusclesToSave.add(exerciseMuscle);
-        }
-
-          exercisesToSave.add(exists);
+        if (exists == null) {
+          // New exercise from cloud - insert it
+          await _insertNewExerciseFromCloud(
+            record,
+            pbExerciseMuscles,
+            exercisesToSave,
+            exerciseMusclesToSave,
+          );
+        } else {
+          // Exercise exists locally - check for updates
+          await _updateExistingExerciseFromCloud(
+            record,
+            exists,
+            pbExerciseMuscles,
+            exercisesToSave,
+            exerciseMusclesToSave,
+          );
         }
       }
+
+      // Save all changes in a single transaction
+      if (exercisesToSave.isNotEmpty || exerciseMusclesToSave.isNotEmpty) {
+        await isar.writeTxn(() async {
+          // First save all exercises to generate IDs
+          await isar.exercises.putAll(exercisesToSave);
+          
+          // Then save exercise-muscle relationships and link them
+          for (final junction in exerciseMusclesToSave) {
+            await isar.exerciseMuscles.put(junction);
+            await junction.exercise.save();
+            await junction.muscle.save();
+          }
+        });
+      }
+    } catch (e) {
+      print('Failed to download and merge cloud exercises: $e');
+      rethrow;
+    }
+  }
+
+  /// Insert a new exercise from cloud that doesn't exist locally
+  Future<void> _insertNewExerciseFromCloud(
+    dynamic record,
+    List<dynamic> pbExerciseMuscles,
+    List<Exercise> exercisesToSave,
+    List<ExerciseMuscles> exerciseMusclesToSave,
+  ) async {
+    final exercise = Exercise(
+      name: record.data['name'] ?? '',
+      description: record.data['description'],
+      caloriesBurned:
+          (record.data['calories_burned'] as num?)?.toDouble() ?? 0.0,
+      pocketbaseId: record.id,
+      needSync: false,
+      imported: record.data['user'] != authService.currentUser?['id'],
+    );
+
+    exercise.createdAt =
+        DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now();
+    exercise.updatedAt =
+        DateTime.tryParse(record.data['updated'] ?? '') ?? DateTime.now();
+
+    // Download thumbnail if exists
+    await _downloadThumbnail(record, exercise);
+
+    // Add exercise muscles relationships
+    await _addExerciseMuscleRelationships(
+      record.id,
+      exercise,
+      pbExerciseMuscles,
+      exerciseMusclesToSave,
+    );
+
+    exercisesToSave.add(exercise);
+  }
+
+  /// Update an existing exercise from cloud if cloud version is newer
+  Future<void> _updateExistingExerciseFromCloud(
+    dynamic record,
+    Exercise exists,
+    List<dynamic> pbExerciseMuscles,
+    List<Exercise> exercisesToSave,
+    List<ExerciseMuscles> exerciseMusclesToSave,
+  ) async {
+    final cloudLastUpdated = DateTime.tryParse(record.data['updated'] ?? '');
+
+    if (cloudLastUpdated == null ||
+        !exists.updatedAt.isBefore(cloudLastUpdated)) {
+      return; // Local version is newer or same, skip
     }
 
-    // Save all new exercises from the cloud to the local DB
-    await isar.writeTxn(() async {
-      await isar.exercises.putAll(exercisesToSave);
-      await isar.exerciseMuscles.putAll(exerciseMusclesToSave);
-    });
+    // Update exercise fields
+    exists
+      ..name = record.data['name'] ?? exists.name
+      ..description = record.data['description']
+      ..caloriesBurned =
+          (record.data['calories_burned'] as num?)?.toDouble() ?? 0.0
+      ..updatedAt = cloudLastUpdated;
 
-    // 3. Sync exercise_muscles junction table
+    // Update thumbnail if cloud version is different
+    await _updateThumbnail(record, exists);
+
+    // Update exercise muscles relationships
+    await _updateExerciseMuscleRelationships(
+      record.id,
+      exists,
+      pbExerciseMuscles,
+      exerciseMusclesToSave,
+    );
+
+    exercisesToSave.add(exists);
+  }
+
+  /// Download thumbnail from cloud for an exercise
+  Future<void> _downloadThumbnail(dynamic record, Exercise exercise) async {
+    final thumbnailField = record.data['thumbnail'];
+    if (thumbnailField == null || thumbnailField.toString().isEmpty) {
+      return;
+    }
+
     try {
-      final pbExerciseMuscles = await pb
-          .collection(PBCollections.exerciseMuscles.value)
-          .getFullList(expand: 'exercise,muscle');
+      final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
+      exercise.thumbnailCloud = cloudUrl;
 
-      await isar.writeTxn(() async {
-        for (final record in pbExerciseMuscles) {
-          // Find the local exercise by pocketbaseId
-          final exercisePbId = record.data['exercise'];
-          final musclePbId = record.data['muscle'];
-          final activation = record.data['activation'] as int? ?? 50;
+      final localPath = await imageStorageService.downloadImageFromCloud(
+        cloudUrl: cloudUrl,
+        directory: 'exercises',
+      );
 
-          if (exercisePbId == null || musclePbId == null) continue;
-
-          // Get local exercise and muscle
-          final localExercise = await isar.exercises
-              .filter()
-              .pocketbaseIdEqualTo(exercisePbId)
-              .findFirst();
-
-          final localMuscle = await isar.muscles
-              .filter()
-              .pocketbaseIdEqualTo(musclePbId)
-              .findFirst();
-
-          if (localExercise != null && localMuscle != null) {
-            // Check if this junction already exists locally
-            final existingJunction = await isar.exerciseMuscles
-                .filter()
-                .exercise((q) => q.idEqualTo(localExercise.id))
-                .and()
-                .muscle((q) => q.idEqualTo(localMuscle.id))
-                .findFirst();
-
-            if (existingJunction == null) {
-              // Create new junction
-              final junction = ExerciseMuscles(
-                activation: activation,
-                pocketbaseId: record.id,
-                needSync: false,
-              );
-
-              junction.exercise.value = localExercise;
-              junction.muscle.value = localMuscle;
-
-              await isar.exerciseMuscles.put(junction);
-              await junction.exercise.save();
-              await junction.muscle.save();
-            } else {
-              // Update existing junction if cloud is newer
-              final cloudUpdated = DateTime.tryParse(
-                record.data['updated'] ?? '',
-              );
-              if (cloudUpdated != null &&
-                  existingJunction.updatedAt.isBefore(cloudUpdated)) {
-                existingJunction.activation = activation;
-                existingJunction.pocketbaseId = record.id;
-                existingJunction.needSync = false;
-                existingJunction.updatedAt = cloudUpdated;
-
-                await isar.exerciseMuscles.put(existingJunction);
-              }
-            }
-          }
-        }
-      });
+      if (localPath != null) {
+        exercise.thumbnailLocal = localPath;
+      }
     } catch (e) {
-      // Continue even if exercise_muscles sync fails
-      print('Failed to sync exercise_muscles: $e');
+      print('Failed to download thumbnail for exercise ${exercise.name}: $e');
+      // Continue without thumbnail
+    }
+  }
+
+  /// Update thumbnail for existing exercise if cloud version changed
+  Future<void> _updateThumbnail(dynamic record, Exercise exists) async {
+    final thumbnailField = record.data['thumbnail'];
+    
+    if (thumbnailField == null || thumbnailField.toString().isEmpty) {
+      return; // Cloud has no thumbnail - keep local one
+    }
+
+    try {
+      final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
+
+      // Only download if URL changed
+      if (exists.thumbnailCloud == cloudUrl) {
+        return;
+      }
+
+      exists.thumbnailCloud = cloudUrl;
+
+      final localPath = await imageStorageService.downloadImageFromCloud(
+        cloudUrl: cloudUrl,
+        directory: 'exercises',
+      );
+
+      if (localPath != null) {
+        // Delete old local image if it exists
+        if (exists.thumbnailLocal != null) {
+          await imageStorageService.deleteLocalImage(exists.thumbnailLocal!);
+        }
+        exists.thumbnailLocal = localPath;
+      }
+    } catch (e) {
+      print('Failed to update thumbnail for exercise ${exists.name}: $e');
+      // Keep existing thumbnailLocal if download fails
+    }
+  }
+
+  /// Add exercise-muscle relationships for a new exercise from cloud
+  Future<void> _addExerciseMuscleRelationships(
+    String exercisePbId,
+    Exercise exercise,
+    List<dynamic> pbExerciseMuscles,
+    List<ExerciseMuscles> exerciseMusclesToSave,
+  ) async {
+    final muscles = pbExerciseMuscles.where(
+      (element) => element.data['exercise'] == exercisePbId,
+    );
+
+    for (final muscle in muscles) {
+      final musclePbId = muscle.data['muscle'];
+      final muscleLocal = await isar.muscles
+          .filter()
+          .pocketbaseIdEqualTo(musclePbId)
+          .findFirst();
+
+      if (muscleLocal == null) continue;
+
+      final activation = (muscle.data['activation'] as int?) ?? 50;
+      final pocketbaseId = muscle.id;
+      final createdAt = DateTime.tryParse(muscle.data['created'] ?? '');
+      final updatedAt = DateTime.tryParse(muscle.data['updated'] ?? '');
+
+      final exerciseMuscle = ExerciseMuscles(
+        activation: activation,
+        pocketbaseId: pocketbaseId,
+        needSync: false,
+      )
+        ..exercise.value = exercise
+        ..muscle.value = muscleLocal;
+
+      if (createdAt != null) exerciseMuscle.createdAt = createdAt;
+      if (updatedAt != null) exerciseMuscle.updatedAt = updatedAt;
+
+      exerciseMusclesToSave.add(exerciseMuscle);
+    }
+  }
+
+  /// Update exercise-muscle relationships for an existing exercise
+  Future<void> _updateExerciseMuscleRelationships(
+    String exercisePbId,
+    Exercise exists,
+    List<dynamic> pbExerciseMuscles,
+    List<ExerciseMuscles> exerciseMusclesToSave,
+  ) async {
+    final muscles = pbExerciseMuscles.where(
+      (element) => element.data['exercise'] == exercisePbId,
+    );
+
+    for (final muscle in muscles) {
+      final musclePbId = muscle.data['muscle'];
+      final muscleLocal = await isar.muscles
+          .filter()
+          .pocketbaseIdEqualTo(musclePbId)
+          .findFirst();
+
+      if (muscleLocal == null) continue;
+
+      // Check if relationship already exists
+      final relationExists = await isar.exerciseMuscles
+          .filter()
+          .exercise((q) => q.idEqualTo(exists.id))
+          .and()
+          .muscle((q) => q.idEqualTo(muscleLocal.id))
+          .findFirst();
+
+      if (relationExists != null) {
+        // Update if cloud is newer
+        final cloudUpdated = DateTime.tryParse(muscle.data['updated'] ?? '');
+        if (cloudUpdated != null &&
+            relationExists.updatedAt.isBefore(cloudUpdated)) {
+          relationExists.activation = (muscle.data['activation'] as int?) ?? 50;
+          relationExists.pocketbaseId = muscle.id;
+          relationExists.needSync = false;
+          relationExists.updatedAt = cloudUpdated;
+          exerciseMusclesToSave.add(relationExists);
+        }
+        continue;
+      }
+
+      // Create new relationship
+      final activation = (muscle.data['activation'] as int?) ?? 50;
+      final pocketbaseId = muscle.id;
+      final createdAt = DateTime.tryParse(muscle.data['created'] ?? '');
+      final updatedAt = DateTime.tryParse(muscle.data['updated'] ?? '');
+
+      final exerciseMuscle = ExerciseMuscles(
+        activation: activation,
+        pocketbaseId: pocketbaseId,
+        needSync: false,
+      )
+        ..exercise.value = exists
+        ..muscle.value = muscleLocal;
+
+      if (createdAt != null) exerciseMuscle.createdAt = createdAt;
+      if (updatedAt != null) exerciseMuscle.updatedAt = updatedAt;
+
+      exerciseMusclesToSave.add(exerciseMuscle);
     }
   }
 }

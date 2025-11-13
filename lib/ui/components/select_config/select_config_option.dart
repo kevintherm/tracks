@@ -1,5 +1,3 @@
-/// Base exercise option model
-/// Can be used across different contexts (workout creation, schedule assignment, etc.)
 class SelectConfigOption {
   final String id;
   final String label;
