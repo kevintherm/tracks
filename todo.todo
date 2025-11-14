@@ -1,7 +1,7 @@
 - schedule
-    - populate list page
     - create update schedule page
         - create 3 types once, and periodically
+    - populate list page
 - session
     - as a history
     - one to one schedule

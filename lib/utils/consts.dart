@@ -53,21 +53,21 @@ Future<bool> showConfirmDialog(
       false;
 }
 
-Widget getImage(String? imagePath) {
+Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
   final hasLocalImage = imagePath != null && File(imagePath).existsSync();
 
   Image image = Image.asset(
     'assets/drawings/not-found.jpg',
-    width: 100,
-    height: 100,
+    width: width,
+    height: height,
     fit: BoxFit.cover,
   );
 
   if (hasLocalImage) {
     image = Image.file(
       File(imagePath),
-      width: 100,
-      height: 100,
+      width: width,
+      height: height,
       fit: BoxFit.cover,
     );
   }
@@ -81,7 +81,18 @@ File? getFile(String? filePath) {
   return exists ? File(filePath) : null;
 }
 
+extension StringCap on String {
+  String capitalize() {
+    return split(' ')
+        .map((w) => w.isEmpty
+            ? w
+            : w[0].toUpperCase() + w.substring(1))
+        .join(' ');
+  }
+}
+
 enum PBCollections {
+  schedules("schedules"),
   workoutExercises("workout_exercises"),
   workouts("workouts"),
   exercises("exercises"),

@@ -4,7 +4,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/pages/modals/assign_schedule_modal.dart';
+import 'package:tracks/ui/pages/assign_schedule_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class ManageSchedulePage extends StatefulWidget {
@@ -115,13 +115,13 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                   return Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.lightPrimary,
+                      color: AppColors.lightPrimary.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
                       child: Text(
                         '${day.day}',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.black),
                       ),
                     ),
                   );
@@ -130,7 +130,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                   return Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.secondary,
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
@@ -167,8 +167,8 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => AssignScheduleModal(
-                                  selectedDay: _selectedDay ?? now,
+                                builder: (context) => AssignSchedulePage(
+                                  selectedDate: _selectedDay ?? now,
                                 ),
                               ),
                             );

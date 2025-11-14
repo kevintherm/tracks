@@ -64,7 +64,7 @@ class WorkoutRepository {
     return results;
   }
 
-  IsarCollection<Workout> getWorkouts() {
+  IsarCollection<Workout> get collection {
     return isar.workouts;
   }
 

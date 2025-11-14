@@ -5,11 +5,13 @@ import 'package:tracks/auth_gate.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
+import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
@@ -34,6 +36,7 @@ void main() async {
       ExerciseMusclesSchema,
       WorkoutSchema,
       WorkoutExercisesSchema,
+      ScheduleSchema
     ],
     directory: dir.path,
     inspector: true,
@@ -67,6 +70,13 @@ void main() async {
         ),
         Provider(
           create: (context) => WorkoutRepository(
+            context.read<Isar>(),
+            pb,
+            context.read<AuthService>(),
+          ),
+        ),
+        Provider(
+          create: (context) => ScheduleRepository(
             context.read<Isar>(),
             pb,
             context.read<AuthService>(),

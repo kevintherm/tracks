@@ -67,4 +67,14 @@ class Workout {
         ))
         .toList();
   }
+
+  @ignore
+  String get excerpt {
+    return exercises.map((e) => e.name).join(', ');
+  }
+
+  @ignore
+  String get thumbnailFallback {
+    return thumbnailLocal ?? exercises.first.thumbnailLocal ?? 'assets/drawings/not-found.jpg';
+  }
 }

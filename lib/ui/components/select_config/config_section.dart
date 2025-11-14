@@ -7,7 +7,7 @@ import 'package:tracks/utils/toast.dart';
 class ConfigSection<T, C> extends StatefulWidget {
   final List<T> selectedOptions;
   final Map<String, C> configurations;
-  final void Function(int, int) onReorder;
+  final void Function(int, int)? onReorder;
   final void Function(int)? onDelete;
   final String Function(T) getId;
   final String Function(T) getLabel;
@@ -24,7 +24,7 @@ class ConfigSection<T, C> extends StatefulWidget {
     super.key,
     required this.selectedOptions,
     required this.configurations,
-    required this.onReorder,
+    this.onReorder,
     this.onDelete,
     required this.getId,
     required this.getLabel,
@@ -96,7 +96,7 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
               _lastReorderedItemId = widget.getId(option);
             });
             
-            widget.onReorder(currentIndex, newIndex);
+            if(widget.enableReordering && widget.onReorder != null) widget.onReorder!(currentIndex, newIndex);
             
             if (widget.showReorderToast) {
               Toast(context).success(

@@ -146,7 +146,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
                                       child: Image.asset(
-                                        'assets/drawings/pushup.jpg',
+                                        'assets/drawings/not-found.jpg',
                                         width: 100,
                                         height: 100,
                                       ),
