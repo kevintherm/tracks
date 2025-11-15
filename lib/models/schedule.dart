@@ -13,7 +13,6 @@ class Schedule {
   late DateTime createdAt;
   late DateTime updatedAt;
 
-  DateTime startAt;
   DateTime startTime;
   int plannedDuration; // In Minutes
   bool durationAlert;
@@ -29,7 +28,6 @@ class Schedule {
   IsarLink<Workout> workout = IsarLink();
 
   Schedule({
-    required this.startAt,
     required this.startTime,
     this.plannedDuration = 30,
     this.durationAlert = false,
@@ -51,7 +49,6 @@ class Schedule {
   }) {
     final copy =
         Schedule(
-            startAt: startAt ?? this.startAt,
             startTime: startTime ?? this.startTime,
             plannedDuration: plannedDuration ?? this.plannedDuration,
             durationAlert: durationAlert ?? this.durationAlert,
@@ -76,7 +73,7 @@ class Schedule {
     return 'Schedule(id: '
         '$id, '
         'recurrence: $recurrenceType, '
-        'startAt: $startAt, startTime: $startTime, '
+        'startTime: $startTime, '
         'duration: ${plannedDuration}min, '
         'alert: $durationAlert, '
         'weekdays: $dailyWeekday, '
@@ -90,7 +87,6 @@ class Schedule {
 enum RecurrenceType {
   once("Applies once in the selected days."),
   daily("Applies daily with the ability to exclude specific exception days."),
-  weekly("Applies weekly on the selected days."),
   monthly("Applies monthly on the selected date or pattern.");
 
   final String description;

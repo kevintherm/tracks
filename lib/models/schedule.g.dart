@@ -59,18 +59,13 @@ const ScheduleSchema = CollectionSchema(
       name: r'selectedDates',
       type: IsarType.dateTimeList,
     ),
-    r'startAt': PropertySchema(
-      id: 8,
-      name: r'startAt',
-      type: IsarType.dateTime,
-    ),
     r'startTime': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'startTime',
       type: IsarType.dateTime,
     ),
     r'updatedAt': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -128,9 +123,8 @@ void _scheduleSerialize(
   writer.writeString(offsets[5], object.pocketbaseId);
   writer.writeByte(offsets[6], object.recurrenceType.index);
   writer.writeDateTimeList(offsets[7], object.selectedDates);
-  writer.writeDateTime(offsets[8], object.startAt);
-  writer.writeDateTime(offsets[9], object.startTime);
-  writer.writeDateTime(offsets[10], object.updatedAt);
+  writer.writeDateTime(offsets[8], object.startTime);
+  writer.writeDateTime(offsets[9], object.updatedAt);
 }
 
 Schedule _scheduleDeserialize(
@@ -146,8 +140,7 @@ Schedule _scheduleDeserialize(
     recurrenceType: _SchedulerecurrenceTypeValueEnumMap[
             reader.readByteOrNull(offsets[6])] ??
         RecurrenceType.once,
-    startAt: reader.readDateTime(offsets[8]),
-    startTime: reader.readDateTime(offsets[9]),
+    startTime: reader.readDateTime(offsets[8]),
   );
   object.createdAt = reader.readDateTime(offsets[0]);
   object.dailyWeekday = reader
@@ -158,7 +151,7 @@ Schedule _scheduleDeserialize(
   object.id = id;
   object.pocketbaseId = reader.readStringOrNull(offsets[5]);
   object.selectedDates = reader.readDateTimeList(offsets[7]) ?? [];
-  object.updatedAt = reader.readDateTime(offsets[10]);
+  object.updatedAt = reader.readDateTime(offsets[9]);
   return object;
 }
 
@@ -196,8 +189,6 @@ P _scheduleDeserializeProp<P>(
       return (reader.readDateTime(offset)) as P;
     case 9:
       return (reader.readDateTime(offset)) as P;
-    case 10:
-      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -224,14 +215,12 @@ const _ScheduledailyWeekdayValueEnumMap = {
 const _SchedulerecurrenceTypeEnumValueMap = {
   'once': 0,
   'daily': 1,
-  'weekly': 2,
-  'monthly': 3,
+  'monthly': 2,
 };
 const _SchedulerecurrenceTypeValueEnumMap = {
   0: RecurrenceType.once,
   1: RecurrenceType.daily,
-  2: RecurrenceType.weekly,
-  3: RecurrenceType.monthly,
+  2: RecurrenceType.monthly,
 };
 
 Id _scheduleGetId(Schedule object) {
@@ -1001,59 +990,6 @@ extension ScheduleQueryFilter
     });
   }
 
-  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> startAtEqualTo(
-      DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'startAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> startAtGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'startAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> startAtLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'startAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> startAtBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'startAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<Schedule, Schedule, QAfterFilterCondition> startTimeEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1253,18 +1189,6 @@ extension ScheduleQuerySortBy on QueryBuilder<Schedule, Schedule, QSortBy> {
     });
   }
 
-  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByStartAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'startAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByStartAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'startAt', Sort.desc);
-    });
-  }
-
   QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByStartTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startTime', Sort.asc);
@@ -1376,18 +1300,6 @@ extension ScheduleQuerySortThenBy
     });
   }
 
-  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByStartAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'startAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByStartAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'startAt', Sort.desc);
-    });
-  }
-
   QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByStartTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startTime', Sort.asc);
@@ -1464,12 +1376,6 @@ extension ScheduleQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Schedule, Schedule, QDistinct> distinctByStartAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'startAt');
-    });
-  }
-
   QueryBuilder<Schedule, Schedule, QDistinct> distinctByStartTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'startTime');
@@ -1539,12 +1445,6 @@ extension ScheduleQueryProperty
       selectedDatesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'selectedDates');
-    });
-  }
-
-  QueryBuilder<Schedule, DateTime, QQueryOperations> startAtProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'startAt');
     });
   }
 

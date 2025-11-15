@@ -6,16 +6,14 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/table_calendar_compact.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
-import 'package:tracks/utils/toast.dart';
 
 class AssignScheduleConfigCard extends StatefulWidget {
   final String exerciseId;
   final String workoutName;
   final int index;
   final Schedule config;
-  final String selectedDayName;
   final DateTime? selectedDate;
-  final ValueChanged<Schedule> onConfigChanged;
+  final ValueChanged<DateTime> onSelectedDateChanged;
   final VoidCallback? onReorderTap;
   final VoidCallback? onDeleteTap;
   final String? imagePath;
@@ -27,9 +25,8 @@ class AssignScheduleConfigCard extends StatefulWidget {
     required this.workoutName,
     required this.index,
     required this.config,
-    required this.selectedDayName,
     required this.selectedDate,
-    required this.onConfigChanged,
+    required this.onSelectedDateChanged,
     this.onReorderTap,
     this.onDeleteTap,
     this.imagePath,
@@ -47,7 +44,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
   late TimeOfDay startTime;
   late Duration plannedDuration;
 
-  List<DateTime> dailyExceptions = [];
+  final now = DateTime.now();
 
   @override
   void initState() {
@@ -74,7 +71,6 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
         startTime.hour,
         startTime.minute,
       );
-      widget.onConfigChanged(schedule);
     }
   }
 
@@ -89,7 +85,6 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
     if (picked != null) {
       setState(() => plannedDuration = Duration(minutes: picked));
       schedule.plannedDuration = Duration(minutes: picked).inMinutes;
-      widget.onConfigChanged(schedule);
     }
   }
 
@@ -99,16 +94,35 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
       builder: (BuildContext context) {
         return _RecurrenceTypePickerDialog(
           initialRecurrenceType: schedule.recurrenceType,
-          allowedTypes: widget.selectedDate == null
-              ? RecurrenceType.values
-                    .where((e) => e != RecurrenceType.once)
-                    .toList()
-              : RecurrenceType.values,
+          allowedTypes: RecurrenceType.values,
         );
       },
     );
 
-    if (picked == RecurrenceType.weekly || picked == RecurrenceType.monthly) {
+    if (picked == RecurrenceType.once) {
+      if (mounted) {
+        final selectedDate = await showDatePicker(
+          context: context,
+          firstDate: now,
+          lastDate: DateTime.utc(now.year + 1, now.month, now.day),
+          initialDate: widget.selectedDate
+        );
+
+        if (selectedDate == null) {
+          return;
+        }
+
+        setState(() {
+          schedule.selectedDates.clear();
+          schedule.selectedDates.add(selectedDate);
+        });
+
+        schedule.dailyWeekday.clear();
+        widget.onSelectedDateChanged(selectedDate);
+      }
+    }
+
+    if (picked == RecurrenceType.monthly) {
       if (mounted) {
         final List<DateTime> selectedDates = await showDialog(
           // ignore: use_build_context_synchronously
@@ -132,13 +146,11 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
 
     if (picked != null) {
       setState(() => schedule.recurrenceType = picked);
-      widget.onConfigChanged(schedule);
     }
   }
 
   void _toggleDurationAlert(bool value) {
     setState(() => schedule.durationAlert = !schedule.durationAlert);
-    widget.onConfigChanged(schedule);
   }
 
   void _toggleSelectedDay(Weekday day) {
@@ -149,7 +161,6 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
         schedule.dailyWeekday.add(day);
       }
     });
-    widget.onConfigChanged(schedule);
   }
 
   String _formatDuration(Duration duration) {

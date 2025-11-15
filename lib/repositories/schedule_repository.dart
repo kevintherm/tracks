@@ -98,11 +98,13 @@ class ScheduleRepository {
 
   /// Check if a schedule is active on a given date
   bool _isScheduleActiveOnDate(Schedule schedule, DateTime date) {
-    final scheduleDate = DateTime(
-      schedule.startAt.year,
-      schedule.startAt.month,
-      schedule.startAt.day,
-    );
+    if (schedule.selectedDates.isEmpty) {
+      throw Exception("Selected date is empty");
+    }
+
+    final onceDate = schedule.selectedDates.first;
+
+    final scheduleDate = DateTime(onceDate.year, onceDate.month, onceDate.day);
     final targetDate = DateTime(date.year, date.month, date.day);
 
     // Check if date is before schedule starts
@@ -130,17 +132,6 @@ class ScheduleRepository {
         }
         final weekday = _dateTimeWeekdayToWeekday(date.weekday);
         return schedule.dailyWeekday.contains(weekday);
-
-      case RecurrenceType.weekly:
-        // For weekly, check if target date is in selectedDates
-        return schedule.selectedDates.any((selectedDate) {
-          final selected = DateTime(
-            selectedDate.year,
-            selectedDate.month,
-            selectedDate.day,
-          );
-          return selected == targetDate;
-        });
 
       case RecurrenceType.monthly:
         // For monthly, check if target date is in selectedDates
@@ -195,7 +186,6 @@ class ScheduleRepository {
             body: {
               'user': authService.currentUser?['id'],
               'workout': workout!.pocketbaseId,
-              'start_at': schedule.startAt.toIso8601String(),
               'start_time': schedule.startTime.toIso8601String(),
               'planned_duration': schedule.plannedDuration,
               'duration_alert': schedule.durationAlert,
@@ -240,7 +230,6 @@ class ScheduleRepository {
             body: {
               'user': authService.currentUser?['id'],
               'workout': workout!.pocketbaseId,
-              'start_at': schedule.startAt.toIso8601String(),
               'start_time': schedule.startTime.toIso8601String(),
               'planned_duration': schedule.plannedDuration,
               'duration_alert': schedule.durationAlert,
@@ -352,9 +341,6 @@ class ScheduleRepository {
 
     final schedule =
         Schedule(
-            startAt: DateTime.parse(
-              record.data['start_at'] ?? DateTime.now().toIso8601String(),
-            ),
             startTime: DateTime.parse(
               record.data['start_time'] ?? DateTime.now().toIso8601String(),
             ),
@@ -407,9 +393,6 @@ class ScheduleRepository {
 
     // Update schedule fields
     exists
-      ..startAt = DateTime.parse(
-        record.data['start_at'] ?? exists.startAt.toIso8601String(),
-      )
       ..startTime = DateTime.parse(
         record.data['start_time'] ?? exists.startTime.toIso8601String(),
       )
@@ -434,8 +417,6 @@ class ScheduleRepository {
         return RecurrenceType.once;
       case 'daily':
         return RecurrenceType.daily;
-      case 'weekly':
-        return RecurrenceType.weekly;
       case 'monthly':
         return RecurrenceType.monthly;
       default:

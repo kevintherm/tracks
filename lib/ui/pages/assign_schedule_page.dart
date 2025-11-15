@@ -19,15 +19,16 @@ import 'package:tracks/utils/toast.dart';
 
 class AssignSchedulePage extends StatefulWidget {
   final DateTime? selectedDate;
+  final Schedule? schedule;
 
-  const AssignSchedulePage({super.key, this.selectedDate});
+  const AssignSchedulePage({super.key, this.selectedDate, this.schedule});
 
   @override
   State<AssignSchedulePage> createState() => _AssignSchedulePageState();
 }
 
 class _AssignSchedulePageState extends State<AssignSchedulePage> {
-  late final String selectedDayName;
+  DateTime? selectedDate;
 
   final searchController = TextEditingController();
   String search = "";
@@ -35,7 +36,6 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
 
   Workout? selectedWorkout;
   Schedule schedule = Schedule(
-    startAt: DateTime.now(),
     startTime: DateTime.now(),
     recurrenceType: RecurrenceType.once,
   );
@@ -43,17 +43,25 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
   @override
   void initState() {
     super.initState();
-    if (widget.selectedDate != null) {
-      selectedDayName = DateFormat('EEEE').format(widget.selectedDate!);
-      searchController.addListener(() {
-        if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-        _debounce = Timer(const Duration(milliseconds: 150), () {
-          setState(() {
-            search = searchController.text;
-          });
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+      _debounce = Timer(const Duration(milliseconds: 150), () {
+        setState(() {
+          search = searchController.text;
         });
       });
+    });
+
+    if (widget.selectedDate != null) {
+      selectedDate = widget.selectedDate;
+      schedule.selectedDates.add(widget.selectedDate!);
+    }
+
+    if (widget.schedule != null) {
+      schedule = widget.schedule!;
+      selectedWorkout = widget.schedule?.workout.value;
     }
   }
 
@@ -62,16 +70,43 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
     super.dispose();
   }
 
+  String formatDate(DateTime date) {
+    return DateFormat('EEEE').format(date);
+  }
+
   void _selectWorkout(Workout workout) {
     setState(() {
       selectedWorkout = workout;
     });
   }
 
-  void _deleteSelectedWorkout() {
-    setState(() {
-      selectedWorkout = null;
-    });
+  void _deleteSelectedWorkout() async {
+    final bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Item'),
+        content: Text('Are you sure you want to remove selected workout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm) {
+      setState(() {
+        selectedWorkout = null;
+      });
+    }
   }
 
   void _saveExercise() {
@@ -138,16 +173,14 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
                   ),
                 ),
 
-                if (widget.selectedDate != null)
+                if (selectedDate != null)
                   SectionCard(
                     title: "Selected Day",
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          DateFormat(
-                            'EEEE dd MMM, y',
-                          ).format(widget.selectedDate!),
+                          DateFormat('EEEE dd MMM, y').format(selectedDate!),
                           style: GoogleFonts.inter(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -375,9 +408,12 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
                       workoutName: 'Workout Name',
                       index: 1,
                       config: schedule,
-                      selectedDayName: selectedDayName,
-                      selectedDate: widget.selectedDate ?? DateTime.now(),
-                      onConfigChanged: (v) {},
+                      selectedDate: selectedDate,
+                      onSelectedDateChanged: (date) {
+                        setState(() {
+                          selectedDate = date;
+                        });
+                      },
                     ),
                   ),
               ],
