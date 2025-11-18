@@ -14,10 +14,4 @@ class SecondaryButton extends AppButton {
 
   @override
   Color get backgroundColor => AppColors.secondary;
-
-  @override
-  Color get shadowColor => Colors.transparent;
-
-  @override
-  Color get shadowColorPressed => Colors.transparent;
 }

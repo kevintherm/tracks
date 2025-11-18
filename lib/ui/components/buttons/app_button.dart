@@ -20,12 +20,6 @@ abstract class AppButton extends StatelessWidget {
   /// Returns the button's background color.
   Color get backgroundColor;
 
-  /// Returns the button's shadow color.
-  Color get shadowColor;
-
-  /// Returns the shadow color when pressed.
-  Color get shadowColorPressed;
-
   /// Returns true if the button is disabled (onTap is null).
   bool get isDisabled => onTap == null;
 

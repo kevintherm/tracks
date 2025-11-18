@@ -5,14 +5,34 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
-import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
+
+class _Filter {
+  String name;
+  List<Schedule> Function(List<Schedule> filtered) onTransform;
+
+  _Filter({required this.name, required this.onTransform});
+}
+
+class _Latest extends _Filter {
+  _Latest()
+    : super(
+        name: "Latest",
+        onTransform: (filtered) {
+          filtered = filtered.toList()
+            ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+          return filtered;
+        },
+      );
+}
 
 class ManageSchedulePage extends StatefulWidget {
   const ManageSchedulePage({super.key});
@@ -26,33 +46,9 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
   Timer? _debounce;
   String search = "";
 
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay = DateTime.now();
+  List<_Filter> activeFilters = [];
 
   final now = DateTime.now().toUtc();
-
-  Widget? _calendarBuild(context, day, focusedDay) {
-    List<Color?> colors = [
-      Colors.grey[200],
-      Colors.green[200],
-      Colors.green[300],
-      Colors.green[500],
-    ];
-
-    Color? color = colors[0];
-    Color textColor = color == Colors.green[500] ? Colors.white : Colors.black;
-
-    return Container(
-      margin: const EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Text('${day.day}', style: TextStyle(color: textColor)),
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -76,6 +72,24 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
     super.dispose();
   }
 
+  Future<void> _deleteSchedule(BuildContext context, Schedule schedule) async {
+    final scheduleRepo = context.read<ScheduleRepository>();
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return _ConfirmDeleteDialog(schedule: schedule);
+      },
+    );
+
+    if (confirmed == true) {
+      await scheduleRepo.deleteSchedule(schedule);
+      if (context.mounted) {
+        Toast(context).success(content: const Text("Schedule deleted"));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleRepo = context.read<ScheduleRepository>();
@@ -96,390 +110,519 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                     child: Icon(Iconsax.arrow_left_2_outline, size: 24),
                   ),
                   Text(
-                    "Manage Schedule",
+                    "All Schedules",
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(width: 1),
+                  Tooltip(
+                    message: 'Create New Schedule',
+                    child: Pressable(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AssignSchedulePage(
+                              selectedDate: DateTime.now(),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Icon(Iconsax.add_outline, size: 32),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            TableCalendar(
-              firstDay: DateTime.utc(now.year, now.month, 1),
-              lastDay: DateTime.utc(now.year, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  if (selectedDay == _selectedDay) {
-                    _selectedDay = now;
-                    _focusedDay = now;
-                  } else {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  }
-                });
-              },
-              calendarFormat: CalendarFormat.month,
-              availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                leftChevronVisible: false,
-                rightChevronIcon: Icon(Iconsax.arrow_right_3_outline),
-                headerMargin: EdgeInsets.only(left: 16),
-              ),
-              calendarBuilders: CalendarBuilders(
-                dowBuilder: (context, day) {
-                  if (day.weekday == DateTime.sunday) {
-                    final text = DateFormat.E().format(day);
-
-                    return Center(
-                      child: Text(text, style: TextStyle(color: Colors.red)),
-                    );
-                  }
-
-                  return null;
-                },
-                // outsideBuilder: _calendarBuild,
-                defaultBuilder: _calendarBuild,
-                todayBuilder: (context, day, focusedDay) {
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightPrimary.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  );
-                },
-                selectedBuilder: (context, day, focusedDay) {
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
+            _SearchBar(controller: searchController),
 
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const SizedBox(width: 0),
-                      Text(
-                        DateFormat("dd MMM, y").format(_selectedDay ?? now),
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Tooltip(
-                        message: 'Assign a schedule to this day',
-                        child: Pressable(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AssignSchedulePage(
-                                  selectedDate: _selectedDay ?? now,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Icon(Iconsax.edit_outline),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  StreamBuilder(
-                    stream: scheduleRepo.watchSchedulesForDate(
-                      _selectedDay ?? now,
+                  BaseButton(
+                    onTap: () {},
+                    child: Row(
+                      children: [
+                        Text("Filter"),
+                        const SizedBox(width: 8),
+                        Icon(Iconsax.filter_outline, size: 20),
+                      ],
                     ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        );
-                      }
-                                    
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text(
-                            'Something went wrong: ${snapshot.error}',
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontStyle: FontStyle.italic,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      }
-                                    
-                      final List<Schedule> schedules = snapshot.data ?? [];
-                      List<Schedule> filtered = schedules;
-                                    
-                      if (search.isNotEmpty) {
-                        filtered = FuzzySearch.search(
-                          items: schedules,
-                          query: search,
-                          getSearchableText: (e) {
-                            e.workout.load();
-                            return e.workout.value!.name;
-                          },
-                          threshold: 0.1,
-                        );
-                      } else {
-                        filtered = schedules.toList()
-                          ..sort(
-                            (a, b) => b.updatedAt.compareTo(a.updatedAt),
-                          );
-                      }
-                                    
-                      if (schedules.isEmpty) {
-                        return Center(
-                          child: Text(
-                            "No schedules available.",
-                            style: TextStyle(
-                              color: Colors.grey[700],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        );
-                      }
-                                    
-                      if (filtered.isEmpty) {
-                        return Center(
-                          child: Text(
-                            "No matching schedules found.",
-                            style: TextStyle(
-                              color: Colors.grey[700],
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        );
-                      }
-                                    
-                      return ListView.separated(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: 1,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          return Dismissible(
-                            key: ValueKey(index),
-                            direction: DismissDirection.horizontal,
-                            background: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.only(left: 20),
-                              decoration: BoxDecoration(
-                                color: Colors.green[200],
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              child: const Icon(
-                                Icons.edit,
-                                color: Colors.white,
-                              ),
-                            ),
-                            secondaryBackground: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                color: Colors.red[200],
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                            onDismissed: (direction) {
-                              if (direction ==
-                                  DismissDirection.endToStart) {
-                                Toast(
-                                  context,
-                                ).success(content: Text("Swipe left"));
-                              } else {
-                                Toast(
-                                  context,
-                                ).success(content: Text("Swipe right"));
-                              }
-                            },
-                            child: Pressable(
-                              onTap: () {},
-                              child: Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        32,
-                                      ),
-                                      color: Colors.white,
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(
-                                            16.0,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      16,
-                                                    ),
-                                                child: Image.asset(
-                                                  'assets/drawings/not-found.jpg',
-                                                  width: 100,
-                                                  height: 100,
-                                                ),
-                                              ),
-                                    
-                                              const SizedBox(width: 16),
-                                    
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment
-                                                          .start,
-                                                  children: [
-                                                    Text(
-                                                      "Push Up",
-                                                      style:
-                                                          GoogleFonts.inter(
-                                                            fontSize: 18,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600,
-                                                          ),
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Icon(
-                                                              MingCute
-                                                                  .fire_line,
-                                                              size: 16,
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Text(
-                                                              "32 Kkal",
-                                                              style: GoogleFonts.inter(
-                                                                fontSize:
-                                                                    14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                                color: Colors
-                                                                    .grey[600],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 16,
-                                                        ),
-                                                        Row(
-                                                          children: [
-                                                            Icon(
-                                                              MingCute
-                                                                  .refresh_3_line,
-                                                              size: 16,
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Text(
-                                                              "12x",
-                                                              style: GoogleFonts.inter(
-                                                                fontSize:
-                                                                    14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                                color: Colors
-                                                                    .grey[600],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          MingCute
-                                                              .barbell_line,
-                                                          size: 16,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 4,
-                                                        ),
-                                                        Text(
-                                                          "Chest, Triceps, Shoulders",
-                                                          style: GoogleFonts.inter(
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w400,
-                                                            color: Colors
-                                                                .grey[600],
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
                   ),
+                  if (activeFilters.isNotEmpty)
+                    BaseButton(onTap: () {}, child: Text("Clear")),
                 ],
+              ),
+            ),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: StreamBuilder(
+                  stream: scheduleRepo.watchAllSchedules(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Something went wrong: ${snapshot.error}',
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+
+                    final List<Schedule> schedules = snapshot.data ?? [];
+                    List<Schedule> filtered = schedules;
+
+                    if (search.isNotEmpty) {
+                      filtered = FuzzySearch.search(
+                        items: schedules,
+                        query: search,
+                        getSearchableText: (e) {
+                          e.workout.load();
+                          return e.workout.value!.name;
+                        },
+                        threshold: 0.1,
+                      );
+                    } else {
+                      // Apply filters
+                      for (final filter in activeFilters) {
+                        filtered = filter.onTransform(filtered);
+                        print(filter.name);
+                      }
+                    }
+
+                    if (schedules.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No schedules available.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (filtered.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No matching schedules found.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: filtered.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final schedule = filtered[index];
+
+                        return Dismissible(
+                          key: ValueKey(index),
+                          direction: DismissDirection.horizontal,
+                          background: Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.green[200],
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: const Icon(Icons.edit, color: Colors.white),
+                          ),
+                          secondaryBackground: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.red[200],
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.endToStart) {
+                              await _deleteSchedule(context, schedule);
+                              return false;
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AssignSchedulePage(schedule: schedule),
+                                ),
+                              );
+                              return false;
+                            }
+                          },
+                          child: _ScheduleCard(schedule: schedule),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _SearchBar({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: "Search",
+              hintStyle: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w300,
+              ),
+              prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 16,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          if (controller.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 250),
+                    child: Text(
+                      'Searching for `${controller.text}`',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+
+                  Pressable(
+                    onTap: () {
+                      controller.text = "";
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: Text(
+                      'Clear',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScheduleCard extends StatelessWidget {
+  _ScheduleCard({required this.schedule});
+
+  final Schedule schedule;
+  final DateTime now = DateTime.now();
+
+  String getQuickSelectedDates() {
+    if (schedule.recurrenceType == RecurrenceType.once) {
+      return 'Once at ${schedule.selectedDates.first.yMMMd}';
+    }
+
+    if (schedule.recurrenceType == RecurrenceType.daily) {
+      return schedule.dailyWeekday
+          .map((e) => e.name.substring(0, 3).capitalize())
+          .join(', ');
+    }
+
+    return 'Monthly on ${schedule.selectedDates.map((e) => e.day.ordinal).join(', ')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheduleRepository = context.read<ScheduleRepository>();
+    final workout = schedule.workout.value!;
+
+    bool isActive = schedule.recurrenceType == RecurrenceType.monthly
+        ? true
+        : scheduleRepository.isScheduleActiveOnDate(schedule, now);
+
+    return Pressable(
+      onTap: () {},
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              color: Colors.white,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      getWorkoutColage(workout),
+
+                      const SizedBox(width: 16),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              workout.name,
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(MingCute.time_line, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      timeFormat(schedule.startTime),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 16),
+                                Row(
+                                  children: [
+                                    Icon(MingCute.barbell_line, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${schedule.workout.value!.exercises.length}x',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(MingCute.target_line, size: 16),
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    getQuickSelectedDates(),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(MingCute.calendar_time_add_line, size: 16),
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    workout.createdAt.yMMMd,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _ActiveBadge(isActive: isActive),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveBadge extends StatelessWidget {
+  final bool isActive;
+
+  const _ActiveBadge({required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      right: 0,
+      top: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isActive ? Colors.grey[900] : Colors.grey[600],
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        child: Text(
+          isActive ? "Active" : "Expired",
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfirmDeleteDialog extends StatelessWidget {
+  const _ConfirmDeleteDialog({required this.schedule});
+
+  final Schedule schedule;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
+          const SizedBox(height: 16),
+          Text(
+            'Delete Schedule?',
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Are you sure you want to delete "${schedule.workout.value!.name}"? This action cannot be undone.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.red[400],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Delete',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

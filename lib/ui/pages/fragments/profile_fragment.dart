@@ -388,7 +388,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             child: OutlinedButton(
               onPressed: () {
                 if (user == null) {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const LoginWithEmail(),

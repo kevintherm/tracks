@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tracks/ui/components/buttons/app_button.dart';
-import 'package:tracks/utils/app_colors.dart';
 
 /// Primary button - uses the primary teal color.
-class PrimaryButton extends AppButton {
+class BaseButton extends AppButton {
   /// Creates a primary button.
-  const PrimaryButton({
+  const BaseButton({
     super.key,
     required super.child,
     super.onTap,
@@ -13,5 +12,6 @@ class PrimaryButton extends AppButton {
   });
 
   @override
-  Color get backgroundColor => AppColors.primary;
+  Color get backgroundColor => Colors.white;
+
 }

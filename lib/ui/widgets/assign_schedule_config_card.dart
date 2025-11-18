@@ -44,6 +44,8 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
   late TimeOfDay startTime;
   late Duration plannedDuration;
 
+  DateTime selectedDate = DateTime.now();
+
   final now = DateTime.now();
 
   @override
@@ -101,24 +103,24 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
 
     if (picked == RecurrenceType.once) {
       if (mounted) {
-        final selectedDate = await showDatePicker(
+        final newDate = await showDatePicker(
           context: context,
           firstDate: now,
           lastDate: DateTime.utc(now.year + 1, now.month, now.day),
-          initialDate: widget.selectedDate
+          initialDate: selectedDate,
         );
 
-        if (selectedDate == null) {
+        if (newDate == null) {
           return;
         }
 
         setState(() {
           schedule.selectedDates.clear();
-          schedule.selectedDates.add(selectedDate);
+          schedule.selectedDates.add(newDate);
         });
 
         schedule.dailyWeekday.clear();
-        widget.onSelectedDateChanged(selectedDate);
+        widget.onSelectedDateChanged(newDate);
       }
     }
 
@@ -188,9 +190,8 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
   }
 
   Widget? _getRecurrenceExcerpt() {
-    if (schedule.recurrenceType == RecurrenceType.once &&
-        widget.selectedDate != null) {
-      return Text(DateFormat('EEEE dd MMM, y').format(widget.selectedDate!));
+    if (schedule.recurrenceType == RecurrenceType.once) {
+      return Text(DateFormat('EEEE dd MMM, y').format(selectedDate));
     }
 
     if (schedule.recurrenceType == RecurrenceType.daily) {

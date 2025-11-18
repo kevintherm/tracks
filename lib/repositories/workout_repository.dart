@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/services/auth_service.dart';
@@ -223,6 +224,10 @@ class WorkoutRepository {
       for (final junction in junctions) {
         await isar.workoutExercises.delete(junction.id);
       }
+
+      final schedules = await isar.schedules.filter().workout((q) => q.idEqualTo(workout.id)).findAll();
+      final scheduleIds = schedules.map((e) => e.id).toList();
+      await isar.schedules.deleteAll(scheduleIds);
 
       // Delete the workout
       await isar.workouts.delete(workout.id);

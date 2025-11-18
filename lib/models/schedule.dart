@@ -27,6 +27,16 @@ class Schedule {
 
   IsarLink<Workout> workout = IsarLink();
 
+  List<DateTime> get activeSelectedDates {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return selectedDates.where((date) {
+      final dateOnly = DateTime(date.year, date.month, date.day);
+      return dateOnly.isAfter(today) || dateOnly == today;
+    }).toList()..sort((a, b) => a.compareTo(b));
+  }
+
   Schedule({
     required this.startTime,
     this.plannedDuration = 30,
@@ -57,7 +67,7 @@ class Schedule {
           )
           ..id = id
           ..pocketbaseId = pocketbaseId ?? this.pocketbaseId
-          ..dailyWeekday = weeklyDays ?? this.dailyWeekday
+          ..dailyWeekday = weeklyDays ?? dailyWeekday
           ..selectedDates = selectedDates ?? this.selectedDates
           ..createdAt = createdAt
           ..updatedAt = DateTime.now();

@@ -26,7 +26,7 @@ class ScheduleRepository {
     final matchingSchedules = <Schedule>[];
 
     for (final schedule in allSchedules) {
-      if (_isScheduleActiveOnDate(schedule, date)) {
+      if (isScheduleActiveOnDate(schedule, date)) {
         matchingSchedules.add(schedule);
       }
     }
@@ -37,7 +37,7 @@ class ScheduleRepository {
   /// Watch schedules for a specific date
   Stream<List<Schedule>> watchSchedulesForDate(DateTime date) {
     return isar.schedules.where().watch(fireImmediately: true).map((schedules) {
-      return schedules.where((s) => _isScheduleActiveOnDate(s, date)).toList();
+      return schedules.where((s) => isScheduleActiveOnDate(s, date)).toList();
     });
   }
 
@@ -97,44 +97,27 @@ class ScheduleRepository {
   // --- SYNC LOGIC ---
 
   /// Check if a schedule is active on a given date
-  bool _isScheduleActiveOnDate(Schedule schedule, DateTime date) {
-    if (schedule.selectedDates.isEmpty) {
-      throw Exception("Selected date is empty");
-    }
-
-    final onceDate = schedule.selectedDates.first;
-
-    final scheduleDate = DateTime(onceDate.year, onceDate.month, onceDate.day);
+  bool isScheduleActiveOnDate(Schedule schedule, DateTime date) {
     final targetDate = DateTime(date.year, date.month, date.day);
 
-    // Check if date is before schedule starts
-    if (targetDate.isBefore(scheduleDate)) {
-      return false;
-    }
-
-    // Check recurrence pattern
     switch (schedule.recurrenceType) {
-      case RecurrenceType.once:
-        // For once type, check if target date is in selectedDates
-        return schedule.selectedDates.any((selectedDate) {
-          final selected = DateTime(
-            selectedDate.year,
-            selectedDate.month,
-            selectedDate.day,
-          );
-          return selected == targetDate;
-        });
-
       case RecurrenceType.daily:
-        // For daily, check if the weekday is in dailyWeekday list
-        if (schedule.dailyWeekday.isEmpty) {
-          return true; // All days if no specific weekdays
-        }
+        if (schedule.dailyWeekday.isEmpty) return false;
+
         final weekday = _dateTimeWeekdayToWeekday(date.weekday);
         return schedule.dailyWeekday.contains(weekday);
 
+      case RecurrenceType.once:
+        final onceDate = schedule.selectedDates.first;
+        final scheduleDate = DateTime(
+          onceDate.year,
+          onceDate.month,
+          onceDate.day,
+        );
+
+        return targetDate == scheduleDate;
+
       case RecurrenceType.monthly:
-        // For monthly, check if target date is in selectedDates
         return schedule.selectedDates.any((selectedDate) {
           final selected = DateTime(
             selectedDate.year,

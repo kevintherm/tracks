@@ -13,10 +13,4 @@ class TertiaryButton extends AppButton {
 
   @override
   Color get backgroundColor => Colors.grey[500]!;
-
-  @override
-  Color get shadowColor => Colors.transparent;
-
-  @override
-  Color get shadowColorPressed => Colors.transparent;
 }

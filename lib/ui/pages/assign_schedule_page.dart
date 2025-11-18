@@ -62,11 +62,13 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
     if (widget.schedule != null) {
       schedule = widget.schedule!;
       selectedWorkout = widget.schedule?.workout.value;
+      selectedDate = widget.schedule!.selectedDates.first;
     }
   }
 
   @override
   void dispose() {
+    searchController.dispose();
     super.dispose();
   }
 
@@ -126,7 +128,7 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
       scheduleRepo.createSchedule(schedule: schedule);
 
       toast.success(content: Text("New schedule created."));
-      nav.pop(true);
+      nav.pop();
     } catch (e) {
       toast.error(content: Text("Failed to create schedule. $e"));
     }
@@ -172,24 +174,6 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
                     ],
                   ),
                 ),
-
-                if (selectedDate != null)
-                  SectionCard(
-                    title: "Selected Day",
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          DateFormat('EEEE dd MMM, y').format(selectedDate!),
-                          style: GoogleFonts.inter(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text("(0)", style: GoogleFonts.inter(fontSize: 16)),
-                      ],
-                    ),
-                  ),
 
                 // Select Workout Section
                 if (selectedWorkout == null)

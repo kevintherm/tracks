@@ -2,6 +2,9 @@
     - create update schedule page
         - create 3 types once, and periodically
     - populate list page
+        - type = once, display once on that day
+        - type = daily, display on the selected week day
+        - type = monthly, display on the selected dates
 - session
     - as a history
     - one to one schedule
