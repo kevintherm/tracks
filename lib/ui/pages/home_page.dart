@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
@@ -34,6 +36,12 @@ class _HomePageState extends State<HomePage> {
 
         log('[Sync] Starting exercise sync..');
         await context.read<ExerciseRepository>().performInitialSync();
+
+        log('[Sync] Starting workout sync..');
+        await context.read<WorkoutRepository>().performInitialSync();
+
+        log('[Sync] Starting schedule sync..');
+        await context.read<ScheduleRepository>().performInitialSync();
 
         log('[Sync] Sync complete..');
       }());

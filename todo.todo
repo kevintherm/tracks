@@ -8,6 +8,8 @@
         - slider on schedule fragment to mark schedule as done
             - create empty session if manually slided
             - create session from session page
+    - create collection on cloud
+        - sync to cloud
 - session
     - as a history
     - one to one schedule
