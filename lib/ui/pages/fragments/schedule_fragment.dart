@@ -21,9 +21,37 @@ class ScheduleFragment extends StatefulWidget {
 class _ScheduleFragmentState extends State<ScheduleFragment> {
   DateTime selectedDate = DateTime.now();
 
+  DateTime _getScheduleDateTime(Schedule schedule, DateTime selectedDate) {
+    if (schedule.recurrenceType == RecurrenceType.daily) {
+      // For daily schedules, use the selected date with the schedule's start time
+      return DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        schedule.startTime.hour,
+        schedule.startTime.minute,
+        schedule.startTime.second,
+      );
+    } else {
+      // For once/monthly schedules, use the actual scheduled date with start time
+      final date = schedule.activeSelectedDates.isNotEmpty
+          ? schedule.activeSelectedDates.first
+          : selectedDate;
+      return DateTime(
+        date.year,
+        date.month,
+        date.day,
+        schedule.startTime.hour,
+        schedule.startTime.minute,
+        schedule.startTime.second,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleRepo = context.read<ScheduleRepository>();
+    final now = DateTime.now();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,9 +90,19 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           showNavigation: false,
           showMonthLabel: false,
           onDateSelected: (value) {
-            setState(() {
-              selectedDate = value;
-            });
+            if (!DateUtils.isSameDay(selectedDate, value)) {
+              setState(() {
+                final newSelected = DateTime(
+                  value.year,
+                  value.month,
+                  value.day,
+                  now.hour,
+                  now.minute,
+                  now.second,
+                );
+                selectedDate = newSelected;
+              });
+            }
           },
           selectedDate: selectedDate,
           initialStartDate: DateTime.utc(
@@ -102,6 +140,27 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                 }
 
                 final List<Schedule> schedules = snapshot.data ?? [];
+                final now = DateTime.now();
+                
+                // Sort: active schedules first, then expired, each sorted by start time
+                schedules.sort((a, b) {
+                  final aDateTime = _getScheduleDateTime(a, selectedDate);
+                  final bDateTime = _getScheduleDateTime(b, selectedDate);
+                  final aIsActive = aDateTime.isAfter(now);
+                  final bIsActive = bDateTime.isAfter(now);
+                  
+                  // Active schedules come first
+                  if (aIsActive != bIsActive) {
+                    return aIsActive ? -1 : 1;
+                  }
+                  
+                  // Within same status, sort by time (earliest first for active, latest first for expired)
+                  if (aIsActive) {
+                    return aDateTime.compareTo(bDateTime);
+                  } else {
+                    return bDateTime.compareTo(aDateTime);
+                  }
+                });
 
                 if (schedules.isEmpty) {
                   return Center(
@@ -185,6 +244,30 @@ class _ScheduleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final workout = schedule.workout.value!;
 
+    DateTime scheduleDateTime;
+    if (schedule.recurrenceType == RecurrenceType.daily) {
+      scheduleDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        schedule.startTime.hour,
+        schedule.startTime.minute,
+        schedule.startTime.second,
+      );
+    } else {
+      final date = schedule.activeSelectedDates.isNotEmpty
+          ? schedule.activeSelectedDates.first
+          : selectedDate;
+      scheduleDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        schedule.startTime.hour,
+        schedule.startTime.minute,
+        schedule.startTime.second,
+      );
+    }
+
     return Pressable(
       onTap: () {},
       child: Column(
@@ -222,7 +305,9 @@ class _ScheduleCard extends StatelessWidget {
                                     Icon(MingCute.play_circle_fill, size: 16),
                                     const SizedBox(width: 4),
                                     Text(
-                                      Duration(minutes: schedule.plannedDuration).hM,
+                                      Duration(
+                                        minutes: schedule.plannedDuration,
+                                      ).hM,
                                       style: GoogleFonts.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
@@ -267,6 +352,25 @@ class _ScheduleCard extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            Row(
+                              children: [
+                                Icon(MingCute.target_line, size: 16),
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    schedule.recurrenceType.name.capitalize(),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -274,8 +378,9 @@ class _ScheduleCard extends StatelessWidget {
                   ),
                 ),
                 _OnComingBadge(
-                  activeDate: schedule.activeSelectedDates.first,
+                  onComingDate: scheduleDateTime,
                   selectedDate: selectedDate,
+                  isActive: scheduleDateTime.isAfter(DateTime.now()),
                 ),
               ],
             ),
@@ -287,27 +392,40 @@ class _ScheduleCard extends StatelessWidget {
 }
 
 class _OnComingBadge extends StatelessWidget {
-  final DateTime activeDate;
+  final DateTime onComingDate;
   final DateTime selectedDate;
+  final bool isActive;
 
-  const _OnComingBadge({required this.activeDate, required this.selectedDate});
+  _OnComingBadge({
+    required this.onComingDate,
+    required this.selectedDate,
+    required this.isActive,
+  });
+
+  final now = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
+    final selectedDateOnly = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final todayOnly = DateTime(now.year, now.month, now.day);
+    final isToday = selectedDateOnly.isAtSameMomentAs(todayOnly);
+    
     return Positioned(
       right: 0,
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: selectedDate.isBefore(activeDate) ? Colors.grey[600] : Colors.grey[900],
+          color: isActive ? Colors.grey[900] : Colors.grey[600],
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(32),
-            topRight: Radius.circular(32)
+            topRight: Radius.circular(32),
           ),
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         child: Text(
-          dateToHumans(selectedDate, from: activeDate),
+          isToday 
+            ? dateToHumans(onComingDate, from: now)
+            : dateToHumans(selectedDate, from: now),
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: 12,

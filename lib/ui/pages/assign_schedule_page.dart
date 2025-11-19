@@ -175,6 +175,29 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
                   ),
                 ),
 
+                if (widget.schedule != null)
+                  BasicCard(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Schedule ID',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        Text(
+                          '#${schedule.id.toString().padLeft(2, '0')}',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Select Workout Section
                 if (selectedWorkout == null)
                   SectionCard(

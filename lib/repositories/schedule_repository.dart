@@ -104,7 +104,7 @@ class ScheduleRepository {
       case RecurrenceType.daily:
         if (schedule.dailyWeekday.isEmpty) return false;
 
-        final weekday = _dateTimeWeekdayToWeekday(date.weekday);
+        final weekday = dateTimeWeekdayToWeekday(date.weekday);
         return schedule.dailyWeekday.contains(weekday);
 
       case RecurrenceType.once:
@@ -130,7 +130,7 @@ class ScheduleRepository {
   }
 
   /// Convert DateTime.weekday (1-7, Monday-Sunday) to Weekday enum
-  Weekday _dateTimeWeekdayToWeekday(int weekday) {
+  Weekday dateTimeWeekdayToWeekday(int weekday) {
     switch (weekday) {
       case DateTime.monday:
         return Weekday.monday;

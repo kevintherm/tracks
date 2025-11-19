@@ -5,6 +5,9 @@
         - type = once, display once on that day
         - type = daily, display on the selected week day
         - type = monthly, display on the selected dates
+        - slider on schedule fragment to mark schedule as done
+            - create empty session if manually slided
+            - create session from session page
 - session
     - as a history
     - one to one schedule

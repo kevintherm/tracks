@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
@@ -425,12 +424,18 @@ class _ScheduleCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              workout.name,
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Row(
+                              children: [
+                                Text('#${schedule.id.toString().padLeft(2, '0')}'),
+                                const SizedBox(width: 8),
+                                Text(
+                                  workout.name,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                             Row(
                               children: [

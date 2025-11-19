@@ -50,3 +50,31 @@ class SectionCard extends StatelessWidget {
     );
   }
 }
+
+class BasicCard extends StatelessWidget {
+  final Widget child;
+
+  const BasicCard({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          color: Colors.white,
+          boxShadow: _kCardShadow,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
