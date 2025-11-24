@@ -147,11 +147,18 @@ class _StartSessionPageState extends State<StartSessionPage> {
     return true;
   }
 
-  void onStartSession() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SessionPage()),
+  void onStartSession() async {
+    final confirm = await showModalBottomSheet(
+      context: context,
+      builder: (_) => _ConfirmStartSessionDialog(),
     );
+
+    if (mounted && confirm == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SessionPage()),
+      );
+    }
   }
 
   void cancelSession() {
@@ -304,6 +311,18 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
+                                        Text(
+                                          "Workout Overview",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color.lerp(
+                                              Colors.white,
+                                              Colors.black,
+                                              1 - scrollProgress,
+                                            ),
+                                          ),
+                                        ),
                                         if (schedule != null &&
                                             scrollProgress > 0.5) ...[
                                           Text(
@@ -320,7 +339,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             'Scheduled for ${schedule!.startTime.hour.toString().padLeft(2, '0')}:${schedule!.startTime.minute.toString().padLeft(2, '0')}',
                                             style: GoogleFonts.inter(
                                               fontSize: 10,
-                                              fontWeight: FontWeight.w500,
+                                              fontWeight: FontWeight.w400,
                                               color: Colors.grey[300],
                                             ),
                                             maxLines: 1,
@@ -338,18 +357,6 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        Text(
-                                          "Workout Overview",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color.lerp(
-                                              Colors.white,
-                                              Colors.black,
-                                              1 - scrollProgress,
-                                            ),
-                                          ),
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -539,115 +546,38 @@ class _ExerciseStat extends StatelessWidget {
   }
 }
 
-class _FabMenu extends StatefulWidget {
+class _FabMenu extends StatelessWidget {
   final VoidCallback onPickActivity;
   final VoidCallback onStartSession;
 
   const _FabMenu({required this.onPickActivity, required this.onStartSession});
 
   @override
-  State<_FabMenu> createState() => _FabMenuState();
-}
-
-class _FabMenuState extends State<_FabMenu>
-    with SingleTickerProviderStateMixin {
-  bool open = false;
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _scaleAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _toggle() {
-    setState(() {
-      open = !open;
-      if (open) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    });
-  }
-
-  Widget _buildFabButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required Color backgroundColor,
-  }) {
-    return Pressable(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 4,
-              offset: Offset(1, 2),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(10),
-        child: Icon(icon, color: Colors.white, size: 24),
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ScaleTransition(
-          scale: _scaleAnimation,
-          child: AnimatedOpacity(
-            opacity: open ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Tooltip(
-                  message: "Pick Another",
-                  child: _buildFabButton(
-                    icon: MingCute.barbell_line,
-                    backgroundColor: AppColors.lightPrimary,
-                    onTap: widget.onPickActivity,
-                  ),
+        Pressable(
+          onTap: onPickActivity,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black45,
+                  blurRadius: 4,
+                  offset: Offset(1, 2),
                 ),
-                const SizedBox(height: 8),
-                Tooltip(
-                  message: "Start Session",
-                  child: _buildFabButton(
-                    backgroundColor: AppColors.lightPrimary,
-                    icon: MingCute.play_line,
-                    onTap: widget.onStartSession,
-                  ),
-                ),
-                const SizedBox(height: 8),
               ],
             ),
+            padding: EdgeInsets.all(16),
+            child: Icon(MingCute.color_picker_fill, color: AppColors.primary),
           ),
         ),
         const SizedBox(height: 8),
         Pressable(
-          onTap: _toggle,
+          onTap: onStartSession,
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.primary,
@@ -661,13 +591,85 @@ class _FabMenuState extends State<_FabMenu>
               ],
             ),
             padding: EdgeInsets.all(16),
-            child: Icon(
-              open ? MingCute.close_line : MingCute.menu_line,
-              color: Colors.white,
-            ),
+            child: Icon(MingCute.play_fill, color: Colors.white),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ConfirmStartSessionDialog extends StatelessWidget {
+  const _ConfirmStartSessionDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(MingCute.play_circle_fill, size: 48, color: AppColors.primary),
+          const SizedBox(height: 16),
+          Text(
+            'Start Workout?',
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Are you sure you want to start session?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context, true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Start',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

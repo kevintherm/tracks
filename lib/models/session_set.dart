@@ -13,13 +13,20 @@ class SessionSet {
   IsarLink<SessionExercise> sessionExercise = IsarLink();
 
   double weight;
-  double reps;
-  double duration; // In Seconds
+
+  int reps;
+  int? failOnRep;
+  int effortRate;
+  int duration; // In Seconds
+  String? note;
 
   SessionSet({
     required this.weight,
     required this.reps,
     required this.duration,
+    required this.effortRate,
     this.needSync = true,
+    this.failOnRep,
+    this.note,
   });
 }

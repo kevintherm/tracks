@@ -23,7 +23,7 @@ class _SessionFinishFailureDialogState
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          'Rep to failure?',
+          'Failure on repetition?',
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,

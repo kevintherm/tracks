@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:lottie/lottie.dart';
+import 'package:tracks/models/session.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/ui/components/safe_keyboard.dart';
@@ -14,7 +15,6 @@ import 'package:tracks/ui/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class SessionPage extends StatefulWidget {
-  
   const SessionPage({super.key});
 
   @override
@@ -22,8 +22,18 @@ class SessionPage extends StatefulWidget {
 }
 
 class _SessionPageState extends State<SessionPage> {
+  late Session session;
+  
   final bool _isLoading = false;
   final double _progress = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      session = Session(start: DateTime.now(), end: DateTime.now());
+    });
+  }
 
   void _handleNextButton() async {
     final nav = Navigator.of(context);
@@ -31,8 +41,12 @@ class _SessionPageState extends State<SessionPage> {
     int? currentReps = await showModalBottomSheet(
       context: context,
       isDismissible: false,
+      enableDrag: false,
       builder: (BuildContext context) {
-        return _ModalPadding(child: SessionFinishRepsDialog());
+        return PopScope(
+          canPop: false,
+          child: _ModalPadding(child: SessionFinishRepsDialog()),
+        );
       },
     );
 
@@ -42,18 +56,26 @@ class _SessionPageState extends State<SessionPage> {
       int failOnRep = await showModalBottomSheet(
         context: context,
         isDismissible: false,
+        enableDrag: false,
         builder: (BuildContext context) {
-          return _ModalPadding(child: SessionFinishFailureDialog());
+          return PopScope(
+            canPop: false,
+            child: _ModalPadding(child: SessionFinishFailureDialog()),
+          );
         },
       );
     }
 
     if (mounted) {
-      final failRate = await showModalBottomSheet(
+      final effortRate = await showModalBottomSheet(
         context: context,
         isDismissible: false,
+        enableDrag: false,
         builder: (BuildContext context) {
-          return _ModalPadding(child: SessionFinishRateFailDialog());
+          return PopScope(
+            canPop: false,
+            child: _ModalPadding(child: SessionFinishRateFailDialog()),
+          );
         },
       );
     }
@@ -62,8 +84,12 @@ class _SessionPageState extends State<SessionPage> {
       String? note = await showModalBottomSheet(
         context: context,
         isDismissible: false,
+        enableDrag: false,
         builder: (BuildContext context) {
-          return _ModalPadding(child: SessionFinishNoteDialog());
+          return PopScope(
+            canPop: false,
+            child: _ModalPadding(child: SessionFinishNoteDialog()),
+          );
         },
       );
     }
