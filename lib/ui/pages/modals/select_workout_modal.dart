@@ -174,7 +174,7 @@ class _SelectWorkoutModalState extends State<SelectWorkoutModal>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Select activity to start session.',
+              'Select Activity To Start Session',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

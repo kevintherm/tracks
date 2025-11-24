@@ -9,6 +9,7 @@ import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/session_activity.dart';
 import 'package:tracks/ui/pages/modals/select_sets_n_reps_modal.dart';
 import 'package:tracks/ui/pages/modals/select_workout_modal.dart';
 import 'package:tracks/ui/pages/session_page.dart';
@@ -45,11 +46,7 @@ class StartSessionPage extends StatefulWidget {
 }
 
 class _StartSessionPageState extends State<StartSessionPage> {
-  Schedule? schedule;
-  Workout? workout;
-  Exercise? exercise;
-  int exerciseSets = 3;
-  int exerciseReps = 8;
+  SessionActivity? activity;
   bool _isLoading = true;
 
   @override
@@ -61,11 +58,15 @@ class _StartSessionPageState extends State<StartSessionPage> {
   }
 
   Future<void> _initialize() async {
-    schedule = widget.schedule;
-    workout = widget.workout;
-    exercise = widget.exercise;
+    if (widget.schedule != null) {
+      activity = ScheduleActivity(widget.schedule!);
+    } else if (widget.workout != null) {
+      activity = WorkoutActivity(widget.workout!);
+    } else if (widget.exercise != null) {
+      activity = ExerciseActivity(widget.exercise!);
+    }
 
-    if (schedule == null && workout == null && exercise == null) {
+    if (activity == null) {
       final success = await _selectActivity(cancelOnDismiss: true);
       if (!success) return;
     }
@@ -76,8 +77,9 @@ class _StartSessionPageState extends State<StartSessionPage> {
   }
 
   Future<void> onPickActivity() async {
-    await _selectActivity(cancelOnDismiss: false);
-    setState(() {}); // Rebuild to show new selection
+    if (await _selectActivity(cancelOnDismiss: false)) {
+      setState(() {});
+    }
   }
 
   Future<bool> _selectActivity({required bool cancelOnDismiss}) async {
@@ -100,13 +102,9 @@ class _StartSessionPageState extends State<StartSessionPage> {
     }
 
     if (s is Schedule) {
-      schedule = s;
-      workout = null;
-      exercise = null;
+      activity = ScheduleActivity(s);
     } else if (s is Workout) {
-      workout = s;
-      schedule = null;
-      exercise = null;
+      activity = WorkoutActivity(s);
     } else if (s is Exercise) {
       if (mounted) {
         final result = await showModalBottomSheet(
@@ -131,11 +129,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
           return false;
         }
 
-        exercise = s;
-        schedule = null;
-        workout = null;
-        exerciseSets = sets;
-        exerciseReps = reps;
+        activity = ExerciseActivity(s, sets: sets, reps: reps);
       }
     } else {
       if (cancelOnDismiss) {
@@ -171,8 +165,9 @@ class _StartSessionPageState extends State<StartSessionPage> {
   Future<List<_ExerciseParam>> getExercises() async {
     final list = <_ExerciseParam>[];
 
-    if (schedule != null) {
-      final workout = schedule!.workout.value;
+    if (activity is ScheduleActivity) {
+      final schedule = (activity as ScheduleActivity).schedule;
+      final workout = schedule.workout.value;
       if (workout == null) {
         log("[FATAL] Missing workout value from Schedule collection");
         return Future.error(fatalError);
@@ -188,8 +183,9 @@ class _StartSessionPageState extends State<StartSessionPage> {
         );
         list.add(param);
       }
-    } else if (workout != null) {
-      final exercises = workout!.exercisesWithPivot;
+    } else if (activity is WorkoutActivity) {
+      final workout = (activity as WorkoutActivity).workout;
+      final exercises = workout.exercisesWithPivot;
 
       for (final row in exercises) {
         final param = _ExerciseParam(
@@ -199,12 +195,13 @@ class _StartSessionPageState extends State<StartSessionPage> {
         );
         list.add(param);
       }
-    } else if (exercise != null) {
+    } else if (activity is ExerciseActivity) {
+      final exerciseActivity = activity as ExerciseActivity;
       list.add(
         _ExerciseParam(
-          exercise: exercise!,
-          sets: exerciseSets,
-          reps: exerciseReps,
+          exercise: exerciseActivity.exercise,
+          sets: exerciseActivity.sets,
+          reps: exerciseActivity.reps,
         ),
       );
     }
@@ -323,10 +320,10 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             ),
                                           ),
                                         ),
-                                        if (schedule != null &&
+                                        if (activity is ScheduleActivity &&
                                             scrollProgress > 0.5) ...[
                                           Text(
-                                            schedule!.workout.value?.name ?? '',
+                                            (activity as ScheduleActivity).schedule.workout.value?.name ?? '',
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -336,7 +333,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           Text(
-                                            'Scheduled for ${schedule!.startTime.hour.toString().padLeft(2, '0')}:${schedule!.startTime.minute.toString().padLeft(2, '0')}',
+                                            'Scheduled for ${(activity as ScheduleActivity).schedule.startTime.hour.toString().padLeft(2, '0')}:${(activity as ScheduleActivity).schedule.startTime.minute.toString().padLeft(2, '0')}',
                                             style: GoogleFonts.inter(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w400,
@@ -345,14 +342,14 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ] else if (workout != null &&
+                                        ] else if (activity is WorkoutActivity &&
                                             scrollProgress > 0.5)
                                           Text(
-                                            workout!.name,
+                                            (activity as WorkoutActivity).workout.name,
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.grey[600],
+                                              color: Colors.grey[200],
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -367,10 +364,10 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                 children: [
                                   Center(
                                     child:
-                                        workout != null &&
-                                            workout!.thumbnailLocal != null
+                                        activity is WorkoutActivity &&
+                                            (activity as WorkoutActivity).workout.thumbnailLocal != null
                                         ? getImage(
-                                            workout!.thumbnailLocal,
+                                            (activity as WorkoutActivity).workout.thumbnailLocal,
                                             width: 1000,
                                             height: 1000,
                                           )

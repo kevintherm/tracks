@@ -15,6 +15,8 @@ import 'package:tracks/ui/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class SessionPage extends StatefulWidget {
+  
+  
   const SessionPage({super.key});
 
   @override
@@ -31,7 +33,8 @@ class _SessionPageState extends State<SessionPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      session = Session(start: DateTime.now(), end: DateTime.now());
+      final now = DateTime.now();
+      session = Session(start: now, end: now);
     });
   }
 

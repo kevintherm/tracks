@@ -175,7 +175,10 @@ enum PBCollections {
   workouts("workouts"),
   exercises("exercises"),
   muscles("muscles"),
-  exerciseMuscles("exercise_muscles");
+  exerciseMuscles("exercise_muscles"),
+  sessions("sessions"),
+  sessionExercises("session_exercises"),
+  sessionSets("session_sets");
 
   final String value;
   const PBCollections(this.value);
