@@ -137,38 +137,40 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                         ),
                         centerTitle: false,
                         title: Row(
+                          crossAxisAlignment: scrollProgress > 0.01
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.center,
                           children: [
-                            if (scrollProgress < 0.5)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16),
-                                child: Tooltip(
-                                  message: "Back",
-                                  child: Pressable(
-                                    onTap: () => Navigator.of(context).pop(),
-                                    child: Icon(
-                                      Iconsax.arrow_left_2_outline,
-                                      color: Colors.grey[400],
-                                      size: 20,
+                            ClipRect(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: 1 - scrollProgress,
+                                child: Opacity(
+                                  opacity: 1 - scrollProgress,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 16),
+                                    child: Tooltip(
+                                      message: "Back",
+                                      child: Pressable(
+                                        onTap: () =>
+                                            Navigator.of(context).pop(),
+                                        child: Icon(
+                                          Iconsax.arrow_left_2_outline,
+                                          color: Colors.grey[700],
+                                          size: 20,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
+                            ),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
+                                // mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  if (scrollProgress > 0.5)
-                                    Text(
-                                      workout.name,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey[200],
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
                                   Text(
                                     "Workout Overview",
                                     style: GoogleFonts.inter(
@@ -181,6 +183,30 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                                       ),
                                     ),
                                   ),
+                                  ClipRect(
+                                    child: Align(
+                                      alignment: Alignment.topLeft,
+                                      heightFactor: scrollProgress,
+                                      child: Opacity(
+                                        opacity: scrollProgress,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 2,
+                                          ),
+                                          child: Text(
+                                            workout.name,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey[200],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -189,17 +215,22 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                         background: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Center(
-                              child: workout.thumbnailLocal != null
-                                  ? getImage(
-                                      workout.thumbnailLocal,
-                                      width: 1000,
-                                      height: 1000,
-                                    )
-                                  : SvgPicture.asset(
+                            workout.thumbnailLocal != null
+                                ? Hero(
+                                    tag: 'workout-thumbnail-${workout.id}',
+                                    child: Center(
+                                      child: getImage(
+                                        workout.thumbnailLocal,
+                                        width: 1000,
+                                        height: 1000,
+                                      ),
+                                    ),
+                                  )
+                                : Center(
+                                    child: SvgPicture.asset(
                                       'assets/drawings/undraw_athletes_training.svg',
                                     ),
-                            ),
+                                  ),
                             Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(

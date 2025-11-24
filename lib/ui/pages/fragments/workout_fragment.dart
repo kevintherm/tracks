@@ -320,7 +320,7 @@ class _ExerciseListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: ValueKey(workout.id),
+      key: Key('dismissible-${workout.id}'),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
@@ -351,7 +351,9 @@ class _ExerciseListItem extends StatelessWidget {
       child: Pressable(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ViewWorkoutPage(workout: workout)),
+          MaterialPageRoute(
+            builder: (_) => ViewWorkoutPage(workout: workout),
+          ),
         ),
         child: _WorkoutCard(workout: workout),
       ),
@@ -489,7 +491,13 @@ class _WorkoutCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                getWorkoutColage(workout),
+                Hero(
+                  tag: 'workout-thumbnail-${workout.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: getImage(workout.thumbnailLocal),
+                  ),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
