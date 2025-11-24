@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:lottie/lottie.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
@@ -301,16 +300,40 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                     ),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        if ((schedule != null || workout != null) && scrollProgress > 0.5)
+                                        if (schedule != null &&
+                                            scrollProgress > 0.5) ...[
                                           Text(
-                                            schedule?.workout.value?.name ?? workout?.name ?? '',
+                                            schedule!.workout.value?.name ?? '',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey[200],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Scheduled for ${schedule!.startTime.hour.toString().padLeft(2, '0')}:${schedule!.startTime.minute.toString().padLeft(2, '0')}',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey[300],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ] else if (workout != null &&
+                                            scrollProgress > 0.5)
+                                          Text(
+                                            workout!.name,
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.white,
+                                              color: Colors.grey[600],
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,

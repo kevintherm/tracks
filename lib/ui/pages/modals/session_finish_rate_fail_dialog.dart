@@ -23,13 +23,10 @@ class _SessionFinishRateFailDialogState
       children: <Widget>[
         Text(
           'Rate the struggle',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
-        
+
         NumberPicker(
           value: _failRate,
           minValue: 1,
@@ -42,9 +39,17 @@ class _SessionFinishRateFailDialogState
             border: Border.all(color: Colors.black26),
           ),
         ),
-        
+
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            '/5',
+            style: TextStyle(fontSize: 18, color: Colors.black54),
+          ),
+        ),
+
         const SizedBox(height: 24),
-        
+
         PrimaryButton(
           onTap: () {
             Navigator.of(context).pop(_failRate);

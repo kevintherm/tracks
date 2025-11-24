@@ -8,6 +8,7 @@ import 'package:tracks/models/workout.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
+import 'package:tracks/ui/pages/view_workout_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
@@ -348,7 +349,10 @@ class _ExerciseListItem extends StatelessWidget {
         padding: const EdgeInsets.only(right: 20),
       ),
       child: Pressable(
-        onTap: () {},
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ViewWorkoutPage(workout: workout)),
+        ),
         child: _WorkoutCard(workout: workout),
       ),
     );
@@ -485,10 +489,7 @@ class _WorkoutCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: getImage(workout.thumbnailLocal),
-                ),
+                getWorkoutColage(workout),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

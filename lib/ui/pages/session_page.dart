@@ -14,6 +14,7 @@ import 'package:tracks/ui/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class SessionPage extends StatefulWidget {
+  
   const SessionPage({super.key});
 
   @override
@@ -22,7 +23,6 @@ class SessionPage extends StatefulWidget {
 
 class _SessionPageState extends State<SessionPage> {
   final bool _isLoading = false;
-
   final double _progress = 10;
 
   void _handleNextButton() async {
@@ -38,32 +38,35 @@ class _SessionPageState extends State<SessionPage> {
 
     if (currentReps == null) return;
 
-    if (!mounted) return;
-    int failOnRep = await showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      builder: (BuildContext context) {
-        return _ModalPadding(child: SessionFinishFailureDialog());
-      },
-    );
+    if (mounted) {
+      int failOnRep = await showModalBottomSheet(
+        context: context,
+        isDismissible: false,
+        builder: (BuildContext context) {
+          return _ModalPadding(child: SessionFinishFailureDialog());
+        },
+      );
+    }
 
-    if (!mounted) return;
-    final failRate = await showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      builder: (BuildContext context) {
-        return _ModalPadding(child: SessionFinishRateFailDialog());
-      },
-    );
+    if (mounted) {
+      final failRate = await showModalBottomSheet(
+        context: context,
+        isDismissible: false,
+        builder: (BuildContext context) {
+          return _ModalPadding(child: SessionFinishRateFailDialog());
+        },
+      );
+    }
 
-    if (!mounted) return;
-    String? note = await showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      builder: (BuildContext context) {
-        return _ModalPadding(child: SessionFinishNoteDialog());
-      },
-    );
+    if (mounted) {
+      String? note = await showModalBottomSheet(
+        context: context,
+        isDismissible: false,
+        builder: (BuildContext context) {
+          return _ModalPadding(child: SessionFinishNoteDialog());
+        },
+      );
+    }
 
     nav.pushReplacement(
       MaterialPageRoute(builder: (context) => SessionFinishPage()),
@@ -214,7 +217,7 @@ class _SessionPageState extends State<SessionPage> {
                                 Icon(MingCute.right_line, color: Colors.white),
                                 const SizedBox(width: 8),
                                 Text(
-                                  "Next",
+                                  "Finish Set",
                                   style: GoogleFonts.inter(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
