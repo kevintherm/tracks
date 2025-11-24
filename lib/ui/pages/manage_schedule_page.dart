@@ -8,30 +8,11 @@ import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/filter.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
-
-class _Filter {
-  String name;
-  List<Schedule> Function(List<Schedule> filtered) onTransform;
-
-  _Filter({required this.name, required this.onTransform});
-}
-
-class _Latest extends _Filter {
-  _Latest()
-    : super(
-        name: "Latest",
-        onTransform: (filtered) {
-          filtered = filtered.toList()
-            ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-          return filtered;
-        },
-      );
-}
 
 class ManageSchedulePage extends StatefulWidget {
   const ManageSchedulePage({super.key});
@@ -45,7 +26,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
   Timer? _debounce;
   String search = "";
 
-  List<_Filter> activeFilters = [];
+  List<Filter<Schedule>> activeFilters = [];
 
   final now = DateTime.now().toUtc();
 

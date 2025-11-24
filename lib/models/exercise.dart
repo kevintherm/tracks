@@ -58,6 +58,11 @@ class Exercise {
         .toList();
   }
 
+  @ignore
+  String get excerpt {
+    return muscles.map((e) => e.name).join(', ');
+  }
+
   Exercise({
     required this.name,
     this.description,

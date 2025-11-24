@@ -16,66 +16,58 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
-      elevation: 0,
-      backgroundColor: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              'Note',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          'Note',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 24),
+        
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: const TextField(
+            maxLines: 6,
+            decoration: InputDecoration(
+              hintText: 'ex: Almost killed myself under the bench...',
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
             ),
-            const SizedBox(height: 24),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: const TextField(
-                maxLines: 6,
-                decoration: InputDecoration(
-                  hintText: 'ex: Almost killed myself under the bench...',
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        
+        const SizedBox(height: 24),
+        
+        PrimaryButton(
+          onTap: () {
+            Navigator.of(context).pop(_note);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "Next",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            PrimaryButton(
-              onTap: () {
-                Navigator.of(context).pop(_note);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Next",
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(MingCute.right_line, color: Colors.white),
-                ],
-              ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Icon(MingCute.right_line, color: Colors.white),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

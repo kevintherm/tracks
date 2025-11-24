@@ -19,82 +19,74 @@ class _SessionFinishFailureDialogState
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
-      elevation: 0,
-      backgroundColor: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              'Rep to failure?',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          'Rep to failure?',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 24),
+        
+        NumberPicker(
+          value: _failOnRep,
+          minValue: 1,
+          maxValue: 20,
+          onChanged: (value) => setState(() => _failOnRep = value),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.black26),
+          ),
+        ),
+        
+        const SizedBox(height: 24),
+        
+        Row(
+          children: [
+            Expanded(
+              child: SecondaryButton(
+                onTap: () {
+                  Navigator.of(context).pop(-1);
+                },
+                child: Text(
+                  "No Fail",
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-
-            NumberPicker(
-              value: _failOnRep,
-              minValue: 1,
-              maxValue: 20,
-              onChanged: (value) => setState(() => _failOnRep = value),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black26),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Row(
-              children: [
-                Expanded(
-                  child: SecondaryButton(
-                    onTap: () {
-                      Navigator.of(context).pop(-1);
-                    },
-                    child: Text(
-                      "No Fail",
+            const SizedBox(width: 8),
+            Expanded(
+              child: PrimaryButton(
+                onTap: () {
+                  Navigator.of(context).pop(_failOnRep);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Next",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Icon(MingCute.right_line, color: Colors.white),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: PrimaryButton(
-                    onTap: () {
-                      Navigator.of(context).pop(_failOnRep);
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "Next",
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(MingCute.right_line, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

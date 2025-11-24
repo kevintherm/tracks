@@ -2,10 +2,10 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
-import 'package:tracks/ui/pages/session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class HomeFragment extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HomeFragmentState extends State<HomeFragment> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => SessionPage()),
+            MaterialPageRoute(builder: (context) => StartSessionPage()),
           );
         },
       },

@@ -1,16 +1,8 @@
-- schedule
-    - create update schedule page
-        - create 3 types once, and periodically
-    - populate list page
-        - type = once, display once on that day
-        - type = daily, display on the selected week day
-        - type = monthly, display on the selected dates
-        - slider on schedule fragment to mark schedule as done
-            - create empty session if manually slided
-            - create session from session page
-    - create collection on cloud
-        - sync to cloud
 - session
+    - start session page
+        - shows the workout summary (list of exercises)
+        - shows bottom modal for selecting the schedule or workout
+            - fix options flickering
     - as a history
     - one to one schedule
         - shares view with schedule
@@ -58,6 +50,18 @@ session page
     - create schedule page
 
 #done
+- schedule
+    - create update schedule page
+        - create 3 types once, and periodically
+    - populate list page
+        - type = once, display once on that day
+        - type = daily, display on the selected week day
+        - type = monthly, display on the selected dates
+        - slider on schedule fragment to mark schedule as done
+            - create empty session if manually slided
+            - create session from session page
+    - create collection on cloud
+        - sync to cloud
 - workout
     - list page
     - create update workout page

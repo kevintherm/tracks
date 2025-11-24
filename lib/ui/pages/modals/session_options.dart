@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/secondary_button.dart';
+import 'package:tracks/ui/pages/session_page.dart';
 
 class ModalOptions extends StatefulWidget {
   const ModalOptions({super.key});
@@ -135,6 +136,10 @@ class _ModalOptionsState extends State<ModalOptions> {
           SizedBox(
             width: double.infinity,
             child: SecondaryButton(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
               child: Row(
                 children: [
                   Icon(MingCute.sad_line, color: Colors.white),

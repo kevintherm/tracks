@@ -6,6 +6,9 @@ import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/models/schedule.dart';
+import 'package:tracks/models/session.dart';
+import 'package:tracks/models/session_exercise.dart';
+import 'package:tracks/models/session_set.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/providers/navigation_provider.dart';
@@ -36,7 +39,10 @@ void main() async {
       ExerciseMusclesSchema,
       WorkoutSchema,
       WorkoutExercisesSchema,
-      ScheduleSchema
+      ScheduleSchema,
+      SessionSchema,
+      SessionExerciseSchema,
+      SessionSetSchema
     ],
     directory: dir.path,
     inspector: true,

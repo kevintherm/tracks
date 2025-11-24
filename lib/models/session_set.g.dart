@@ -1,0 +1,861 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'session_set.dart';
+
+// **************************************************************************
+// IsarCollectionGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetSessionSetCollection on Isar {
+  IsarCollection<SessionSet> get sessionSets => this.collection();
+}
+
+const SessionSetSchema = CollectionSchema(
+  name: r'SessionSet',
+  id: 7378379328497303479,
+  properties: {
+    r'duration': PropertySchema(
+      id: 0,
+      name: r'duration',
+      type: IsarType.double,
+    ),
+    r'needSync': PropertySchema(
+      id: 1,
+      name: r'needSync',
+      type: IsarType.bool,
+    ),
+    r'pocketbaseId': PropertySchema(
+      id: 2,
+      name: r'pocketbaseId',
+      type: IsarType.string,
+    ),
+    r'reps': PropertySchema(
+      id: 3,
+      name: r'reps',
+      type: IsarType.double,
+    ),
+    r'weight': PropertySchema(
+      id: 4,
+      name: r'weight',
+      type: IsarType.double,
+    )
+  },
+  estimateSize: _sessionSetEstimateSize,
+  serialize: _sessionSetSerialize,
+  deserialize: _sessionSetDeserialize,
+  deserializeProp: _sessionSetDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {
+    r'sessionExercise': LinkSchema(
+      id: 8209102497419006420,
+      name: r'sessionExercise',
+      target: r'SessionExercise',
+      single: true,
+    )
+  },
+  embeddedSchemas: {},
+  getId: _sessionSetGetId,
+  getLinks: _sessionSetGetLinks,
+  attach: _sessionSetAttach,
+  version: '3.1.0+1',
+);
+
+int _sessionSetEstimateSize(
+  SessionSet object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.pocketbaseId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _sessionSetSerialize(
+  SessionSet object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeDouble(offsets[0], object.duration);
+  writer.writeBool(offsets[1], object.needSync);
+  writer.writeString(offsets[2], object.pocketbaseId);
+  writer.writeDouble(offsets[3], object.reps);
+  writer.writeDouble(offsets[4], object.weight);
+}
+
+SessionSet _sessionSetDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = SessionSet(
+    duration: reader.readDouble(offsets[0]),
+    needSync: reader.readBoolOrNull(offsets[1]) ?? true,
+    reps: reader.readDouble(offsets[3]),
+    weight: reader.readDouble(offsets[4]),
+  );
+  object.id = id;
+  object.pocketbaseId = reader.readStringOrNull(offsets[2]);
+  return object;
+}
+
+P _sessionSetDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readDouble(offset)) as P;
+    case 1:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readDouble(offset)) as P;
+    case 4:
+      return (reader.readDouble(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _sessionSetGetId(SessionSet object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _sessionSetGetLinks(SessionSet object) {
+  return [object.sessionExercise];
+}
+
+void _sessionSetAttach(IsarCollection<dynamic> col, Id id, SessionSet object) {
+  object.id = id;
+  object.sessionExercise.attach(
+      col, col.isar.collection<SessionExercise>(), r'sessionExercise', id);
+}
+
+extension SessionSetQueryWhereSort
+    on QueryBuilder<SessionSet, SessionSet, QWhere> {
+  QueryBuilder<SessionSet, SessionSet, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension SessionSetQueryWhere
+    on QueryBuilder<SessionSet, SessionSet, QWhereClause> {
+  QueryBuilder<SessionSet, SessionSet, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterWhereClause> idNotEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension SessionSetQueryFilter
+    on QueryBuilder<SessionSet, SessionSet, QFilterCondition> {
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> durationEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'duration',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      durationGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'duration',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> durationLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'duration',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> durationBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'duration',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> idEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> needSyncEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'needSync',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'pocketbaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'pocketbaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pocketbaseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'pocketbaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'pocketbaseId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pocketbaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      pocketbaseIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'pocketbaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> repsEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'reps',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> repsGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'reps',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> repsLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'reps',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> repsBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'reps',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> weightEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> weightGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> weightLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> weightBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'weight',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+}
+
+extension SessionSetQueryObject
+    on QueryBuilder<SessionSet, SessionSet, QFilterCondition> {}
+
+extension SessionSetQueryLinks
+    on QueryBuilder<SessionSet, SessionSet, QFilterCondition> {
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> sessionExercise(
+      FilterQuery<SessionExercise> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'sessionExercise');
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      sessionExerciseIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'sessionExercise', 0, true, 0, true);
+    });
+  }
+}
+
+extension SessionSetQuerySortBy
+    on QueryBuilder<SessionSet, SessionSet, QSortBy> {
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByNeedSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByNeedSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needSync', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByPocketbaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByPocketbaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByReps() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reps', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByRepsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reps', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weight', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByWeightDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weight', Sort.desc);
+    });
+  }
+}
+
+extension SessionSetQuerySortThenBy
+    on QueryBuilder<SessionSet, SessionSet, QSortThenBy> {
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByNeedSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByNeedSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needSync', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByPocketbaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByPocketbaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByReps() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reps', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByRepsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reps', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weight', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByWeightDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weight', Sort.desc);
+    });
+  }
+}
+
+extension SessionSetQueryWhereDistinct
+    on QueryBuilder<SessionSet, SessionSet, QDistinct> {
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'duration');
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByNeedSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'needSync');
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByPocketbaseId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByReps() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'reps');
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'weight');
+    });
+  }
+}
+
+extension SessionSetQueryProperty
+    on QueryBuilder<SessionSet, SessionSet, QQueryProperty> {
+  QueryBuilder<SessionSet, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<SessionSet, double, QQueryOperations> durationProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'duration');
+    });
+  }
+
+  QueryBuilder<SessionSet, bool, QQueryOperations> needSyncProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'needSync');
+    });
+  }
+
+  QueryBuilder<SessionSet, String?, QQueryOperations> pocketbaseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<SessionSet, double, QQueryOperations> repsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'reps');
+    });
+  }
+
+  QueryBuilder<SessionSet, double, QQueryOperations> weightProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'weight');
+    });
+  }
+}

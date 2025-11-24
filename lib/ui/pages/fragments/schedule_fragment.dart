@@ -8,6 +8,7 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/single_row_calendar_pager.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
+import 'package:tracks/ui/pages/sessions_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -68,19 +69,38 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Tooltip(
-                message: 'Manage All Schedules.',
-                child: Pressable(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ManageSchedulePage(),
-                      ),
-                    );
-                  },
-                  child: Icon(Iconsax.menu_outline, size: 32),
-                ),
+              Row(
+                children: [
+                  Tooltip(
+                    message: 'See All Sessions.',
+                    child: Pressable(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SessionsPage(),
+                          ),
+                        );
+                      },
+                      child: Icon(MingCute.history_line, size: 28),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: 'Manage All Schedules.',
+                    child: Pressable(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ManageSchedulePage(),
+                          ),
+                        );
+                      },
+                      child: Icon(MingCute.list_search_line, size: 28),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -141,19 +161,19 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
                 final List<Schedule> schedules = snapshot.data ?? [];
                 final now = DateTime.now();
-                
+
                 // Sort: active schedules first, then expired, each sorted by start time
                 schedules.sort((a, b) {
                   final aDateTime = _getScheduleDateTime(a, selectedDate);
                   final bDateTime = _getScheduleDateTime(b, selectedDate);
                   final aIsActive = aDateTime.isAfter(now);
                   final bIsActive = bDateTime.isAfter(now);
-                  
+
                   // Active schedules come first
                   if (aIsActive != bIsActive) {
                     return aIsActive ? -1 : 1;
                   }
-                  
+
                   // Within same status, sort by time (earliest first for active, latest first for expired)
                   if (aIsActive) {
                     return aDateTime.compareTo(bDateTime);
@@ -406,10 +426,14 @@ class _OnComingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedDateOnly = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final selectedDateOnly = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
     final todayOnly = DateTime(now.year, now.month, now.day);
     final isToday = selectedDateOnly.isAtSameMomentAs(todayOnly);
-    
+
     return Positioned(
       right: 0,
       top: 0,
@@ -423,9 +447,9 @@ class _OnComingBadge extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         child: Text(
-          isToday 
-            ? dateToHumans(onComingDate, from: now)
-            : dateToHumans(selectedDate, from: now),
+          isToday
+              ? dateToHumans(onComingDate, from: now)
+              : dateToHumans(selectedDate, from: now),
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: 12,

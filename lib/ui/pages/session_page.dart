@@ -28,40 +28,40 @@ class _SessionPageState extends State<SessionPage> {
   void _handleNextButton() async {
     final nav = Navigator.of(context);
 
-    int? currentReps = await showDialog(
+    int? currentReps = await showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
       builder: (BuildContext context) {
-        return PopScope(canPop: false, child: SessionFinishRepsDialog());
+        return _ModalPadding(child: SessionFinishRepsDialog());
       },
     );
 
     if (currentReps == null) return;
 
     if (!mounted) return;
-    int failOnRep = await showDialog(
+    int failOnRep = await showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
       builder: (BuildContext context) {
-        return PopScope(canPop: false, child: SessionFinishFailureDialog());
+        return _ModalPadding(child: SessionFinishFailureDialog());
       },
     );
 
     if (!mounted) return;
-    final failRate = await showDialog(
+    final failRate = await showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
       builder: (BuildContext context) {
-        return PopScope(canPop: false, child: SessionFinishRateFailDialog());
+        return _ModalPadding(child: SessionFinishRateFailDialog());
       },
     );
 
     if (!mounted) return;
-    String? note = await showDialog(
+    String? note = await showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
       builder: (BuildContext context) {
-        return PopScope(canPop: false, child: SessionFinishNoteDialog());
+        return _ModalPadding(child: SessionFinishNoteDialog());
       },
     );
 
@@ -234,6 +234,20 @@ class _SessionPageState extends State<SessionPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ModalPadding extends StatelessWidget {
+  final Widget child;
+
+  const _ModalPadding({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 24),
+      child: child,
     );
   }
 }

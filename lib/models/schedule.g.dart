@@ -17,55 +17,60 @@ const ScheduleSchema = CollectionSchema(
   name: r'Schedule',
   id: 6369058706800408146,
   properties: {
-    r'createdAt': PropertySchema(
+    r'activeSelectedDates': PropertySchema(
       id: 0,
+      name: r'activeSelectedDates',
+      type: IsarType.dateTimeList,
+    ),
+    r'createdAt': PropertySchema(
+      id: 1,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'dailyWeekday': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'dailyWeekday',
       type: IsarType.byteList,
       enumMap: _ScheduledailyWeekdayEnumValueMap,
     ),
     r'durationAlert': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'durationAlert',
       type: IsarType.bool,
     ),
     r'needSync': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'plannedDuration': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'plannedDuration',
       type: IsarType.long,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'recurrenceType': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'recurrenceType',
       type: IsarType.byte,
       enumMap: _SchedulerecurrenceTypeEnumValueMap,
     ),
     r'selectedDates': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'selectedDates',
       type: IsarType.dateTimeList,
     ),
     r'startTime': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'startTime',
       type: IsarType.dateTime,
     ),
     r'updatedAt': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -97,6 +102,7 @@ int _scheduleEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.activeSelectedDates.length * 8;
   bytesCount += 3 + object.dailyWeekday.length;
   {
     final value = object.pocketbaseId;
@@ -114,17 +120,18 @@ void _scheduleSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.createdAt);
+  writer.writeDateTimeList(offsets[0], object.activeSelectedDates);
+  writer.writeDateTime(offsets[1], object.createdAt);
   writer.writeByteList(
-      offsets[1], object.dailyWeekday.map((e) => e.index).toList());
-  writer.writeBool(offsets[2], object.durationAlert);
-  writer.writeBool(offsets[3], object.needSync);
-  writer.writeLong(offsets[4], object.plannedDuration);
-  writer.writeString(offsets[5], object.pocketbaseId);
-  writer.writeByte(offsets[6], object.recurrenceType.index);
-  writer.writeDateTimeList(offsets[7], object.selectedDates);
-  writer.writeDateTime(offsets[8], object.startTime);
-  writer.writeDateTime(offsets[9], object.updatedAt);
+      offsets[2], object.dailyWeekday.map((e) => e.index).toList());
+  writer.writeBool(offsets[3], object.durationAlert);
+  writer.writeBool(offsets[4], object.needSync);
+  writer.writeLong(offsets[5], object.plannedDuration);
+  writer.writeString(offsets[6], object.pocketbaseId);
+  writer.writeByte(offsets[7], object.recurrenceType.index);
+  writer.writeDateTimeList(offsets[8], object.selectedDates);
+  writer.writeDateTime(offsets[9], object.startTime);
+  writer.writeDateTime(offsets[10], object.updatedAt);
 }
 
 Schedule _scheduleDeserialize(
@@ -134,24 +141,24 @@ Schedule _scheduleDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Schedule(
-    durationAlert: reader.readBoolOrNull(offsets[2]) ?? false,
-    needSync: reader.readBoolOrNull(offsets[3]) ?? true,
-    plannedDuration: reader.readLongOrNull(offsets[4]) ?? 30,
+    durationAlert: reader.readBoolOrNull(offsets[3]) ?? false,
+    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
+    plannedDuration: reader.readLongOrNull(offsets[5]) ?? 30,
     recurrenceType: _SchedulerecurrenceTypeValueEnumMap[
-            reader.readByteOrNull(offsets[6])] ??
+            reader.readByteOrNull(offsets[7])] ??
         RecurrenceType.once,
-    startTime: reader.readDateTime(offsets[8]),
+    startTime: reader.readDateTime(offsets[9]),
   );
-  object.createdAt = reader.readDateTime(offsets[0]);
+  object.createdAt = reader.readDateTime(offsets[1]);
   object.dailyWeekday = reader
-          .readByteList(offsets[1])
+          .readByteList(offsets[2])
           ?.map((e) => _ScheduledailyWeekdayValueEnumMap[e] ?? Weekday.monday)
           .toList() ??
       [];
   object.id = id;
-  object.pocketbaseId = reader.readStringOrNull(offsets[5]);
-  object.selectedDates = reader.readDateTimeList(offsets[7]) ?? [];
-  object.updatedAt = reader.readDateTime(offsets[9]);
+  object.pocketbaseId = reader.readStringOrNull(offsets[6]);
+  object.selectedDates = reader.readDateTimeList(offsets[8]) ?? [];
+  object.updatedAt = reader.readDateTime(offsets[10]);
   return object;
 }
 
@@ -163,31 +170,33 @@ P _scheduleDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeList(offset) ?? []) as P;
     case 1:
+      return (reader.readDateTime(offset)) as P;
+    case 2:
       return (reader
               .readByteList(offset)
               ?.map(
                   (e) => _ScheduledailyWeekdayValueEnumMap[e] ?? Weekday.monday)
               .toList() ??
           []) as P;
-    case 2:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 4:
-      return (reader.readLongOrNull(offset) ?? 30) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 30) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (_SchedulerecurrenceTypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           RecurrenceType.once) as P;
-    case 7:
-      return (reader.readDateTimeList(offset) ?? []) as P;
     case 8:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeList(offset) ?? []) as P;
     case 9:
+      return (reader.readDateTime(offset)) as P;
+    case 10:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -313,6 +322,151 @@ extension ScheduleQueryWhere on QueryBuilder<Schedule, Schedule, QWhereClause> {
 
 extension ScheduleQueryFilter
     on QueryBuilder<Schedule, Schedule, QFilterCondition> {
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesElementEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'activeSelectedDates',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesElementGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'activeSelectedDates',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesElementLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'activeSelectedDates',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesElementBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'activeSelectedDates',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      activeSelectedDatesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeSelectedDates',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterFilterCondition> createdAtEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1327,6 +1481,12 @@ extension ScheduleQuerySortThenBy
 
 extension ScheduleQueryWhereDistinct
     on QueryBuilder<Schedule, Schedule, QDistinct> {
+  QueryBuilder<Schedule, Schedule, QDistinct> distinctByActiveSelectedDates() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'activeSelectedDates');
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -1394,6 +1554,13 @@ extension ScheduleQueryProperty
   QueryBuilder<Schedule, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Schedule, List<DateTime>, QQueryOperations>
+      activeSelectedDatesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'activeSelectedDates');
     });
   }
 
