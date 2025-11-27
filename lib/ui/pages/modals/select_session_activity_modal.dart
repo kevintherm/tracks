@@ -16,16 +16,16 @@ import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 
-class SelectWorkoutModal extends StatefulWidget {
+class SelectSessionActivityModal extends StatefulWidget {
   final bool canPop;
 
-  const SelectWorkoutModal({super.key, this.canPop = false});
+  const SelectSessionActivityModal({super.key, this.canPop = false});
 
   @override
-  State<SelectWorkoutModal> createState() => _SelectWorkoutModalState();
+  State<SelectSessionActivityModal> createState() => _SelectSessionActivityModalState();
 }
 
-class _SelectWorkoutModalState extends State<SelectWorkoutModal>
+class _SelectSessionActivityModalState extends State<SelectSessionActivityModal>
     with SingleTickerProviderStateMixin {
   late final TabController tabController;
   final searchController = TextEditingController();
@@ -240,7 +240,7 @@ class _SelectWorkoutModalState extends State<SelectWorkoutModal>
                   ? () => Navigator.of(context).pop(selectedItem)
                   : null,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Select",
@@ -250,7 +250,7 @@ class _SelectWorkoutModalState extends State<SelectWorkoutModal>
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Icon(MingCute.right_line, color: Colors.white),
                 ],
               ),

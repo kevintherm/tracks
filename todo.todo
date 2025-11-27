@@ -1,11 +1,4 @@
-- session
-    - start session page
-        - shows the workout summary (list of exercises)
-        - shows bottom modal for selecting the schedule or workout
-            - fix options flickering
-    - as a history
-    - one to one schedule
-        - shares view with schedule
+
 - integrate session with every single fucking things
     - session finish section
         - last session reps + 1
@@ -50,6 +43,12 @@ session page
     - create schedule page
 
 #done
+- session
+    - start session page
+        - shows the workout summary (list of exercises)
+        - shows bottom modal for selecting the schedule or workout
+            - fix options flickering
+    - as a history
 - schedule
     - create update schedule page
         - create 3 types once, and periodically

@@ -64,7 +64,7 @@ class _SearchPageState extends State<SearchPage> {
                     horizontal: 16,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                 ),

@@ -128,7 +128,6 @@ class _SessionFinishPageState extends State<SessionFinishPage>
               ),
               Spacer(),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
                     child: PrimaryButton(
@@ -138,9 +137,8 @@ class _SessionFinishPageState extends State<SessionFinishPage>
                         horizontal: 16,
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(MingCute.right_line, color: Colors.white),
-                          const SizedBox(width: 8),
                           Text(
                             "Finish",
                             style: GoogleFonts.inter(
@@ -149,6 +147,8 @@ class _SessionFinishPageState extends State<SessionFinishPage>
                               color: Colors.white,
                             ),
                           ),
+                          const SizedBox(width: 4),
+                          Icon(MingCute.right_line, color: Colors.white),
                         ],
                       ),
                     ),

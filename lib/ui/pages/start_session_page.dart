@@ -11,7 +11,7 @@ import 'package:tracks/models/workout.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/session_activity.dart';
 import 'package:tracks/ui/pages/modals/select_sets_n_reps_modal.dart';
-import 'package:tracks/ui/pages/modals/select_workout_modal.dart';
+import 'package:tracks/ui/pages/modals/select_session_activity_modal.dart';
 import 'package:tracks/ui/pages/session_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
@@ -89,7 +89,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
       isDismissible: false,
       enableDrag: true,
       builder: (_) {
-        return SelectWorkoutModal(canPop: true);
+        return SelectSessionActivityModal(canPop: true);
       },
     );
 
@@ -660,7 +660,7 @@ class _ConfirmStartSessionDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       'Cancel',
@@ -681,7 +681,7 @@ class _ConfirmStartSessionDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       'Start',
@@ -733,7 +733,7 @@ class _MissingActivityDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: AppColors.darkAccent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       'OK',

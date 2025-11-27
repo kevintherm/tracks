@@ -447,7 +447,7 @@ class _ConfirmStartSessionDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       'Cancel',
@@ -468,7 +468,7 @@ class _ConfirmStartSessionDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       'Start',
