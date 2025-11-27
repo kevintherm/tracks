@@ -15,7 +15,7 @@ class SessionFinishSetDialog extends StatelessWidget {
         Icon(MingCute.barbell_line, size: 48, color: AppColors.primary),
         const SizedBox(height: 16),
         Text(
-          'Another Set?',
+          'Finish Exercise',
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),

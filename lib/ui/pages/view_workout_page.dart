@@ -7,6 +7,8 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/session_activity.dart';
+import 'package:tracks/ui/pages/session_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 
@@ -47,10 +49,12 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
     );
 
     if (mounted && confirm == true) {
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => SessionPage()),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SessionPage(activity: SessionActivity.from(workout)),
+        ),
+      );
     }
   }
 
@@ -303,11 +307,11 @@ class _ExerciseCard extends StatelessWidget {
 
   const _ExerciseCard({required this.exerciseParam});
 
-  String get exercisesExcerpt {
+  String get excerpt {
     final muscles = List.of(exerciseParam.exercise.muscles).map((e) => e.name);
 
-    return muscles.length > 4
-        ? '${muscles.length} muscles'
+    return muscles.length > 3
+        ? '${muscles.first} and ${muscles.length - 1} other'
         : muscles.join(', ');
   }
 
@@ -338,12 +342,25 @@ class _ExerciseCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  _ExerciseStat(icon: MingCute.time_line, label: "32 Minutes"),
-                  if (exercisesExcerpt.isNotEmpty)
-                    _ExerciseStat(
-                      icon: MingCute.barbell_line,
-                      label: exercisesExcerpt,
-                    ),
+                  _ExerciseStat(
+                    icon: MingCute.time_line,
+                    label: "32 Minutes ~",
+                  ),
+                  if (excerpt.isNotEmpty)
+                    _ExerciseStat(icon: MingCute.barbell_line, label: excerpt),
+                  Row(
+                    children: [
+                      _ExerciseStat(
+                        icon: MingCute.barbell_line,
+                        label: '${exerciseParam.sets} Sets',
+                      ),
+                      const SizedBox(width: 8),
+                      _ExerciseStat(
+                        icon: MingCute.repeat_line,
+                        label: '${exerciseParam.reps} Reps',
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

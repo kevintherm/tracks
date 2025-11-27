@@ -5,6 +5,14 @@ import 'package:tracks/models/workout.dart';
 sealed class SessionActivity {
   List<Exercise> getExercises();
   Workout? getWorkout();
+
+  static SessionActivity from(dynamic value) {
+    if (value is Workout) return WorkoutActivity(value);
+    if (value is Schedule) return ScheduleActivity(value);
+    if (value is Exercise) return ExerciseActivity(value);
+    throw ArgumentError("Unsupported type");
+  }
+
 }
 
 class ScheduleActivity extends SessionActivity {

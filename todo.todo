@@ -1,6 +1,12 @@
-
+- validate min reps and set to be 1 in pb
+- start session from view workout page
+- view exercise page
+- session page (history page)
+    - list session page
+    - mark schedule as completed 
+        - if session for that workout in that range of time exists
 - integrate session with every single fucking things
-    - session finish section
+    - session finish section (last week session)
         - last session reps + 1
         - last session sets + 1
         - last session failure rate + 1
@@ -10,10 +16,10 @@
                 - 1 normal
                 - 2 -> 1-2 set failure
                 - 3 -> 50% set failure
-    - charts and dashboard stuff
-        - weekly sets
-        - weekly weights
-        - github style history session/effort?
+- charts and dashboard stuff
+    - weekly sets
+    - weekly weights
+    - github style history session/effort?
 - news
     - display news on home page
     - list news page
