@@ -24,26 +24,32 @@ class _SessionFinishFailureDialogState
       children: <Widget>[
         Text(
           'Failure on repetition?',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
-        
-        NumberPicker(
-          value: _failOnRep,
-          minValue: 1,
-          maxValue: 20,
-          onChanged: (value) => setState(() => _failOnRep = value),
+
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.black26),
           ),
+          child: NumberPicker(
+            value: _failOnRep,
+            minValue: 1,
+            maxValue: 20,
+            onChanged: (value) => setState(() => _failOnRep = value),
+            itemWidth: 60,
+            textStyle: GoogleFonts.spaceMono(fontSize: 20, color: Colors.grey),
+            selectedTextStyle: GoogleFonts.spaceMono(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         Row(
           children: [
             Expanded(
@@ -53,6 +59,7 @@ class _SessionFinishFailureDialogState
                 },
                 child: Text(
                   "No Fail",
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -61,14 +68,14 @@ class _SessionFinishFailureDialogState
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 16),
             Expanded(
               child: PrimaryButton(
                 onTap: () {
                   Navigator.of(context).pop(_failOnRep);
                 },
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Next",
@@ -78,7 +85,7 @@ class _SessionFinishFailureDialogState
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     Icon(MingCute.right_line, color: Colors.white),
                   ],
                 ),

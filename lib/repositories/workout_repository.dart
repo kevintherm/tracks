@@ -69,6 +69,10 @@ class WorkoutRepository {
     return isar.workouts;
   }
 
+  IsarCollection<WorkoutExercises> get weCollection {
+    return isar.workoutExercises;
+  }
+
   Future<void> createWorkout({
     required Workout workout,
     required List<WorkoutConfigParam> exercises,

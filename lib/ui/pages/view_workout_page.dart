@@ -7,7 +7,6 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/pages/session_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 
@@ -48,10 +47,10 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
     );
 
     if (mounted && confirm == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SessionPage()),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => SessionPage()),
+      // );
     }
   }
 

@@ -147,10 +147,22 @@ class _StartSessionPageState extends State<StartSessionPage> {
       builder: (_) => _ConfirmStartSessionDialog(),
     );
 
+    if (activity == null) {
+      if (mounted) {
+        await showModalBottomSheet(
+          context: context,
+          builder: (_) => _MissingActivityDialog(),
+        );
+      }
+      return;
+    }
+
     if (mounted && confirm == true) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SessionPage()),
+        MaterialPageRoute(
+          builder: (context) => SessionPage(activity: activity!),
+        ),
       );
     }
   }
@@ -323,7 +335,12 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                         if (activity is ScheduleActivity &&
                                             scrollProgress > 0.5) ...[
                                           Text(
-                                            (activity as ScheduleActivity).schedule.workout.value?.name ?? '',
+                                            (activity as ScheduleActivity)
+                                                    .schedule
+                                                    .workout
+                                                    .value
+                                                    ?.name ??
+                                                '',
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -342,10 +359,13 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ] else if (activity is WorkoutActivity &&
+                                        ] else if (activity
+                                                is WorkoutActivity &&
                                             scrollProgress > 0.5)
                                           Text(
-                                            (activity as WorkoutActivity).workout.name,
+                                            (activity as WorkoutActivity)
+                                                .workout
+                                                .name,
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
@@ -365,9 +385,14 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                   Center(
                                     child:
                                         activity is WorkoutActivity &&
-                                            (activity as WorkoutActivity).workout.thumbnailLocal != null
+                                            (activity as WorkoutActivity)
+                                                    .workout
+                                                    .thumbnailLocal !=
+                                                null
                                         ? getImage(
-                                            (activity as WorkoutActivity).workout.thumbnailLocal,
+                                            (activity as WorkoutActivity)
+                                                .workout
+                                                .thumbnailLocal,
                                             width: 1000,
                                             height: 1000,
                                           )
@@ -461,11 +486,11 @@ class _ExerciseCard extends StatelessWidget {
 
   const _ExerciseCard({required this.exerciseParam});
 
-  String get exercisesExcerpt {
+  String get excerpt {
     final muscles = List.of(exerciseParam.exercise.muscles).map((e) => e.name);
 
     return muscles.length > 3
-        ? '${muscles.length} Exercises'
+        ? '${muscles.length} muscles'
         : muscles.join(', ');
   }
 
@@ -496,12 +521,21 @@ class _ExerciseCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  _ExerciseStat(icon: MingCute.time_line, label: "32 Minutes"),
-                  if (exercisesExcerpt.isNotEmpty)
-                    _ExerciseStat(
-                      icon: MingCute.barbell_line,
-                      label: exercisesExcerpt,
-                    ),
+                  if (excerpt.isNotEmpty)
+                    _ExerciseStat(icon: MingCute.barbell_line, label: excerpt),
+                  Row(
+                    children: [
+                      _ExerciseStat(
+                        icon: MingCute.barbell_line,
+                        label: '${exerciseParam.sets} Sets',
+                      ),
+                      const SizedBox(width: 8),
+                      _ExerciseStat(
+                        icon: MingCute.repeat_line,
+                        label: '${exerciseParam.reps} Reps',
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -597,8 +631,6 @@ class _FabMenu extends StatelessWidget {
 }
 
 class _ConfirmStartSessionDialog extends StatelessWidget {
-  const _ConfirmStartSessionDialog();
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -653,6 +685,58 @@ class _ConfirmStartSessionDialog extends StatelessWidget {
                     ),
                     child: Text(
                       'Start',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MissingActivityDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(MingCute.alert_fill, size: 48, color: AppColors.darkAccent),
+          const SizedBox(height: 16),
+          Text(
+            'Cannot Start Session',
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'You haven\'t selected any activity for session to start.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Pressable(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'OK',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 16,

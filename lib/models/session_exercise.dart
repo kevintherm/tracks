@@ -12,14 +12,10 @@ class SessionExercise {
   bool needSync;
 
   IsarLink<Session> session = IsarLink();
-  IsarLink<Exercise> exercise =  IsarLink();
+  IsarLink<Exercise> exercise = IsarLink();
 
-  String exerciseName;
+  String exerciseName; // Snapshot only
   int order;
 
-  SessionExercise({
-    required this.exerciseName,
-    required this.order,
-    this.needSync = true,
-  });
+  SessionExercise({required this.exerciseName, required this.order, this.needSync = true});
 }

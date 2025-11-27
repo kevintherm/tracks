@@ -16,13 +16,13 @@ class Session {
   IsarLink<Workout> workout = IsarLink();
 
   DateTime start;
-  DateTime end;
+  DateTime? end;
   
   Session({
     this.pocketbaseId,
     this.needSync = true,
     required this.start,
-    required this.end,
+    this.end
   }) : created = DateTime.now(),
        updated = DateTime.now();
 }

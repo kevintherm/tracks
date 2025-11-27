@@ -105,12 +105,12 @@ Session _sessionDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Session(
-    end: reader.readDateTime(offsets[1]),
     needSync: reader.readBoolOrNull(offsets[2]) ?? true,
     pocketbaseId: reader.readStringOrNull(offsets[3]),
     start: reader.readDateTime(offsets[4]),
   );
   object.created = reader.readDateTime(offsets[0]);
+  object.end = reader.readDateTimeOrNull(offsets[1]);
   object.id = id;
   object.updated = reader.readDateTime(offsets[5]);
   return object;
@@ -126,7 +126,7 @@ P _sessionDeserializeProp<P>(
     case 0:
       return (reader.readDateTime(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 3:
@@ -283,8 +283,24 @@ extension SessionQueryFilter
     });
   }
 
+  QueryBuilder<Session, Session, QAfterFilterCondition> endIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'end',
+      ));
+    });
+  }
+
+  QueryBuilder<Session, Session, QAfterFilterCondition> endIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'end',
+      ));
+    });
+  }
+
   QueryBuilder<Session, Session, QAfterFilterCondition> endEqualTo(
-      DateTime value) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'end',
@@ -294,7 +310,7 @@ extension SessionQueryFilter
   }
 
   QueryBuilder<Session, Session, QAfterFilterCondition> endGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -307,7 +323,7 @@ extension SessionQueryFilter
   }
 
   QueryBuilder<Session, Session, QAfterFilterCondition> endLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -320,8 +336,8 @@ extension SessionQueryFilter
   }
 
   QueryBuilder<Session, Session, QAfterFilterCondition> endBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -887,7 +903,7 @@ extension SessionQueryProperty
     });
   }
 
-  QueryBuilder<Session, DateTime, QQueryOperations> endProperty() {
+  QueryBuilder<Session, DateTime?, QQueryOperations> endProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'end');
     });

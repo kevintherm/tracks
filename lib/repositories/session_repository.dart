@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
@@ -12,10 +14,7 @@ class SessionExerciseData {
   final SessionExercise sessionExercise;
   final List<SessionSet> sets;
 
-  SessionExerciseData({
-    required this.sessionExercise,
-    required this.sets,
-  });
+  SessionExerciseData({required this.sessionExercise, required this.sets});
 }
 
 class SessionRepository {
@@ -39,26 +38,30 @@ class SessionRepository {
   }) async {
     session.needSync = true;
 
-    await isar.writeTxn(() async {
-      await isar.sessions.put(session);
-      await session.workout.save();
+    try {
+      await isar.writeTxn(() async {
+        await isar.sessions.put(session);
+        await session.workout.save();
 
-      for (final data in exercises) {
-        final se = data.sessionExercise;
-        se.session.value = session;
-        se.needSync = true;
-        await isar.sessionExercises.put(se);
-        await se.exercise.save();
-        await se.session.save();
+        for (final data in exercises) {
+          final se = data.sessionExercise;
+          se.session.value = session;
+          se.needSync = true;
+          await isar.sessionExercises.put(se);
+          await se.exercise.save();
+          await se.session.save();
 
-        for (final set in data.sets) {
-          set.sessionExercise.value = se;
-          set.needSync = true;
-          await isar.sessionSets.put(set);
-          await set.sessionExercise.save();
+          for (final set in data.sets) {
+            set.sessionExercise.value = se;
+            set.needSync = true;
+            await isar.sessionSets.put(set);
+            await set.sessionExercise.save();
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      log('Failed to create session, $e');
+    }
 
     if (authService.isSyncEnabled) {
       await _uploadSessionToCloud(session);
@@ -85,6 +88,50 @@ class SessionRepository {
     }
   }
 
+  Future<void> addExercisesToSession({
+    required Session session,
+    required List<SessionExerciseData> exercises,
+  }) async {
+    session.updated = DateTime.now();
+    if (session.pocketbaseId != null) {
+      session.needSync = true;
+    }
+
+    await isar.writeTxn(() async {
+      await isar.sessions.put(session);
+
+      for (final data in exercises) {
+        final se = data.sessionExercise;
+        se.session.value = session;
+        se.needSync = true;
+        await isar.sessionExercises.put(se);
+        await se.exercise.save();
+        await se.session.save();
+
+        for (final set in data.sets) {
+          set.sessionExercise.value = se;
+          set.needSync = true;
+          await isar.sessionSets.put(set);
+          await set.sessionExercise.save();
+        }
+      }
+    });
+
+    if (authService.isSyncEnabled) {
+      if (session.pocketbaseId != null) {
+        for (final data in exercises) {
+          await _uploadSessionExerciseToCloud(
+            data.sessionExercise,
+            session.pocketbaseId!,
+          );
+        }
+        await _updateSessionOnCloud(session);
+      } else {
+        await _uploadSessionToCloud(session);
+      }
+    }
+  }
+
   Future<void> deleteSession(Session session) async {
     await isar.writeTxn(() async {
       // Delete sets
@@ -92,7 +139,7 @@ class SessionRepository {
           .filter()
           .session((q) => q.idEqualTo(session.id))
           .findAll();
-      
+
       for (final ex in exercises) {
         await isar.sessionSets
             .filter()
@@ -154,14 +201,16 @@ class SessionRepository {
       }
 
       // 1. Upload Session
-      final record = await pb.collection(PBCollections.sessions.value).create(
-        body: {
-          'user': authService.currentUser?['id'],
-          'workout': workout!.pocketbaseId,
-          'start': session.start.toIso8601String(),
-          'end': session.end.toIso8601String(),
-        },
-      );
+      final record = await pb
+          .collection(PBCollections.sessions.value)
+          .create(
+            body: {
+              'user': authService.currentUser?['id'],
+              'workout': workout!.pocketbaseId,
+              'start': session.start.toIso8601String(),
+              'end': session.end?.toIso8601String(),
+            },
+          );
 
       session.pocketbaseId = record.id;
       session.needSync = false;
@@ -179,7 +228,6 @@ class SessionRepository {
       for (final ex in exercises) {
         await _uploadSessionExerciseToCloud(ex, session.pocketbaseId!);
       }
-
     } catch (e) {
       print('Failed to upload session to cloud: $e');
     }
@@ -197,15 +245,17 @@ class SessionRepository {
         return;
       }
 
-      await pb.collection(PBCollections.sessions.value).update(
-        session.pocketbaseId!,
-        body: {
-          'user': authService.currentUser?['id'],
-          'workout': workout!.pocketbaseId,
-          'start': session.start.toIso8601String(),
-          'end': session.end.toIso8601String(),
-        },
-      );
+      await pb
+          .collection(PBCollections.sessions.value)
+          .update(
+            session.pocketbaseId!,
+            body: {
+              'user': authService.currentUser?['id'],
+              'workout': workout!.pocketbaseId,
+              'start': session.start.toIso8601String(),
+              'end': session.end?.toIso8601String(),
+            },
+          );
 
       session.needSync = false;
 
@@ -267,17 +317,19 @@ class SessionRepository {
     String sessionExercisePbId,
   ) async {
     try {
-      final record = await pb.collection(PBCollections.sessionSets.value).create(
-        body: {
-          'session_exercise': sessionExercisePbId,
-          'weight': set.weight,
-          'reps': set.reps,
-          'duration': set.duration,
-          'effort_rate': set.effortRate,
-          'fail_on_rep': set.failOnRep,
-          'note': set.note,
-        },
-      );
+      final record = await pb
+          .collection(PBCollections.sessionSets.value)
+          .create(
+            body: {
+              'session_exercise': sessionExercisePbId,
+              'weight': set.weight,
+              'reps': set.reps,
+              'duration': set.duration,
+              'effort_rate': set.effortRate,
+              'fail_on_rep': set.failOnRep,
+              'note': set.note,
+            },
+          );
 
       set.pocketbaseId = record.id;
       set.needSync = false;
@@ -294,9 +346,12 @@ class SessionRepository {
     try {
       // Fetch all cloud sessions with nested relations
       // Note: PocketBase expand syntax might vary, assuming standard relation expansion
-      final pbRecords = await pb.collection(PBCollections.sessions.value).getFullList(
-        expand: 'workout,session_exercises(session).exercise,session_exercises(session).session_sets(session_exercise)',
-      );
+      final pbRecords = await pb
+          .collection(PBCollections.sessions.value)
+          .getFullList(
+            expand:
+                'workout,session_exercises(session).exercise,session_exercises(session).session_sets(session_exercise)',
+          );
 
       for (final record in pbRecords) {
         await _processCloudSession(record);

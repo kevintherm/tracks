@@ -34,12 +34,12 @@ abstract class AppButton extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Padding(
               padding:
                   padding ??
-                  const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               child: child,
             ),
           ),

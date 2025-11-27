@@ -27,24 +27,41 @@ class _SessionFinishRateFailDialogState
         ),
         const SizedBox(height: 24),
 
-        NumberPicker(
-          value: _failRate,
-          minValue: 1,
-          maxValue: 5,
-          haptics: true,
-          axis: Axis.horizontal,
-          onChanged: (value) => setState(() => _failRate = value),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.black26),
           ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            '/5',
-            style: TextStyle(fontSize: 18, color: Colors.black54),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              NumberPicker(
+                value: _failRate,
+                minValue: 1,
+                maxValue: 5,
+                haptics: true,
+                onChanged: (value) => setState(() => _failRate = value),
+                itemWidth: 60,
+                textStyle: GoogleFonts.spaceMono(
+                  fontSize: 20,
+                  color: Colors.grey,
+                ),
+                selectedTextStyle: GoogleFonts.spaceMono(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '/5',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -55,7 +72,7 @@ class _SessionFinishRateFailDialogState
             Navigator.of(context).pop(_failRate);
           },
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 "Next",
@@ -65,7 +82,7 @@ class _SessionFinishRateFailDialogState
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Icon(MingCute.right_line, color: Colors.white),
             ],
           ),

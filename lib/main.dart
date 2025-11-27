@@ -15,6 +15,7 @@ import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
@@ -83,6 +84,13 @@ void main() async {
         ),
         Provider(
           create: (context) => ScheduleRepository(
+            context.read<Isar>(),
+            pb,
+            context.read<AuthService>(),
+          ),
+        ),
+        Provider(
+          create: (context) => SessionRepository(
             context.read<Isar>(),
             pb,
             context.read<AuthService>(),

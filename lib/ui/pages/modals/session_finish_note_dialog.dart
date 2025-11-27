@@ -52,7 +52,7 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
             Navigator.of(context).pop(_note);
           },
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 "Next",
@@ -62,7 +62,7 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Icon(MingCute.right_line, color: Colors.white),
             ],
           ),
