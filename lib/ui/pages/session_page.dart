@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -253,9 +252,7 @@ class _SessionPageState extends State<SessionPage> {
     }
 
     // Finish exercise or another set
-    if (!lastExercise &&
-        (exercisePlan != null && sessionSets.length < exercisePlan!.sets))
-      return;
+    if (!lastExercise && (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) return;
 
     if (!mounted) return;
     final finishExercise = await showModalBottomSheet<bool>(

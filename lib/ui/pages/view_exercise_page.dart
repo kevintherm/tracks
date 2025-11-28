@@ -2,24 +2,25 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/workout.dart';
-import 'package:tracks/repositories/workout_repository.dart';
+import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
-import 'package:tracks/ui/pages/create_workout_page.dart';
-import 'package:tracks/ui/pages/view_exercise_page.dart';
+import 'package:tracks/ui/pages/create_exercise_page.dart';
+import 'package:tracks/ui/pages/view_workout_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
-class ViewWorkoutPage extends StatelessWidget {
-  final Workout workout;
+class ViewExercisePage extends StatelessWidget {
+  final Exercise exercise;
   final bool readonly;
 
-  const ViewWorkoutPage({
+  const ViewExercisePage({
     super.key,
-    required this.workout,
+    required this.exercise,
     this.readonly = false,
   });
 
@@ -42,7 +43,9 @@ class ViewWorkoutPage extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildDescription(),
                   const SizedBox(height: 32),
-                  _buildExercises(context),
+                  _buildMusclesSection(),
+                  const SizedBox(height: 32),
+                  _buildRelatedWorkouts(context),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -53,15 +56,15 @@ class ViewWorkoutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExercises(BuildContext context) {
-    final exercisesWithPlan = workout.exercisesWithPivot;
-    if (exercisesWithPlan.isEmpty) return const SizedBox.shrink();
+  Widget _buildRelatedWorkouts(BuildContext context) {
+    final workouts = exercise.workouts;
+    if (workouts.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Exercises',
+          'Related Workouts',
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -71,11 +74,10 @@ class ViewWorkoutPage extends StatelessWidget {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: exercisesWithPlan.length,
+          itemCount: workouts.length,
           separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
-            final exercisePlan = exercisesWithPlan[index];
-            final exercise = exercisePlan.exercise;
+            final workout = workouts[index];
             return Pressable(
               onTap: readonly
                   ? null
@@ -90,15 +92,15 @@ class ViewWorkoutPage extends StatelessWidget {
                               topLeft: Radius.circular(16),
                               topRight: Radius.circular(16),
                             ),
-                            child: ViewExercisePage(
-                              exercise: exercise,
+                            child: ViewWorkoutPage(
+                              workout: workout,
                               readonly: true,
                             ),
                           ),
                         ),
                       );
                     },
-              child: _ExerciseCard(exercise: exercise, readonly: readonly),
+              child: _RelatedWorkoutCard(workout: workout, readOnly: readonly),
             );
           },
         ),
@@ -113,6 +115,15 @@ class ViewWorkoutPage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      title: readonly
+          ? Text(
+              "View Exercise",
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          : null,
       leading: Tooltip(
         message: "Back",
         child: Pressable(
@@ -120,15 +131,6 @@ class ViewWorkoutPage extends StatelessWidget {
           child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
         ),
       ),
-      title: readonly
-          ? Text(
-              "View Workout",
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            )
-          : null,
       actions: readonly
           ? [
               Tooltip(
@@ -139,7 +141,7 @@ class ViewWorkoutPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewWorkoutPage(workout: workout),
+                        builder: (_) => ViewExercisePage(exercise: exercise),
                       ),
                     );
                   },
@@ -154,40 +156,46 @@ class ViewWorkoutPage extends StatelessWidget {
               Tooltip(
                 message: "Action",
                 child: Pressable(
-                  onTap: () => showModalBottomSheet(
-                    context: context,
-                    builder: (context) => SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: Icon(MingCute.pencil_line),
-                              title: Text('Edit Workout'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        CreateWorkoutPage(workout: workout),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: Icon(Iconsax.trash_bold),
-                              title: Text('Delete Workout'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                _showDeleteConfirmation(context);
-                              },
-                            ),
-                          ],
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                leading: Icon(MingCute.pencil_line),
+                                title: Text('Edit Exercise'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CreateExercisePage(
+                                        exercise: exercise,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Iconsax.trash_bold),
+                                title: Text('Delete Exercise'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _showDeleteConfirmation(context);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                   child: Icon(Iconsax.menu_outline, color: Colors.grey[700]),
                 ),
               ),
@@ -195,7 +203,7 @@ class ViewWorkoutPage extends StatelessWidget {
       actionsPadding: EdgeInsets.only(right: 16),
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
-          tag: 'workout-${workout.id}',
+          tag: 'exercise-${exercise.id}',
           child: _buildExerciseImage(),
         ),
       ),
@@ -204,20 +212,22 @@ class ViewWorkoutPage extends StatelessWidget {
 
   Widget _buildExerciseImage() {
     // 1. Try Local Image
-    if (workout.thumbnailLocal != null && workout.thumbnailLocal!.isNotEmpty) {
-      final file = File(workout.thumbnailLocal!);
+    if (exercise.thumbnailLocal != null &&
+        exercise.thumbnailLocal!.isNotEmpty) {
+      final file = File(exercise.thumbnailLocal!);
       if (file.existsSync()) {
         return Image.file(file, fit: BoxFit.cover);
       }
     }
 
     // 2. Try Cloud Image
-    if (workout.thumbnailCloud != null && workout.thumbnailCloud!.isNotEmpty) {
-      String url = workout.thumbnailCloud!;
+    if (exercise.thumbnailCloud != null &&
+        exercise.thumbnailCloud!.isNotEmpty) {
+      String url = exercise.thumbnailCloud!;
       if (!url.startsWith('http')) {
-        if (workout.pocketbaseId != null) {
+        if (exercise.pocketbaseId != null) {
           url =
-              '$backendUrlAndroid/api/files/exercises/${workout.pocketbaseId}/$url';
+              '$backendUrlAndroid/api/files/exercises/${exercise.pocketbaseId}/$url';
         }
       }
 
@@ -241,7 +251,7 @@ class ViewWorkoutPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          workout.name,
+          exercise.name,
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -251,7 +261,7 @@ class ViewWorkoutPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Last updated: ${_formatDate(workout.updatedAt)}',
+          'Last updated: ${_formatDate(exercise.updatedAt)}',
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
         ),
       ],
@@ -271,22 +281,21 @@ class ViewWorkoutPage extends StatelessWidget {
         children: [
           _buildStatItem(
             icon: Iconsax.flash_1_bold,
-            value:
-                '${workout.exercises.map((e) => e.caloriesBurned).reduce((value, e) => value + e).toInt()}~',
+            value: '${exercise.caloriesBurned.toInt()}',
             label: 'Kcal',
             color: Colors.orange,
           ),
           Container(width: 1, height: 40, color: Colors.grey[300]),
           _buildStatItem(
             icon: Iconsax.timer_1_bold,
-            value: '15',
+            value: '15', // Placeholder or derived
             label: 'Min',
             color: Colors.blue,
           ),
           Container(width: 1, height: 40, color: Colors.grey[300]),
           _buildStatItem(
             icon: Iconsax.activity_bold,
-            value: 'Med',
+            value: 'Med', // Placeholder
             label: 'Intensity',
             color: Colors.purple,
           ),
@@ -329,7 +338,7 @@ class ViewWorkoutPage extends StatelessWidget {
   }
 
   Widget _buildDescription() {
-    if (workout.description == null || workout.description!.isEmpty) {
+    if (exercise.description == null || exercise.description!.isEmpty) {
       return const SizedBox.shrink();
     }
     return Column(
@@ -345,7 +354,7 @@ class ViewWorkoutPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          workout.description!,
+          exercise.description!,
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey[600],
@@ -356,24 +365,84 @@ class ViewWorkoutPage extends StatelessWidget {
     );
   }
 
+  Widget _buildMusclesSection() {
+    final muscles = exercise.muscles;
+    if (muscles.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Target Muscles',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: muscles
+              .map((muscle) => _buildMuscleChip(muscle.name))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMuscleChip(String name) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+          const SizedBox(width: 8),
+          Text(
+            name,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
     return date.yMMMd;
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final workoutRepo = context.read<WorkoutRepository>();
+    final exerciseRepo = context.read<ExerciseRepository>();
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       builder: (BuildContext context) {
-        return _ModalPadding(child: _ConfirmDeleteDialog(workout: workout));
+        return _ModalPadding(child: _ConfirmDeleteDialog(exercise: exercise));
       },
     );
 
     if (confirmed == true) {
-      await workoutRepo.deleteWorkout(workout);
+      await exerciseRepo.deleteExercise(exercise);
       if (context.mounted) {
-        Toast(context).success(content: const Text("Workout deleted"));
+        Toast(context).success(content: const Text("Exercise deleted"));
         Navigator.pop(context);
       }
     }
@@ -381,9 +450,9 @@ class ViewWorkoutPage extends StatelessWidget {
 }
 
 class _ConfirmDeleteDialog extends StatelessWidget {
-  const _ConfirmDeleteDialog({required this.workout});
+  const _ConfirmDeleteDialog({required this.exercise});
 
-  final Workout workout;
+  final Exercise exercise;
 
   @override
   Widget build(BuildContext context) {
@@ -393,12 +462,12 @@ class _ConfirmDeleteDialog extends StatelessWidget {
         Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
         const SizedBox(height: 16),
         Text(
-          'Delete Workout?',
+          'Delete Exercise?',
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Text(
-          'Are you sure you want to delete "${workout.name}"? This action cannot be undone.',
+          'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
           textAlign: TextAlign.center,
           style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
         ),
@@ -454,14 +523,14 @@ class _ConfirmDeleteDialog extends StatelessWidget {
   }
 }
 
-class _ExerciseCard extends StatelessWidget {
-  final Exercise exercise;
-  final bool readonly;
+class _RelatedWorkoutCard extends StatelessWidget {
+  final Workout workout;
+  final bool readOnly;
 
-  const _ExerciseCard({required this.exercise, this.readonly = false});
+  const _RelatedWorkoutCard({required this.workout, this.readOnly = false});
 
-  String get excerpt {
-    final exercises = List.of(exercise.muscles).map((e) => e.name);
+  String get exercisesExcerpt {
+    final exercises = List.of(workout.exercises).map((e) => e.name);
 
     return exercises.length > 3
         ? '${exercises.first} and ${exercises.length - 1} other'
@@ -489,7 +558,7 @@ class _ExerciseCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: getImage(exercise.thumbnailLocal, width: 80, height: 80),
+              child: getImage(workout.thumbnailLocal, width: 80, height: 80),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -497,7 +566,7 @@ class _ExerciseCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercise.name,
+                    workout.name,
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -506,14 +575,17 @@ class _ExerciseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   _buildStat(icon: MingCute.time_line, label: "32 Minutes"),
-                  if (excerpt.isNotEmpty) ...[
+                  if (exercisesExcerpt.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    _buildStat(icon: MingCute.barbell_line, label: excerpt),
+                    _buildStat(
+                      icon: MingCute.barbell_line,
+                      label: exercisesExcerpt,
+                    ),
                   ],
                 ],
               ),
             ),
-            if (!readonly)
+            if (!readOnly)
               const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             const SizedBox(width: 8),
           ],

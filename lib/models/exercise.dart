@@ -1,6 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/models/exercise_muscles.dart';
+import 'package:tracks/models/workout.dart';
+import 'package:tracks/models/workout_exercises.dart';
 
 part 'exercise.g.dart';
 
@@ -61,6 +63,22 @@ class Exercise {
   @ignore
   String get excerpt {
     return muscles.map((e) => e.name).join(', ');
+  }
+
+  @ignore
+  List<Workout> get workouts {
+    final isar = Isar.getInstance();
+    if (isar == null) return [];
+    
+    final workoutExercises = isar.workoutExercises
+        .filter()
+        .exercise((q) => q.idEqualTo(id))
+        .findAllSync();
+    
+    return workoutExercises
+        .map((we) => we.workout.value)
+        .whereType<Workout>()
+        .toList();
   }
 
   Exercise({

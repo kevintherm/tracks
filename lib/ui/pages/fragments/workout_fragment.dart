@@ -492,7 +492,7 @@ class _WorkoutCard extends StatelessWidget {
             child: Row(
               children: [
                 Hero(
-                  tag: 'workout-thumbnail-${workout.id}',
+                  tag: 'workout-${workout.id}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: getImage(workout.thumbnailLocal),

@@ -1,6 +1,12 @@
-- validate min reps and set to be 1 in pb
-- start session from view workout page
 - view exercise page
+    - (section) short session history on the bottom of the page
+    - (section) workout that include this exercises
+- revamp view workout page
+- update state after editing workout/exercise
+- prioritize local data
+    - remove imported flag
+    - remove owned flag
+- validate min reps and set to be 1 in pb
 - session page (history page)
     - list session page
     - mark schedule as completed 
@@ -49,6 +55,7 @@ session page
     - create schedule page
 
 #done
+- start session from view workout page
 - session
     - start session page
         - shows the workout summary (list of exercises)

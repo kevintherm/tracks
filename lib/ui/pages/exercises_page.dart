@@ -9,6 +9,7 @@ import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
+import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
@@ -58,9 +59,9 @@ class _ExercisesPageState extends State<ExercisesPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _ExercisesAppBar(),
-      
+
               _SearchBar(controller: searchController),
-      
+
               Expanded(
                 child: StreamBuilder<List<Exercise>>(
                   stream: exerciseRepo.watchAllExercises(),
@@ -70,7 +71,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         child: CircularProgressIndicator.adaptive(),
                       );
                     }
-      
+
                     if (snapshot.hasError) {
                       return Center(
                         child: Text(
@@ -83,10 +84,10 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         ),
                       );
                     }
-      
+
                     final List<Exercise> exercises = snapshot.data ?? [];
                     List<Exercise> filtered = exercises;
-      
+
                     if (search.isNotEmpty) {
                       filtered = FuzzySearch.search(
                         items: exercises,
@@ -98,7 +99,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       filtered = exercises.toList()
                         ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
                     }
-      
+
                     if (exercises.isEmpty) {
                       return Center(
                         child: Text(
@@ -110,7 +111,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         ),
                       );
                     }
-      
+
                     if (filtered.isEmpty) {
                       return Center(
                         child: Text(
@@ -122,7 +123,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         ),
                       );
                     }
-      
+
                     return _ExercisesList(exercises: filtered);
                   },
                 ),
@@ -384,7 +385,14 @@ class _ExerciseListItem extends StatelessWidget {
         padding: const EdgeInsets.only(right: 20),
       ),
       child: Pressable(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ViewExercisePage(exercise: exercise),
+            ),
+          );
+        },
         child: _ExerciseCard(exercise: exercise),
       ),
     );
@@ -520,9 +528,12 @@ class _ExerciseCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: getImage(exercise.thumbnailLocal),
+                Hero(
+                  tag: 'exercise-${exercise.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: getImage(exercise.thumbnailLocal),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

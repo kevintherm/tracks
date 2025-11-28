@@ -13,6 +13,7 @@ import 'package:tracks/ui/components/session_activity.dart';
 import 'package:tracks/ui/pages/modals/select_sets_n_reps_modal.dart';
 import 'package:tracks/ui/pages/modals/select_session_activity_modal.dart';
 import 'package:tracks/ui/pages/session_page.dart';
+import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
@@ -461,7 +462,14 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                 bottom: index < exercises.length - 1 ? 8 : 0,
                               ),
                               child: Pressable(
-                                onTap: () {},
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ViewExercisePage(
+                                      exercise: exercise.exercise,
+                                    ),
+                                  ),
+                                ),
                                 child: _ExerciseCard(exerciseParam: exercise),
                               ),
                             );
@@ -505,9 +513,12 @@ class _ExerciseCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: getImage(exerciseParam.exercise.thumbnailLocal),
+            Hero(
+              tag: 'exercise-${exerciseParam.exercise.id}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: getImage(exerciseParam.exercise.thumbnailLocal),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
