@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/repositories/workout_repository.dart';
+import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
@@ -582,19 +583,7 @@ class _ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.grey[100],
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppContainer(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(

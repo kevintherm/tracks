@@ -4,6 +4,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/single_row_calendar_pager.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
@@ -292,11 +293,7 @@ class _ScheduleCard extends StatelessWidget {
       onTap: () {},
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              color: Colors.white,
-            ),
+          AppContainer(
             child: Stack(
               children: [
                 Padding(
@@ -304,9 +301,9 @@ class _ScheduleCard extends StatelessWidget {
                   child: Row(
                     children: [
                       getWorkoutColage(workout, width: 80, height: 80),
-
+            
                       const SizedBox(width: 16),
-
+            
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

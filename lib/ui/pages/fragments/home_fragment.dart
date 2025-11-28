@@ -1,3 +1,4 @@
+import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
@@ -320,11 +321,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   onTap: () {},
                   child: Column(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          color: Colors.white,
-                        ),
+                      AppContainer(
                         child: Stack(
                           children: [
                             Padding(
@@ -339,9 +336,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-
+                        
                                   const SizedBox(width: 16),
-
+                        
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -384,7 +381,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-
+                        
                             Positioned(
                               right: 32 + 10,
                               top: 0,
@@ -435,11 +432,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   onTap: () {},
                   child: Column(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          color: Colors.white,
-                        ),
+                      AppContainer(
                         child: Stack(
                           children: [
                             Padding(
@@ -454,9 +447,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-
+                        
                                   const SizedBox(width: 16),
-
+                        
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -499,7 +492,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-
+                        
                             Positioned(
                               right: 32 + 10,
                               top: 0,

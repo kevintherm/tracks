@@ -6,6 +6,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/filter.dart';
@@ -386,11 +387,7 @@ class _ScheduleCard extends StatelessWidget {
       onTap: () {},
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              color: Colors.white,
-            ),
+          AppContainer(
             child: Stack(
               children: [
                 Padding(
@@ -398,9 +395,9 @@ class _ScheduleCard extends StatelessWidget {
                   child: Row(
                     children: [
                       getWorkoutColage(workout),
-
+            
                       const SizedBox(width: 16),
-
+            
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,8 +516,8 @@ class _ActiveBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? Colors.grey[900] : Colors.grey[600],
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+            bottomLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
           ),
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
