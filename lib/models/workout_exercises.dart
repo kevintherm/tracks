@@ -16,6 +16,8 @@ class WorkoutExercises {
   late int sets;
   late int reps;
 
+  late int order;
+
   bool needSync;
 
   late DateTime createdAt;
@@ -24,6 +26,7 @@ class WorkoutExercises {
   WorkoutExercises({
     this.sets = 3,
     this.reps = 6,
+    this.order = -1,
     this.pocketbaseId,
     this.needSync = true,
   }) : createdAt = DateTime.now(),

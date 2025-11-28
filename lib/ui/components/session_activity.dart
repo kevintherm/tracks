@@ -1,10 +1,12 @@
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
+import 'package:tracks/models/workout_exercises.dart';
 
 sealed class SessionActivity {
   List<Exercise> getExercises();
   Workout? getWorkout();
+  WorkoutExercises? getPlan(Exercise exercise);
 
   static SessionActivity from(dynamic value) {
     if (value is Workout) return WorkoutActivity(value);
@@ -28,6 +30,20 @@ class ScheduleActivity extends SessionActivity {
   Workout? getWorkout() {
     return schedule.workout.value;
   }
+
+  @override
+  WorkoutExercises? getPlan(Exercise exercise) {
+    final workout = schedule.workout.value;
+    if (workout == null) return null;
+    
+    final exerciseWithPlan = workout.exercisesWithPivot
+        .where((e) => e.exercise.id == exercise.id)
+        .firstOrNull;
+    
+    if (exerciseWithPlan == null) return null;
+    
+    return WorkoutExercises(sets: exerciseWithPlan.sets, reps: exerciseWithPlan.reps);
+  }
 }
 
 class WorkoutActivity extends SessionActivity {
@@ -42,6 +58,17 @@ class WorkoutActivity extends SessionActivity {
   @override
   Workout? getWorkout() {
     return workout;
+  }
+
+  @override
+  WorkoutExercises? getPlan(Exercise exercise) {
+    final exerciseWithPlan = workout.exercisesWithPivot
+        .where((e) => e.exercise.id == exercise.id)
+        .firstOrNull;
+    
+    if (exerciseWithPlan == null) return null;
+    
+    return WorkoutExercises(sets: exerciseWithPlan.sets, reps: exerciseWithPlan.reps);
   }
 }
 
@@ -59,5 +86,11 @@ class ExerciseActivity extends SessionActivity {
   @override
   Workout? getWorkout() {
     return null;
+  }
+
+  @override
+  WorkoutExercises? getPlan(Exercise exercise) {
+    if (exercise.id != this.exercise.id) return null;
+    return WorkoutExercises(sets: sets, reps: reps);
   }
 }

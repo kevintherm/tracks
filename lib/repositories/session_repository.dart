@@ -32,6 +32,29 @@ class SessionRepository {
     return isar.sessions.where().sortByStartDesc().watch(fireImmediately: true);
   }
 
+  Future<List<SessionExercise>> getSessionExercisesForExercise(
+    int exerciseId,
+  ) async {
+    final sessionExercises = await isar.sessionExercises
+        .filter()
+        .exercise((q) => q.idEqualTo(exerciseId))
+        .findAll();
+
+    for (final se in sessionExercises) {
+      await se.session.load();
+    }
+
+    final valid = sessionExercises
+        .where((se) => se.session.value != null)
+        .toList();
+
+    valid.sort(
+      (a, b) => b.session.value!.start.compareTo(a.session.value!.start),
+    );
+
+    return valid;
+  }
+
   Future<void> createSession({
     required Session session,
     required List<SessionExerciseData> exercises,

@@ -95,6 +95,7 @@ class _SessionPageState extends State<SessionPage> {
     await sessionRepo.createSession(session: session, exercises: []);
 
     setState(() {
+      exercisePlan = widget.activity.getPlan(exercises.first);
       currentSE = SessionExercise(
         exerciseName: exercises.first.name,
         order: progress,
@@ -102,19 +103,6 @@ class _SessionPageState extends State<SessionPage> {
 
       lastExercise = exercises.length == 1;
     });
-
-    final currentExercise = currentSE.exercise.value;
-    if (workout != null && currentExercise != null) {
-      exercisePlan = await workoutRepo.weCollection
-          .filter()
-          .exercise((q) => q.idEqualTo(currentExercise.id))
-          .workout((q) => q.idEqualTo(workout.id))
-          .findFirst();
-
-      if (mounted) {
-        setState(() {});
-      }
-    }
   }
 
   void handleNextButton() async {
@@ -252,7 +240,10 @@ class _SessionPageState extends State<SessionPage> {
     }
 
     // Finish exercise or another set
-    if (!lastExercise && (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) return;
+    if (!lastExercise &&
+        (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) {
+      return;
+    }
 
     if (!mounted) return;
     final finishExercise = await showModalBottomSheet<bool>(
@@ -268,17 +259,15 @@ class _SessionPageState extends State<SessionPage> {
     );
 
     if (finishExercise == true) {
-
       final pos = exercises.indexOf(
         currentSE.exercise.value ?? Exercise(name: '', caloriesBurned: -1),
       );
 
       // Session ends
       if (pos == -1 || ((pos + 2) > exercises.length)) {
-
         session.end = DateTime.now();
         await sessionRepo.updateSession(session);
-        
+
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
@@ -292,6 +281,8 @@ class _SessionPageState extends State<SessionPage> {
       setState(() {
         sessionSets.clear();
 
+        exercisePlan = widget.activity.getPlan(nextExercise);
+
         currentSE = SessionExercise(
           exerciseName: nextExercise.name,
           order: progress,
@@ -299,16 +290,6 @@ class _SessionPageState extends State<SessionPage> {
 
         lastExercise = exercises.length == 1;
         progress++;
-
-        final currentExercise = currentSE.exercise.value;
-        final workout = session.workout.value;
-        if (workout != null && currentExercise != null) {
-          exercisePlan = workoutRepo.weCollection
-              .filter()
-              .exercise((q) => q.idEqualTo(currentExercise.id))
-              .workout((q) => q.idEqualTo(workout.id))
-              .findFirstSync();
-        }
       });
     }
   }

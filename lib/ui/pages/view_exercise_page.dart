@@ -4,10 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/schedule.dart';
+import 'package:tracks/models/session.dart';
+import 'package:tracks/models/session_exercise.dart';
+import 'package:tracks/models/session_set.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
@@ -46,7 +54,9 @@ class ViewExercisePage extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildMusclesSection(),
                   const SizedBox(height: 32),
-                  _buildRelatedWorkouts(context),
+                  _buildRelatedWorkouts(),
+                  const SizedBox(height: 32),
+                  _buildLastSessions(context),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -57,7 +67,7 @@ class ViewExercisePage extends StatelessWidget {
     );
   }
 
-  Widget _buildRelatedWorkouts(BuildContext context) {
+  Widget _buildRelatedWorkouts() {
     final workouts = exercise.workouts;
     if (workouts.isEmpty) return const SizedBox.shrink();
 
@@ -107,6 +117,113 @@ class ViewExercisePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildLastSessions(BuildContext context) {
+    final sessionRepo = context.read<SessionRepository>();
+    final scheduleRepo = context.read<ScheduleRepository>();
+
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        sessionRepo.getSessionExercisesForExercise(exercise.id),
+        scheduleRepo.collection.where().findAll(),
+      ]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final sessionExercises = snapshot.data![0] as List<SessionExercise>;
+        final schedules = snapshot.data![1] as List<Schedule>;
+
+        if (sessionExercises.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Last Sessions',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: sessionExercises.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final se = sessionExercises[index];
+                final session = se.session.value!;
+                final matchingSchedule = _findMatchingSchedule(
+                  session,
+                  schedules,
+                );
+
+                return _SessionCard(
+                  sessionExercise: se,
+                  session: session,
+                  schedule: matchingSchedule,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Schedule? _findMatchingSchedule(Session session, List<Schedule> schedules) {
+    for (final schedule in schedules) {
+      if (session.workout.value?.id != schedule.workout.value?.id) continue;
+
+      final sessionDate = session.start;
+      final scheduleTime = schedule.startTime;
+
+      final sessionMinutes = sessionDate.hour * 60 + sessionDate.minute;
+      final scheduleMinutes = scheduleTime.hour * 60 + scheduleTime.minute;
+      final diff = (sessionMinutes - scheduleMinutes).abs();
+
+      bool dateMatches = false;
+      final targetDate = DateTime(
+        sessionDate.year,
+        sessionDate.month,
+        sessionDate.day,
+      );
+
+      switch (schedule.recurrenceType) {
+        case RecurrenceType.once:
+          if (schedule.selectedDates.isEmpty) break;
+          final onceDate = schedule.selectedDates.first;
+          final sDate = DateTime(onceDate.year, onceDate.month, onceDate.day);
+          dateMatches = targetDate == sDate;
+          break;
+        case RecurrenceType.daily:
+          if (schedule.dailyWeekday.isEmpty) {
+            dateMatches = false;
+          } else {
+            final weekdayIndex = sessionDate.weekday - 1;
+            final weekdayEnum = Weekday.values[weekdayIndex];
+            dateMatches = schedule.dailyWeekday.contains(weekdayEnum);
+          }
+          break;
+        case RecurrenceType.monthly:
+          dateMatches = schedule.selectedDates.any(
+            (d) =>
+                d.year == targetDate.year &&
+                d.month == targetDate.month &&
+                d.day == targetDate.day,
+          );
+          break;
+      }
+
+      if (dateMatches) {
+        if (diff <= 90) {
+          return schedule;
+        }
+      }
+    }
+    return null;
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -273,12 +390,20 @@ class ViewExercisePage extends StatelessWidget {
             _buildChip(
               Icon(MingCute.barbell_line, size: 16, color: AppColors.accent),
               'Exercise',
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
             if (!exercise.needSync)
               _buildChip(
-                Icon(MingCute.check_circle_fill, size: 16, color: AppColors.lightPrimary),
+                Icon(
+                  MingCute.check_circle_fill,
+                  size: 16,
+                  color: AppColors.lightPrimary,
+                ),
                 'Synced',
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               )
             else
               _buildChip(
@@ -288,10 +413,13 @@ class ViewExercisePage extends StatelessWidget {
                   color: AppColors.darkSecondary,
                 ),
                 'Not Synced',
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -429,7 +557,8 @@ class ViewExercisePage extends StatelessWidget {
 
   Widget _buildChip(Icon icon, String name, {EdgeInsets? padding}) {
     return Container(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -576,8 +705,8 @@ class _RelatedWorkoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.grey[100],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
@@ -659,5 +788,270 @@ class _ModalPadding extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 24),
       child: child,
     );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  final SessionExercise sessionExercise;
+  final Session session;
+  final Schedule? schedule;
+
+  const _SessionCard({
+    required this.sessionExercise,
+    required this.session,
+    this.schedule,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isar = Isar.getInstance()!;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                DateFormat('EEE, d MMM').format(session.start),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    DateFormat('HH:mm').format(session.start),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                  if (session.end != null)
+                    Text(
+                      _formatDuration(session.end!.difference(session.start)),
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  else
+                    Text(
+                      'Incomplete',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: Colors.orange[300],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildTypeBadge(),
+          const SizedBox(height: 12),
+          FutureBuilder<List<SessionSet>>(
+            future: isar.sessionSets
+                .filter()
+                .sessionExercise((q) => q.idEqualTo(sessionExercise.id))
+                .findAll(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final sets = snapshot.data!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(color: Colors.grey[100]),
+                  const SizedBox(height: 8),
+                  ...sets.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final set = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: Text(
+                              '${index + 1}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.grey[400],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '${set.weight}kg x ${set.reps}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          if (set.effortRate > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getRpeColor(
+                                  set.effortRate,
+                                ).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'RPE ${set.effortRate}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: _getRpeColor(set.effortRate),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeBadge() {
+    if (schedule != null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.blue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Iconsax.calendar_1_bold, size: 14, color: Colors.blue),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                _getScheduleConfig(schedule!),
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blue[700],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (session.workout.value != null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.purple.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(MingCute.barbell_fill, size: 14, color: Colors.purple),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                session.workout.value!.name,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.purple[700],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Iconsax.flash_1_bold, size: 14, color: Colors.orange),
+            const SizedBox(width: 6),
+            Text(
+              'Single Exercise',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.orange[700],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  String _getScheduleConfig(Schedule schedule) {
+    final time = DateFormat.Hm().format(schedule.startTime);
+    switch (schedule.recurrenceType) {
+      case RecurrenceType.daily:
+        if (schedule.dailyWeekday.isEmpty) return 'Daily at $time';
+        final days = schedule.dailyWeekday
+            .map((w) => w.name.substring(0, 3).toUpperCase())
+            .join(', ');
+        return '$days at $time';
+      case RecurrenceType.once:
+        return 'Scheduled at $time';
+      case RecurrenceType.monthly:
+        return 'Monthly at $time';
+    }
+  }
+
+  Color _getRpeColor(int rpe) {
+    if (rpe < 7) return Colors.green;
+    if (rpe < 9) return Colors.orange;
+    return Colors.red;
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    }
+    return '${minutes}m';
   }
 }

@@ -97,6 +97,9 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   Future<void> _pickThumbnailImage() async {
     final toast = Toast(context);
 
+    // Unfocus any text fields to prevent refocusing after modal closes
+    FocusScope.of(context).unfocus();
+
     final ImageSource? source = await showModalBottomSheet(
       context: context,
       builder: (context) {

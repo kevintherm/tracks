@@ -83,7 +83,7 @@ class _SelectSetsRepsModalState extends State<SelectSetsRepsModal> {
             PrimaryButton(
               onTap: () => Navigator.of(context).pop((sets, reps)),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Select",
@@ -93,7 +93,7 @@ class _SelectSetsRepsModalState extends State<SelectSetsRepsModal> {
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Icon(MingCute.right_line, color: Colors.white),
                 ],
               ),
