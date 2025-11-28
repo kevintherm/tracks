@@ -462,11 +462,20 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                 bottom: index < exercises.length - 1 ? 8 : 0,
                               ),
                               child: Pressable(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ViewExercisePage(
-                                      exercise: exercise.exercise,
+                                onTap: () => showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) => FractionallySizedBox(
+                                    heightFactor: 0.7,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadiusGeometry.only(
+                                        topLeft: Radius.circular(16),
+                                        topRight: Radius.circular(16),
+                                      ),
+                                      child: ViewExercisePage(
+                                        exercise: exercise.exercise,
+                                        asModal: true,
+                                      ),
                                     ),
                                   ),
                                 ),

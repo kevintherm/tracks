@@ -10,17 +10,18 @@ import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
+import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
 class ViewWorkoutPage extends StatelessWidget {
   final Workout workout;
-  final bool readonly;
+  final bool asModal;
 
   const ViewWorkoutPage({
     super.key,
     required this.workout,
-    this.readonly = false,
+    this.asModal = false,
   });
 
   @override
@@ -41,6 +42,8 @@ class ViewWorkoutPage extends StatelessWidget {
                   _buildStatsRow(),
                   const SizedBox(height: 32),
                   _buildDescription(),
+                  const SizedBox(height: 32),
+                  _buildMusclesSection(),
                   const SizedBox(height: 32),
                   _buildExercises(context),
                   const SizedBox(height: 100),
@@ -77,7 +80,7 @@ class ViewWorkoutPage extends StatelessWidget {
             final exercisePlan = exercisesWithPlan[index];
             final exercise = exercisePlan.exercise;
             return Pressable(
-              onTap: readonly
+              onTap: asModal
                   ? null
                   : () {
                       showModalBottomSheet(
@@ -92,13 +95,13 @@ class ViewWorkoutPage extends StatelessWidget {
                             ),
                             child: ViewExercisePage(
                               exercise: exercise,
-                              readonly: true,
+                              asModal: true,
                             ),
                           ),
                         ),
                       );
                     },
-              child: _ExerciseCard(exercise: exercise, readonly: readonly),
+              child: _ExerciseCard(exercise: exercise, readonly: asModal),
             );
           },
         ),
@@ -120,7 +123,7 @@ class ViewWorkoutPage extends StatelessWidget {
           child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
         ),
       ),
-      title: readonly
+      title: asModal
           ? Text(
               "View Workout",
               style: GoogleFonts.inter(
@@ -129,7 +132,7 @@ class ViewWorkoutPage extends StatelessWidget {
               ),
             )
           : null,
-      actions: readonly
+      actions: asModal
           ? [
               Tooltip(
                 message: "Go To Details",
@@ -254,7 +257,116 @@ class ViewWorkoutPage extends StatelessWidget {
           'Last updated: ${_formatDate(workout.updatedAt)}',
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
         ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildChip(
+              Icon(MingCute.barbell_line, size: 16, color: AppColors.accent),
+              'Workout',
+            ),
+            if (!workout.needSync)
+              _buildChip(
+                Icon(MingCute.check_circle_fill, size: 16, color: AppColors.lightPrimary),
+                'Synced',
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+              )
+            else
+              _buildChip(
+                Icon(
+                  MingCute.close_circle_fill,
+                  size: 16,
+                  color: AppColors.darkSecondary,
+                ),
+                'Not Synced',
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+              ),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildMusclesSection() {
+    final muscles = workout.exercises
+        .map((e) => e.muscles.take(1))
+        .expand((e) => e);
+    if (muscles.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'Target Muscles',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              '(Major)',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.black45,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: muscles
+              .map((muscle) => _buildMuscleChip(muscle.name))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMuscleChip(String name) {
+    return _buildChip(
+      const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+      name,
+    );
+  }
+
+  Widget _buildChip(Icon icon, String name, {EdgeInsets? padding}) {
+    return Container(
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(width: 8),
+          Text(
+            name,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -50,6 +50,8 @@ class Exercise {
         .filter()
         .exercise((q) => q.idEqualTo(id))
         .findAllSync();
+
+    exerciseMuscles.sort((a, b) => b.activation.compareTo(a.activation));
     
     return exerciseMuscles
         .where((em) => em.muscle.value != null)

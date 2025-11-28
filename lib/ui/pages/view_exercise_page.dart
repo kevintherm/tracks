@@ -11,17 +11,18 @@ import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
+import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
 class ViewExercisePage extends StatelessWidget {
   final Exercise exercise;
-  final bool readonly;
+  final bool asModal;
 
   const ViewExercisePage({
     super.key,
     required this.exercise,
-    this.readonly = false,
+    this.asModal = false,
   });
 
   @override
@@ -79,7 +80,7 @@ class ViewExercisePage extends StatelessWidget {
           itemBuilder: (context, index) {
             final workout = workouts[index];
             return Pressable(
-              onTap: readonly
+              onTap: asModal
                   ? null
                   : () {
                       showModalBottomSheet(
@@ -94,13 +95,13 @@ class ViewExercisePage extends StatelessWidget {
                             ),
                             child: ViewWorkoutPage(
                               workout: workout,
-                              readonly: true,
+                              asModal: true,
                             ),
                           ),
                         ),
                       );
                     },
-              child: _RelatedWorkoutCard(workout: workout, readOnly: readonly),
+              child: _RelatedWorkoutCard(workout: workout, readOnly: asModal),
             );
           },
         ),
@@ -115,7 +116,7 @@ class ViewExercisePage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      title: readonly
+      title: asModal
           ? Text(
               "View Exercise",
               style: GoogleFonts.inter(
@@ -131,7 +132,7 @@ class ViewExercisePage extends StatelessWidget {
           child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
         ),
       ),
-      actions: readonly
+      actions: asModal
           ? [
               Tooltip(
                 message: "Go To Details",
@@ -264,6 +265,33 @@ class ViewExercisePage extends StatelessWidget {
           'Last updated: ${_formatDate(exercise.updatedAt)}',
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
         ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildChip(
+              Icon(MingCute.barbell_line, size: 16, color: AppColors.accent),
+              'Exercise',
+            ),
+            if (!exercise.needSync)
+              _buildChip(
+                Icon(MingCute.check_circle_fill, size: 16, color: AppColors.lightPrimary),
+                'Synced',
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+              )
+            else
+              _buildChip(
+                Icon(
+                  MingCute.close_circle_fill,
+                  size: 16,
+                  color: AppColors.darkSecondary,
+                ),
+                'Not Synced',
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+              ),
+          ],
+        )
       ],
     );
   }
@@ -393,8 +421,15 @@ class ViewExercisePage extends StatelessWidget {
   }
 
   Widget _buildMuscleChip(String name) {
+    return _buildChip(
+      const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+      name,
+    );
+  }
+
+  Widget _buildChip(Icon icon, String name, {EdgeInsets? padding}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -410,7 +445,7 @@ class ViewExercisePage extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+          icon,
           const SizedBox(width: 8),
           Text(
             name,
