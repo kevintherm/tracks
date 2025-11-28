@@ -12,6 +12,7 @@ import 'package:tracks/ui/components/single_row_calendar_pager.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/sessions_page.dart';
+import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -214,7 +215,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
                         return Dismissible(
                           key: ValueKey(index),
-                          direction: DismissDirection.horizontal,
+                          direction: DismissDirection.startToEnd,
                           background: Container(
                             alignment: Alignment.centerLeft,
                             padding: const EdgeInsets.only(left: 20),
@@ -224,33 +225,14 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                             ),
                             child: const Icon(Icons.edit, color: Colors.white),
                           ),
-                          secondaryBackground: Container(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.red[200],
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                            child: const Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                            ),
-                          ),
                           confirmDismiss: (direction) async {
-                            if (direction == DismissDirection.endToStart) {
-                              Toast(
-                                context,
-                              ).success(content: const Text("Delete"));
-                              return false;
-                            } else {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      AssignSchedulePage(schedule: schedule),
-                                ),
-                              );
-                              return false;
-                            }
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AssignSchedulePage(schedule: schedule),
+                              ),
+                            );
+                            return false;
                           },
                           child: _ScheduleCard(
                             schedule: schedule,
@@ -318,14 +300,22 @@ class _ScheduleCard extends StatelessWidget {
     }).firstOrNull;
 
     final isCompleted = matchingSession != null && matchingSession.end != null;
-    final isMissed =
-        !isCompleted &&
-        DateTime.now().isAfter(
+    final isComing = DateTime.now().isAfter(
           scheduleDateTime.add(Duration(minutes: schedule.plannedDuration)),
         );
+    final isMissed = !isCompleted && isComing;
 
     return Pressable(
-      onTap: () {},
+      onTap: isComing
+          ? null
+          : () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StartSessionPage(schedule: schedule),
+                ),
+              );
+            },
       child: Column(
         children: [
           AppContainer(
