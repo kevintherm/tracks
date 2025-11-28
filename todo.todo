@@ -46,6 +46,7 @@ session page
     - create schedule page
 
 #done
+- create view muscle detail page
 - mark schedule as completed 
     - if session for that workout in that range of time exists
 - update state after editing workout/exercise

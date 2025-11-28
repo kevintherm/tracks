@@ -22,7 +22,7 @@ class _SessionFinishRateFailDialogState
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          'Rate the struggle',
+          'Rate the effort',
           style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
@@ -39,7 +39,7 @@ class _SessionFinishRateFailDialogState
               NumberPicker(
                 value: _failRate,
                 minValue: 1,
-                maxValue: 5,
+                maxValue: 10,
                 haptics: true,
                 onChanged: (value) => setState(() => _failRate = value),
                 itemWidth: 60,
@@ -54,7 +54,7 @@ class _SessionFinishRateFailDialogState
               ),
               const SizedBox(width: 8),
               Text(
-                '/5',
+                '/10',
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,

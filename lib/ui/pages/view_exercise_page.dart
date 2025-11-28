@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
+import 'package:tracks/models/muscle.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/session.dart';
 import 'package:tracks/models/session_exercise.dart';
@@ -19,6 +20,7 @@ import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
+import 'package:tracks/ui/pages/view_muscle_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
@@ -575,17 +577,27 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           spacing: 12,
           runSpacing: 12,
           children: muscles
-              .map((muscle) => _buildMuscleChip(muscle.name))
+              .map((muscle) => _buildMuscleChip(muscle))
               .toList(),
         ),
       ],
     );
   }
 
-  Widget _buildMuscleChip(String name) {
-    return _buildChip(
-      const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
-      name,
+  Widget _buildMuscleChip(Muscle muscle) {
+    return Pressable(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ViewMusclePage(muscle: muscle),
+          ),
+        );
+      },
+      child: _buildChip(
+        const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+        muscle.name,
+      ),
     );
   }
 

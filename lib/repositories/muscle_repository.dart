@@ -15,6 +15,8 @@ class MuscleRepository {
     imageStorageService = ImageStorageService(pb, authService);
   }
 
+  IsarCollection<Muscle> get collection => isar.muscles;
+
   Stream<List<Muscle>> watchAllMuscles() {
     return isar.muscles.where().watch(fireImmediately: true);
   }

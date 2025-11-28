@@ -2,6 +2,7 @@ import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
+import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,6 +57,16 @@ class _HomeFragmentState extends State<HomeFragment> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ExercisesPage()),
+          );
+        },
+      },
+      {
+        'icon': MingCute.fitness_line,
+        'title': 'All Muscles',
+        'action': (context) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MusclesPage()),
           );
         },
       },
