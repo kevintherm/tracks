@@ -272,6 +272,15 @@ class SessionRepository {
         .watch(fireImmediately: true);
   }
 
+  Stream<List<Session>> watchSessionsForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    return isar.sessions
+        .filter()
+        .startBetween(startOfDay, endOfDay)
+        .watch(fireImmediately: true);
+  }
+
   // --- SYNC LOGIC ---
 
   Future<void> performInitialSync() async {

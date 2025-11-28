@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/schedule.dart';
+import 'package:tracks/models/session.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/single_row_calendar_pager.dart';
@@ -53,11 +55,13 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   @override
   Widget build(BuildContext context) {
     final scheduleRepo = context.read<ScheduleRepository>();
+    final sessionRepo = context.read<SessionRepository>();
     final now = DateTime.now();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // HEADER
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
@@ -107,13 +111,14 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           ),
         ),
 
+        // CALENDAR
         SingleRowCalendarPager(
           showNavigation: false,
           showMonthLabel: false,
           onDateSelected: (value) {
             if (!DateUtils.isSameDay(selectedDate, value)) {
               setState(() {
-                final newSelected = DateTime(
+                selectedDate = DateTime(
                   value.year,
                   value.month,
                   value.day,
@@ -121,7 +126,6 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                   now.minute,
                   now.second,
                 );
-                selectedDate = newSelected;
               });
             }
           },
@@ -135,114 +139,126 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
         const SizedBox(height: 16),
 
+        // MAIN CONTENT
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: StreamBuilder(
-              stream: scheduleRepo.watchSchedulesForDate(selectedDate),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                }
+            child: StreamBuilder<List<Session>>(
+              stream: sessionRepo.watchSessionsForDate(selectedDate),
+              builder: (context, sessionSnapshot) {
+                final sessions = sessionSnapshot.data ?? [];
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Something went wrong: ${snapshot.error}',
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
+                return StreamBuilder<List<Schedule>>(
+                  stream: scheduleRepo.watchSchedulesForDate(selectedDate),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
 
-                final List<Schedule> schedules = snapshot.data ?? [];
-                final now = DateTime.now();
-
-                // Sort: active schedules first, then expired, each sorted by start time
-                schedules.sort((a, b) {
-                  final aDateTime = _getScheduleDateTime(a, selectedDate);
-                  final bDateTime = _getScheduleDateTime(b, selectedDate);
-                  final aIsActive = aDateTime.isAfter(now);
-                  final bIsActive = bDateTime.isAfter(now);
-
-                  // Active schedules come first
-                  if (aIsActive != bIsActive) {
-                    return aIsActive ? -1 : 1;
-                  }
-
-                  // Within same status, sort by time (earliest first for active, latest first for expired)
-                  if (aIsActive) {
-                    return aDateTime.compareTo(bDateTime);
-                  } else {
-                    return bDateTime.compareTo(aDateTime);
-                  }
-                });
-
-                if (schedules.isEmpty) {
-                  return Center(
-                    child: Text(
-                      "No schedules for ${isToday(selectedDate) ? 'today' : 'this day'}.",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: schedules.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final schedule = schedules[index];
-
-                    return Dismissible(
-                      key: ValueKey(index),
-                      direction: DismissDirection.horizontal,
-                      background: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.green[200],
-                          borderRadius: BorderRadius.circular(32),
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Something went wrong: ${snapshot.error}',
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        child: const Icon(Icons.edit, color: Colors.white),
-                      ),
-                      secondaryBackground: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.red[200],
-                          borderRadius: BorderRadius.circular(32),
+                      );
+                    }
+
+                    final schedules = snapshot.data ?? [];
+                    final now = DateTime.now();
+
+                    schedules.sort((a, b) {
+                      final aTime = _getScheduleDateTime(a, selectedDate);
+                      final bTime = _getScheduleDateTime(b, selectedDate);
+
+                      final aActive = aTime.isAfter(now);
+                      final bActive = bTime.isAfter(now);
+
+                      if (aActive != bActive) {
+                        return aActive ? -1 : 1; // active first
+                      }
+
+                      return aActive
+                          ? aTime.compareTo(bTime)
+                          : bTime.compareTo(
+                              aTime,
+                            ); // earliest first / latest first
+                    });
+
+                    if (schedules.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No schedules for ${isToday(selectedDate) ? 'today' : 'this day'}.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        if (direction == DismissDirection.endToStart) {
-                          Toast(context).success(content: Text("Delete"));
-                          return false;
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  AssignSchedulePage(schedule: schedule),
+                      );
+                    }
+
+                    // LIST
+                    return ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: schedules.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final schedule = schedules[index];
+
+                        return Dismissible(
+                          key: ValueKey(index),
+                          direction: DismissDirection.horizontal,
+                          background: Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.green[200],
+                              borderRadius: BorderRadius.circular(32),
                             ),
-                          );
-                          return false;
-                        }
+                            child: const Icon(Icons.edit, color: Colors.white),
+                          ),
+                          secondaryBackground: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.red[200],
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.endToStart) {
+                              Toast(
+                                context,
+                              ).success(content: const Text("Delete"));
+                              return false;
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AssignSchedulePage(schedule: schedule),
+                                ),
+                              );
+                              return false;
+                            }
+                          },
+                          child: _ScheduleCard(
+                            schedule: schedule,
+                            selectedDate: selectedDate,
+                            sessions: sessions,
+                          ),
+                        );
                       },
-                      child: _ScheduleCard(
-                        schedule: schedule,
-                        selectedDate: selectedDate,
-                      ),
                     );
                   },
                 );
@@ -256,10 +272,15 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 }
 
 class _ScheduleCard extends StatelessWidget {
-  const _ScheduleCard({required this.schedule, required this.selectedDate});
+  const _ScheduleCard({
+    required this.schedule,
+    required this.selectedDate,
+    required this.sessions,
+  });
 
   final Schedule schedule;
   final DateTime selectedDate;
+  final List<Session> sessions;
 
   @override
   Widget build(BuildContext context) {
@@ -289,6 +310,20 @@ class _ScheduleCard extends StatelessWidget {
       );
     }
 
+    final matchingSession = sessions.where((s) {
+      if (s.workout.value?.id != workout.id) return false;
+      final diff = s.start.difference(scheduleDateTime).inMinutes.abs();
+      // Match if session started within 2 hours of scheduled time
+      return diff <= scheduleIncludedSessionRange;
+    }).firstOrNull;
+
+    final isCompleted = matchingSession != null && matchingSession.end != null;
+    final isMissed =
+        !isCompleted &&
+        DateTime.now().isAfter(
+          scheduleDateTime.add(Duration(minutes: schedule.plannedDuration)),
+        );
+
     return Pressable(
       onTap: () {},
       child: Column(
@@ -301,9 +336,9 @@ class _ScheduleCard extends StatelessWidget {
                   child: Row(
                     children: [
                       getWorkoutColage(workout, width: 80, height: 80),
-            
+
                       const SizedBox(width: 16),
-            
+
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,6 +433,8 @@ class _ScheduleCard extends StatelessWidget {
                   onComingDate: scheduleDateTime,
                   selectedDate: selectedDate,
                   isActive: scheduleDateTime.isAfter(DateTime.now()),
+                  isCompleted: isCompleted,
+                  isMissed: isMissed,
                 ),
               ],
             ),
@@ -412,11 +449,15 @@ class _OnComingBadge extends StatelessWidget {
   final DateTime onComingDate;
   final DateTime selectedDate;
   final bool isActive;
+  final bool isCompleted;
+  final bool isMissed;
 
   _OnComingBadge({
     required this.onComingDate,
     required this.selectedDate,
     required this.isActive,
+    required this.isCompleted,
+    required this.isMissed,
   });
 
   final now = DateTime.now();
@@ -431,12 +472,28 @@ class _OnComingBadge extends StatelessWidget {
     final todayOnly = DateTime(now.year, now.month, now.day);
     final isToday = selectedDateOnly.isAtSameMomentAs(todayOnly);
 
+    Color badgeColor;
+    String badgeText;
+
+    if (isCompleted) {
+      badgeColor = Colors.green[600]!;
+      badgeText = "Completed";
+    } else if (isMissed) {
+      badgeColor = Colors.red[600]!;
+      badgeText = "Missed";
+    } else {
+      badgeColor = isActive ? Colors.grey[900]! : Colors.grey[600]!;
+      badgeText = isToday
+          ? dateToHumans(onComingDate, from: now)
+          : dateToHumans(selectedDate, from: now);
+    }
+
     return Positioned(
       right: 0,
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: isActive ? Colors.grey[900] : Colors.grey[600],
+          color: badgeColor,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(16),
             topRight: Radius.circular(16),
@@ -444,9 +501,7 @@ class _OnComingBadge extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         child: Text(
-          isToday
-              ? dateToHumans(onComingDate, from: now)
-              : dateToHumans(selectedDate, from: now),
+          badgeText,
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: 12,

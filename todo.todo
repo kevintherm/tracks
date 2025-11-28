@@ -1,10 +1,7 @@
-- update state after editing workout/exercise
 - prioritize local data
     - remove imported flag
     - remove owned flag
 - validate min reps and set to be 1 in pb
-- mark schedule as completed 
-    - if session for that workout in that range of time exists
 - integrate session with every single fucking things
     - session finish section (last week session)
         - last session reps + 1
@@ -49,6 +46,9 @@ session page
     - create schedule page
 
 #done
+- mark schedule as completed 
+    - if session for that workout in that range of time exists
+- update state after editing workout/exercise
 - session page (history page)
     - list session page
 - optimize performance create exercise page

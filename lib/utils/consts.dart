@@ -16,6 +16,7 @@ const String defaultAvatar = 'https://i.pravatar.cc/300';
 const Duration snackBarShort = Duration(seconds: 1, milliseconds: 500);
 const Duration snackBarMedium = Duration(seconds: 3);
 const Duration snackBarLong = Duration(seconds: 5);
+const int scheduleIncludedSessionRange = 120; // 2 Hours after scheduled time
 
 String errorClient(ClientException e) {
   log(e.toString());
