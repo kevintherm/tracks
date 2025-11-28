@@ -4,6 +4,8 @@ import 'package:tracks/utils/app_colors.dart';
 
 /// Secondary button - uses the secondary coral/red color.
 class SecondaryButton extends AppButton {
+  final Color color = AppColors.secondary;
+
   /// Creates a secondary button.
   const SecondaryButton({
     super.key,
@@ -13,5 +15,5 @@ class SecondaryButton extends AppButton {
   });
 
   @override
-  Color get backgroundColor => AppColors.secondary;
+  Color get backgroundColor => color;
 }

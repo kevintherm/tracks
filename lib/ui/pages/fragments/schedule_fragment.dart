@@ -438,8 +438,8 @@ class _OnComingBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? Colors.grey[900] : Colors.grey[600],
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+            bottomLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
           ),
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),

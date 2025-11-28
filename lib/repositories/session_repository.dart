@@ -191,6 +191,48 @@ class SessionRepository {
     }
   }
 
+  Future<void> updateSessionSet(SessionSet set) async {
+    set.needSync = true;
+    await isar.writeTxn(() async {
+      await isar.sessionSets.put(set);
+    });
+  }
+
+  Future<void> deleteSessionExercise(SessionExercise exercise) async {
+    await isar.writeTxn(() async {
+      // Delete all sets for this exercise
+      await isar.sessionSets
+          .filter()
+          .sessionExercise((q) => q.idEqualTo(exercise.id))
+          .deleteAll();
+
+      // Delete the exercise itself
+      await isar.sessionExercises.delete(exercise.id);
+    });
+  }
+
+  Future<void> updateSessionExercise(SessionExercise exercise) async {
+    exercise.needSync = true;
+    await isar.writeTxn(() async {
+      await isar.sessionExercises.put(exercise);
+    });
+  }
+
+  Future<List<SessionExercise>> getSessionExercises(int sessionId) {
+    return isar.sessionExercises
+        .filter()
+        .session((q) => q.idEqualTo(sessionId))
+        .sortByOrder()
+        .findAll();
+  }
+
+  Future<List<SessionSet>> getSessionSets(int sessionExerciseId) {
+    return isar.sessionSets
+        .filter()
+        .sessionExercise((q) => q.idEqualTo(sessionExerciseId))
+        .findAll();
+  }
+
   // --- SYNC LOGIC ---
 
   Future<void> performInitialSync() async {
