@@ -419,24 +419,24 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     SectionCard(
                       title:
                           "Configure Activation (${_selectedOptions.length})",
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _selectedOptions.length,
-                        itemBuilder: (context, index) {
-                          final option = _selectedOptions[index];
-                          final activation =
-                              _muscleActivations[option.id] ?? 50;
+                      child: Column(
+                        children: List.generate(
+                          _selectedOptions.length,
+                          (index) {
+                            final option = _selectedOptions[index];
+                            final activation =
+                                _muscleActivations[option.id] ?? 50;
 
-                          return _ConfigurableExerciseCard(
-                            key: ValueKey(option.id),
-                            option: option,
-                            muscleActivation: activation,
-                            onActivationChanged: (value) =>
-                                _updateMuscleActivation(option.id, value),
-                            onDelete: () => _removeSelectedMuscle(index),
-                          );
-                        },
+                            return _ConfigurableExerciseCard(
+                              key: ValueKey(option.id),
+                              option: option,
+                              muscleActivation: activation,
+                              onActivationChanged: (value) =>
+                                  _updateMuscleActivation(option.id, value),
+                              onDelete: () => _removeSelectedMuscle(index),
+                            );
+                          },
+                        ),
                       ),
                     ),
 
@@ -554,6 +554,7 @@ class _ThumbnailSection extends StatelessWidget {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  cacheWidth: 500,
                 ),
               ),
               Positioned(
@@ -652,6 +653,7 @@ class _ThumbnailSection extends StatelessWidget {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  cacheWidth: 500,
                 ),
               ),
               Positioned(
@@ -905,12 +907,14 @@ class _ConfigurableExerciseCard extends StatelessWidget {
             width: 80,
             height: 80,
             fit: BoxFit.cover,
+            cacheWidth: 150,
             errorBuilder: (context, error, stackTrace) {
               return Image.asset(
                 'assets/drawings/not-found.jpg',
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
+                cacheWidth: 150,
               );
             },
           ),
@@ -925,12 +929,14 @@ class _ConfigurableExerciseCard extends StatelessWidget {
         width: 80,
         height: 80,
         fit: BoxFit.cover,
+        cacheWidth: 150,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
             'assets/drawings/not-found.jpg',
             width: 80,
             height: 80,
             fit: BoxFit.cover,
+            cacheWidth: 150,
           );
         },
       ),

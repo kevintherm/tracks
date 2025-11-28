@@ -151,7 +151,7 @@ class ViewExercisePage extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: sessionExercises.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final se = sessionExercises[index];
                 final session = se.session.value!;

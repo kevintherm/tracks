@@ -29,7 +29,7 @@ class SelectConfig<T> extends StatefulWidget {
     required this.itemBuilder,
     this.aiRecommendation,
     this.searchHint = "Search",
-    this.limitItems = 6,
+    this.limitItems = 12,
   });
 
   @override
@@ -38,16 +38,33 @@ class SelectConfig<T> extends StatefulWidget {
 
 class _SelectConfigState<T> extends State<SelectConfig<T>> {
   String _searchQuery = '';
+  late List<T> _filteredOptions;
 
   @override
-  Widget build(BuildContext context) {
-    final filteredOptions = FuzzySearch.search(
+  void initState() {
+    super.initState();
+    _updateFilteredOptions();
+  }
+
+  @override
+  void didUpdateWidget(SelectConfig<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.allOptions != widget.allOptions) {
+      _updateFilteredOptions();
+    }
+  }
+
+  void _updateFilteredOptions() {
+    _filteredOptions = FuzzySearch.search(
       items: widget.allOptions,
       query: _searchQuery,
       getSearchableText: widget.getLabel,
       threshold: 0.0,
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -56,6 +73,7 @@ class _SelectConfigState<T> extends State<SelectConfig<T>> {
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
+              _updateFilteredOptions();
             });
           },
           decoration: InputDecoration(
@@ -87,13 +105,13 @@ class _SelectConfigState<T> extends State<SelectConfig<T>> {
         // List Item
         SizedBox(
           height: 350,
-          child: filteredOptions.isNotEmpty
+          child: _filteredOptions.isNotEmpty
               ? ListView.builder(
-                  itemCount: filteredOptions.length > widget.limitItems
+                  itemCount: _filteredOptions.length > widget.limitItems
                       ? widget.limitItems
-                      : filteredOptions.length,
+                      : _filteredOptions.length,
                   itemBuilder: (context, index) {
-                    final option = filteredOptions[index];
+                    final option = _filteredOptions[index];
                     final isSelected = widget.selectedOptions.any(
                       (selected) =>
                           widget.getId(selected) == widget.getId(option),

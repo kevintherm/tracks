@@ -568,6 +568,7 @@ class _ThumbnailSection extends StatelessWidget {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  cacheWidth: 500,
                 ),
               ),
               Positioned(
@@ -669,6 +670,7 @@ class _ThumbnailSection extends StatelessWidget {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  cacheWidth: 500,
                 ),
               ),
               Positioned(
@@ -997,12 +999,14 @@ class _ConfigurableExerciseCardState extends State<_ConfigurableExerciseCard> {
             width: 80,
             height: 80,
             fit: BoxFit.cover,
+            cacheWidth: 150,
             errorBuilder: (context, error, stackTrace) {
               return Image.asset(
                 'assets/drawings/not-found.jpg',
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
+                cacheWidth: 150,
               );
             },
           ),
@@ -1017,12 +1021,14 @@ class _ConfigurableExerciseCardState extends State<_ConfigurableExerciseCard> {
         width: 80,
         height: 80,
         fit: BoxFit.cover,
+        cacheWidth: 150,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
             'assets/drawings/not-found.jpg',
             width: 80,
             height: 80,
             fit: BoxFit.cover,
+            cacheWidth: 150,
           );
         },
       ),

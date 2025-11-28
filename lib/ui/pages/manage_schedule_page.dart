@@ -456,7 +456,7 @@ class _ScheduleCard extends StatelessWidget {
                                 Icon(MingCute.target_line, size: 16),
                                 const SizedBox(width: 4),
                                 SizedBox(
-                                  width: 200,
+                                  width: 160,
                                   child: Text(
                                     getQuickSelectedDates(),
                                     overflow: TextOverflow.ellipsis,
@@ -475,7 +475,7 @@ class _ScheduleCard extends StatelessWidget {
                                 Icon(MingCute.calendar_time_add_line, size: 16),
                                 const SizedBox(width: 4),
                                 SizedBox(
-                                  width: 200,
+                                  width: 160,
                                   child: Text(
                                     workout.createdAt.yMMMd,
                                     overflow: TextOverflow.ellipsis,

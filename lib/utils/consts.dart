@@ -58,12 +58,14 @@ Future<bool> showConfirmDialog(
 
 Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
   final hasLocalImage = imagePath != null && File(imagePath).existsSync();
+  final cacheWidth = (width * 2).toInt(); // 2x for retina
 
   Image image = Image.asset(
     'assets/drawings/not-found.jpg',
     width: width,
     height: height,
     fit: BoxFit.cover,
+    cacheWidth: cacheWidth,
   );
 
   if (hasLocalImage) {
@@ -72,6 +74,7 @@ Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
       width: width,
       height: height,
       fit: BoxFit.cover,
+      cacheWidth: cacheWidth,
       errorBuilder: (context, error, stackTrace) => image,
     );
   }
