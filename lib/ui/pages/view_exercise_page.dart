@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
@@ -13,9 +12,11 @@ import 'package:tracks/models/session.dart';
 import 'package:tracks/models/session_exercise.dart';
 import 'package:tracks/models/session_set.dart';
 import 'package:tracks/models/workout.dart';
+import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/repositories/session_repository.dart';
+import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
@@ -23,7 +24,7 @@ import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
-class ViewExercisePage extends StatelessWidget {
+class ViewExercisePage extends StatefulWidget {
   final Exercise exercise;
   final bool asModal;
 
@@ -34,113 +35,77 @@ class ViewExercisePage extends StatelessWidget {
   });
 
   @override
+  State<ViewExercisePage> createState() => _ViewExercisePageState();
+}
+
+class _ViewExercisePageState extends State<ViewExercisePage> {
+  late Exercise _exercise;
+
+  @override
+  void initState() {
+    super.initState();
+    _exercise = widget.exercise;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(context),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildStatsRow(),
-                  const SizedBox(height: 32),
-                  _buildDescription(),
-                  const SizedBox(height: 32),
-                  _buildMusclesSection(),
-                  const SizedBox(height: 32),
-                  _buildRelatedWorkouts(),
-                  const SizedBox(height: 32),
-                  _buildLastSessions(context),
-                  const SizedBox(height: 100),
-                ],
+    final exerciseRepo = context.read<ExerciseRepository>();
+
+    return StreamBuilder<Exercise?>(
+      stream: exerciseRepo.collection.watchObject(_exercise.id, fireImmediately: true),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _exercise = snapshot.data!;
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: CustomScrollView(
+            slivers: [
+              _buildAppBar(context),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 32),
+                      _buildStatsRow(),
+                      const SizedBox(height: 32),
+                      _buildDescription(),
+                      const SizedBox(height: 32),
+                      _buildMusclesSection(),
+                      const SizedBox(height: 32),
+                      _buildRelatedWorkouts(),
+                      const SizedBox(height: 32),
+                      _buildLastSessions(context),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildRelatedWorkouts() {
-    final workouts = exercise.workouts;
-    if (workouts.isEmpty) return const SizedBox.shrink();
+    final workoutRepo = context.read<WorkoutRepository>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Related Workouts',
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: workouts.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final workout = workouts[index];
-            return Pressable(
-              onTap: asModal
-                  ? null
-                  : () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => FractionallySizedBox(
-                          heightFactor: 0.7,
-                          child: ClipRRect(
-                            borderRadius: BorderRadiusGeometry.only(
-                              topLeft: Radius.circular(16),
-                              topRight: Radius.circular(16),
-                            ),
-                            child: ViewWorkoutPage(
-                              workout: workout,
-                              asModal: true,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-              child: _RelatedWorkoutCard(workout: workout, readOnly: asModal),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLastSessions(BuildContext context) {
-    final sessionRepo = context.read<SessionRepository>();
-    final scheduleRepo = context.read<ScheduleRepository>();
-
-    return FutureBuilder<List<dynamic>>(
-      future: Future.wait([
-        sessionRepo.getSessionExercisesForExercise(exercise.id),
-        scheduleRepo.collection.where().findAll(),
-      ]),
+    return StreamBuilder<List<WorkoutExercises>>(
+      stream: workoutRepo.watchWorkoutsForExercise(_exercise.id),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
-
-        final sessionExercises = snapshot.data![0] as List<SessionExercise>;
-        final schedules = snapshot.data![1] as List<Schedule>;
-
-        if (sessionExercises.isEmpty) return const SizedBox.shrink();
+        final workouts = _exercise.workouts;
+        if (workouts.isEmpty) return const SizedBox.shrink();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Last Sessions',
+              'Related Workouts',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -150,24 +115,93 @@ class ViewExercisePage extends StatelessWidget {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: sessionExercises.length,
+              itemCount: workouts.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final se = sessionExercises[index];
-                final session = se.session.value!;
-                final matchingSchedule = _findMatchingSchedule(
-                  session,
-                  schedules,
-                );
-
-                return _SessionCard(
-                  sessionExercise: se,
-                  session: session,
-                  schedule: matchingSchedule,
+                final workout = workouts[index];
+                return Pressable(
+                  onTap: widget.asModal
+                      ? null
+                      : () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) => FractionallySizedBox(
+                              heightFactor: 0.7,
+                              child: ClipRRect(
+                                borderRadius: BorderRadiusGeometry.only(
+                                  topLeft: Radius.circular(16),
+                                  topRight: Radius.circular(16),
+                                ),
+                                child: ViewWorkoutPage(
+                                  workout: workout,
+                                  asModal: true,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                  child: _RelatedWorkoutCard(workout: workout, readOnly: widget.asModal),
                 );
               },
             ),
           ],
+        );
+      }
+    );
+  }
+
+  Widget _buildLastSessions(BuildContext context) {
+    final sessionRepo = context.read<SessionRepository>();
+    final scheduleRepo = context.read<ScheduleRepository>();
+
+    return StreamBuilder<List<SessionExercise>>(
+      stream: sessionRepo.watchSessionExercisesForExercise(_exercise.id),
+      builder: (context, sessionSnapshot) {
+        if (!sessionSnapshot.hasData) return const SizedBox.shrink();
+        final sessionExercises = sessionSnapshot.data!;
+        if (sessionExercises.isEmpty) return const SizedBox.shrink();
+
+        return StreamBuilder<List<Schedule>>(
+          stream: scheduleRepo.watchAllSchedules(),
+          builder: (context, scheduleSnapshot) {
+            if (!scheduleSnapshot.hasData) return const SizedBox.shrink();
+            final schedules = scheduleSnapshot.data!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Last Sessions',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: sessionExercises.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final se = sessionExercises[index];
+                    final session = se.session.value!;
+                    final matchingSchedule = _findMatchingSchedule(
+                      session,
+                      schedules,
+                    );
+
+                    return _SessionCard(
+                      sessionExercise: se,
+                      session: session,
+                      schedule: matchingSchedule,
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -233,7 +267,7 @@ class ViewExercisePage extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      title: asModal
+      title: widget.asModal
           ? Text(
               "View Exercise",
               style: GoogleFonts.inter(
@@ -249,7 +283,7 @@ class ViewExercisePage extends StatelessWidget {
           child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
         ),
       ),
-      actions: asModal
+      actions: widget.asModal
           ? [
               Tooltip(
                 message: "Go To Details",
@@ -259,7 +293,7 @@ class ViewExercisePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewExercisePage(exercise: exercise),
+                        builder: (_) => ViewExercisePage(exercise: _exercise),
                       ),
                     );
                   },
@@ -294,7 +328,7 @@ class ViewExercisePage extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => CreateExercisePage(
-                                        exercise: exercise,
+                                        exercise: _exercise,
                                       ),
                                     ),
                                   );
@@ -321,7 +355,7 @@ class ViewExercisePage extends StatelessWidget {
       actionsPadding: EdgeInsets.only(right: 16),
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
-          tag: 'exercise-${exercise.id}',
+          tag: 'exercise-${_exercise.id}',
           child: _buildExerciseImage(),
         ),
       ),
@@ -330,22 +364,22 @@ class ViewExercisePage extends StatelessWidget {
 
   Widget _buildExerciseImage() {
     // 1. Try Local Image
-    if (exercise.thumbnailLocal != null &&
-        exercise.thumbnailLocal!.isNotEmpty) {
-      final file = File(exercise.thumbnailLocal!);
+    if (_exercise.thumbnailLocal != null &&
+        _exercise.thumbnailLocal!.isNotEmpty) {
+      final file = File(_exercise.thumbnailLocal!);
       if (file.existsSync()) {
         return Image.file(file, fit: BoxFit.cover);
       }
     }
 
     // 2. Try Cloud Image
-    if (exercise.thumbnailCloud != null &&
-        exercise.thumbnailCloud!.isNotEmpty) {
-      String url = exercise.thumbnailCloud!;
+    if (_exercise.thumbnailCloud != null &&
+        _exercise.thumbnailCloud!.isNotEmpty) {
+      String url = _exercise.thumbnailCloud!;
       if (!url.startsWith('http')) {
-        if (exercise.pocketbaseId != null) {
+        if (_exercise.pocketbaseId != null) {
           url =
-              '$backendUrlAndroid/api/files/exercises/${exercise.pocketbaseId}/$url';
+              '$backendUrlAndroid/api/files/exercises/${_exercise.pocketbaseId}/$url';
         }
       }
 
@@ -369,7 +403,7 @@ class ViewExercisePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          exercise.name,
+          _exercise.name,
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -379,7 +413,7 @@ class ViewExercisePage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Last updated: ${_formatDate(exercise.updatedAt)}',
+          'Last updated: ${_formatDate(_exercise.updatedAt)}',
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
         ),
         const SizedBox(height: 8),
@@ -392,7 +426,7 @@ class ViewExercisePage extends StatelessWidget {
               'Exercise',
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
-            if (!exercise.needSync)
+            if (!_exercise.needSync)
               _buildChip(
                 Icon(
                   MingCute.check_circle_fill,
@@ -437,7 +471,7 @@ class ViewExercisePage extends StatelessWidget {
         children: [
           _buildStatItem(
             icon: Iconsax.flash_1_bold,
-            value: '${exercise.caloriesBurned.toInt()}',
+            value: '${_exercise.caloriesBurned.toInt()}',
             label: 'Kcal',
             color: Colors.orange,
           ),
@@ -494,7 +528,7 @@ class ViewExercisePage extends StatelessWidget {
   }
 
   Widget _buildDescription() {
-    if (exercise.description == null || exercise.description!.isEmpty) {
+    if (_exercise.description == null || _exercise.description!.isEmpty) {
       return const SizedBox.shrink();
     }
     return Column(
@@ -510,7 +544,7 @@ class ViewExercisePage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          exercise.description!,
+          _exercise.description!,
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey[600],
@@ -522,7 +556,7 @@ class ViewExercisePage extends StatelessWidget {
   }
 
   Widget _buildMusclesSection() {
-    final muscles = exercise.muscles;
+    final muscles = _exercise.muscles;
     if (muscles.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -599,12 +633,12 @@ class ViewExercisePage extends StatelessWidget {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       builder: (BuildContext context) {
-        return _ModalPadding(child: _ConfirmDeleteDialog(exercise: exercise));
+        return _ModalPadding(child: _ConfirmDeleteDialog(exercise: _exercise));
       },
     );
 
     if (confirmed == true) {
-      await exerciseRepo.deleteExercise(exercise);
+      await exerciseRepo.deleteExercise(_exercise);
       if (context.mounted) {
         Toast(context).success(content: const Text("Exercise deleted"));
         Navigator.pop(context);

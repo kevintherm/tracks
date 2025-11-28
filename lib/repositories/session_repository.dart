@@ -55,6 +55,30 @@ class SessionRepository {
     return valid;
   }
 
+  Stream<List<SessionExercise>> watchSessionExercisesForExercise(
+    int exerciseId,
+  ) {
+    return isar.sessionExercises
+        .filter()
+        .exercise((q) => q.idEqualTo(exerciseId))
+        .watch(fireImmediately: true)
+        .asyncMap((sessionExercises) async {
+      for (final se in sessionExercises) {
+        await se.session.load();
+      }
+
+      final valid = sessionExercises
+          .where((se) => se.session.value != null)
+          .toList();
+
+      valid.sort(
+        (a, b) => b.session.value!.start.compareTo(a.session.value!.start),
+      );
+
+      return valid;
+    });
+  }
+
   Future<void> createSession({
     required Session session,
     required List<SessionExerciseData> exercises,
@@ -231,6 +255,21 @@ class SessionRepository {
         .filter()
         .sessionExercise((q) => q.idEqualTo(sessionExerciseId))
         .findAll();
+  }
+
+  Stream<List<SessionExercise>> watchSessionExercises(int sessionId) {
+    return isar.sessionExercises
+        .filter()
+        .session((q) => q.idEqualTo(sessionId))
+        .sortByOrder()
+        .watch(fireImmediately: true);
+  }
+
+  Stream<List<SessionSet>> watchSessionSets(int sessionExerciseId) {
+    return isar.sessionSets
+        .filter()
+        .sessionExercise((q) => q.idEqualTo(sessionExerciseId))
+        .watch(fireImmediately: true);
   }
 
   // --- SYNC LOGIC ---

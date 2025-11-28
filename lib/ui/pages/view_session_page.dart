@@ -11,7 +11,6 @@ import 'package:tracks/models/session_exercise.dart';
 import 'package:tracks/models/session_set.dart';
 import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/ui/components/app_container.dart';
-import 'package:tracks/ui/components/buttons/app_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/ui/components/buttons/secondary_button.dart';
@@ -322,8 +321,8 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
   Widget _buildExercisesList(BuildContext context) {
     final sessionRepo = context.read<SessionRepository>();
 
-    return FutureBuilder<List<SessionExercise>>(
-      future: sessionRepo.getSessionExercises(_session.id),
+    return StreamBuilder<List<SessionExercise>>(
+      stream: sessionRepo.watchSessionExercises(_session.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -819,8 +818,8 @@ class _SessionExerciseCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            FutureBuilder<List<SessionSet>>(
-              future: sessionRepo.getSessionSets(sessionExercise.id),
+            StreamBuilder<List<SessionSet>>(
+              stream: sessionRepo.watchSessionSets(sessionExercise.id),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const SizedBox.shrink();

@@ -41,6 +41,20 @@ class WorkoutRepository {
     return isar.workouts.where().watch(fireImmediately: true);
   }
 
+  Stream<List<WorkoutExercises>> watchExercisesForWorkout(int workoutId) {
+    return isar.workoutExercises
+        .filter()
+        .workout((q) => q.idEqualTo(workoutId))
+        .watch(fireImmediately: true);
+  }
+
+  Stream<List<WorkoutExercises>> watchWorkoutsForExercise(int exerciseId) {
+    return isar.workoutExercises
+        .filter()
+        .exercise((q) => q.idEqualTo(exerciseId))
+        .watch(fireImmediately: true);
+  }
+
   // Get exercises for a specific workout with sets and reps
   Future<List<Map<String, dynamic>>> getExercisesForWorkout(
     int workoutId,
