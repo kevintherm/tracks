@@ -305,206 +305,353 @@ class _SessionPageState extends State<SessionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Pressable(
-                        onTap: () async {
-                          await showModalBottomSheet(
-                            context: context,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(32),
-                              ),
-                            ),
-                            builder: (context) => ModalOptions(),
-                          );
-                        },
-                        child: Icon(MingCute.settings_3_line, size: 32),
-                      ),
-                      Expanded(
-                        child: SliderTheme(
-                          data: SliderThemeData(
-                            trackHeight: 20,
-                            disabledActiveTrackColor: AppColors.lightPrimary,
-                            thumbShape: SliderComponentShape.noThumb,
-                          ),
-                          child: Slider(
-                            value: progress * 10,
-                            min: 0,
-                            max: 100,
-                            onChanged: null,
-                          ),
-                        ),
-                      ),
-                    ],
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(child: _buildContent()),
+            _buildBottomControls(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Exercise $progress of ${exercises.length}",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[500],
+                    letterSpacing: 1.0,
                   ),
-
-                  const SizedBox(height: 16),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Current exercise:",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color:
-                              Theme.of(context).brightness == Brightness.light
-                              ? Colors.grey[600]
-                              : Colors.grey[300],
-                        ),
-                      ),
-                      Text(
-                        currentSE.exerciseName,
-                        style: GoogleFonts.inter(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Expanded(
-                    child: SafeKeyboard(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: SizedBox(
-                              height: 300,
-                              child: Lottie.asset(
-                                'assets/animations/idle-people.json',
-                                animate: stopwatch.isRunning,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-                        ],
-                      ),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress / exercises.length,
+                    backgroundColor: Colors.grey[100],
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
                     ),
+                    minHeight: 6,
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 24),
+          Pressable(
+            onTap: () async {
+              await showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                ),
+                builder: (context) => ModalOptions(),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
               ),
+              child: Icon(
+                MingCute.settings_3_line,
+                size: 24,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          Text(
+            currentSE.exerciseName,
+            style: GoogleFonts.poppins(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildTargetBadge(),
+
+          const SizedBox(height: 40),
+
+          Center(child: _buildTimer()),
+
+          const SizedBox(height: 40),
+
+          if (sessionSets.isNotEmpty) ...[
+            Text(
+              "Completed Sets",
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[500],
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSetsList(),
+          ] else ...[
+            Center(
+              child: Opacity(
+                opacity: 0.5,
+                child: SizedBox(
+                  height: 200,
+                  child: Lottie.asset(
+                    'assets/animations/idle-people.json',
+                    animate: stopwatch.isRunning,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTargetBadge() {
+    if (exercisePlan == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(MingCute.target_line, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Text(
+            "Target: ${exercisePlan!.sets} sets × ${exercisePlan!.reps} reps",
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimer() {
+    return Column(
+      children: [
+        Text(
+          sessionStarted ? "WORKING" : "RESTING",
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: sessionStarted ? Colors.orange : Colors.green,
+            letterSpacing: 2.0,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          sessionStarted ? elapsed.mmss : "00:00",
+          style: GoogleFonts.spaceMono(
+            fontSize: 64,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            letterSpacing: -2.0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSetsList() {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: sessionSets.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final set = sessionSets[index];
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[100]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  "${index + 1}",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Card(
-                          elevation: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Set ${sessionSets.length + 1}",
-                              style: GoogleFonts.spaceMono(fontSize: 16),
-                            ),
-                          ),
-                        ),
-                        if (!stopwatch.isRunning && sessionStarted)
-                          Text(
-                            "Paused",
-                            style: GoogleFonts.spaceMono(fontSize: 16),
-                          ),
-                        Card(
-                          elevation: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              sessionStarted ? elapsed.mmss : "00:00",
-                              style: GoogleFonts.spaceMono(fontSize: 16),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      "${set.weight} kg × ${set.reps} reps",
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (!sessionStarted)
-                          Expanded(
-                            child: PrimaryButton(
-                              onTap: isLoading ? null : handleNextButton,
-                              padding: EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                "Start Set",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(width: 52),
-                                Pressable(
-                                  onTap: toggleStopwatch,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    padding: EdgeInsets.all(6),
-                                    child: Icon(
-                                      stopwatch.isRunning
-                                          ? MingCute.pause_fill
-                                          : MingCute.play_fill,
-                                      color: Colors.white,
-                                      size: 48,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Pressable(
-                                  onTap: stopwatch.isRunning
-                                      ? null
-                                      : handleNextButton,
-                                  child: Icon(
-                                    MingCute.skip_forward_fill,
-                                    color: AppColors.primary.withValues(
-                                      alpha: stopwatch.isRunning ? 0.5 : 1,
-                                    ),
-                                    size: 36,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
+                    if (set.note != null && set.note!.isNotEmpty)
+                      Text(
+                        set.note!,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                        ),
+                      ),
                   ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getRpeColor(set.effortRate).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  "RPE ${set.effortRate}",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: _getRpeColor(set.effortRate),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Color _getRpeColor(int rpe) {
+    if (rpe < 7) return Colors.green;
+    if (rpe < 9) return Colors.orange;
+    return Colors.red;
+  }
+
+  Widget _buildBottomControls() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey[100]!)),
+      ),
+      child: Column(
+        children: [
+          if (sessionStarted)
+            Row(
+              children: [
+                Pressable(
+                  onTap: toggleStopwatch,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      stopwatch.isRunning
+                          ? MingCute.pause_fill
+                          : MingCute.play_fill,
+                      color: Colors.black87,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: PrimaryButton(
+                    onTap: isLoading || stopwatch.isRunning
+                        ? null
+                        : handleNextButton,
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      "Finish Set",
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else
+            PrimaryButton(
+              onTap: isLoading ? null : handleNextButton,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(MingCute.play_fill, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Start Set ${sessionSets.length + 1}",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
