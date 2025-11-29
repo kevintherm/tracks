@@ -1,6 +1,9 @@
 - prioritize local data
     - remove imported flag
     - remove owned flag
+- add performed_count for cached occurances count (exercises, workouts) 
+- add import json exercise
+- add import json workout
 - validate min reps and set to be 1 in pb
 - integrate session with every single fucking things
     - session finish section (last week session)

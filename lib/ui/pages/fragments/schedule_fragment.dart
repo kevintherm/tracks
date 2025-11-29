@@ -229,7 +229,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    AssignSchedulePage(schedule: schedule),
+                                    CreateSchedulePage(schedule: schedule),
                               ),
                             );
                             return false;

@@ -11,6 +11,7 @@ import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/filter.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
+import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
@@ -105,7 +106,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AssignSchedulePage(
+                            builder: (context) => CreateSchedulePage(
                               selectedDate: DateTime.now(),
                             ),
                           ),
@@ -222,7 +223,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
 
                         return Dismissible(
                           key: ValueKey(index),
-                          direction: DismissDirection.horizontal,
+                          direction: DismissDirection.endToStart,
                           background: Container(
                             alignment: Alignment.centerLeft,
                             padding: const EdgeInsets.only(left: 20),
@@ -245,18 +246,8 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                             ),
                           ),
                           confirmDismiss: (direction) async {
-                            if (direction == DismissDirection.endToStart) {
-                              await _deleteSchedule(context, schedule);
-                              return false;
-                            } else {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AssignSchedulePage(schedule: schedule),
-                                ),
-                              );
-                              return false;
-                            }
+                            await _deleteSchedule(context, schedule);
+                            return false;
                           },
                           child: _ScheduleCard(schedule: schedule),
                         );
@@ -384,7 +375,14 @@ class _ScheduleCard extends StatelessWidget {
         : scheduleRepository.isScheduleActiveOnDate(schedule, now);
 
     return Pressable(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateSchedulePage(schedule: schedule),
+          ),
+        );
+      },
       child: Column(
         children: [
           AppContainer(
@@ -395,16 +393,18 @@ class _ScheduleCard extends StatelessWidget {
                   child: Row(
                     children: [
                       getWorkoutColage(workout),
-            
+
                       const SizedBox(width: 16),
-            
+
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Text('#${schedule.id.toString().padLeft(2, '0')}'),
+                                Text(
+                                  '#${schedule.id.toString().padLeft(2, '0')}',
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   workout.name,

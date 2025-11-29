@@ -17,17 +17,17 @@ import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
-class AssignSchedulePage extends StatefulWidget {
+class CreateSchedulePage extends StatefulWidget {
   final DateTime? selectedDate;
   final Schedule? schedule;
 
-  const AssignSchedulePage({super.key, this.selectedDate, this.schedule});
+  const CreateSchedulePage({super.key, this.selectedDate, this.schedule});
 
   @override
-  State<AssignSchedulePage> createState() => _AssignSchedulePageState();
+  State<CreateSchedulePage> createState() => _CreateSchedulePageState();
 }
 
-class _AssignSchedulePageState extends State<AssignSchedulePage> {
+class _CreateSchedulePageState extends State<CreateSchedulePage> {
   DateTime? selectedDate;
 
   final searchController = TextEditingController();
