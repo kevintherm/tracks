@@ -17,6 +17,7 @@ class SessionSet {
   int reps;
   int? failOnRep;
   int effortRate;
+  int restDuration;
   int duration; // In Seconds
   String? note;
 
@@ -25,6 +26,7 @@ class SessionSet {
     required this.reps,
     required this.duration,
     required this.effortRate,
+    this.restDuration = 0,
     this.needSync = true,
     this.failOnRep,
     this.note,

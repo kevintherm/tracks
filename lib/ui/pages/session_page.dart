@@ -14,7 +14,6 @@ import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
-import 'package:tracks/ui/components/safe_keyboard.dart';
 import 'package:tracks/ui/components/session_activity.dart';
 import 'package:tracks/ui/pages/modals/session_finish_failure_dialog.dart';
 import 'package:tracks/ui/pages/modals/session_finish_note_dialog.dart';
@@ -42,7 +41,7 @@ class _SessionPageState extends State<SessionPage> {
   late final WorkoutRepository workoutRepo;
 
   late final Session session;
-  late final List<Exercise> exercises;
+  final List<Exercise> exercises = [];
 
   // Current exercise and its sets
   final List<SessionSet> sessionSets = [];
@@ -52,7 +51,9 @@ class _SessionPageState extends State<SessionPage> {
   Timer? _timer;
 
   final stopwatch = Stopwatch();
+  final restStopwatch = Stopwatch();
   Duration elapsed = Duration();
+  Duration restElapsed = Duration();
 
   bool sessionStarted = false;
   bool isLoading = false;
@@ -74,13 +75,15 @@ class _SessionPageState extends State<SessionPage> {
   void dispose() {
     super.dispose();
     _timer?.cancel();
+    stopwatch.stop();
+    restStopwatch.stop();
   }
 
   Future<void> initialize() async {
     workoutRepo = context.read<WorkoutRepository>();
     sessionRepo = context.read<SessionRepository>();
 
-    exercises = widget.activity.getExercises();
+    exercises.addAll(widget.activity.getExercises());
     if (exercises.isEmpty) {
       Toast(context).error(content: Text("Cannot find related activity."));
       Navigator.pop(context);
@@ -101,19 +104,27 @@ class _SessionPageState extends State<SessionPage> {
 
       lastExercise = exercises.length == 1;
     });
+
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (restStopwatch.isRunning) {
+        setState(() {
+          restElapsed = restStopwatch.elapsed;
+        });
+      }
+      if (stopwatch.isRunning) {
+        setState(() {
+          elapsed = stopwatch.elapsed;
+        });
+      }
+    });
   }
 
   void handleNextButton() async {
     if (!sessionStarted) {
+      // Stop rest timer and start work timer
+      restStopwatch.stop();
       stopwatch.start();
-
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (stopwatch.isRunning) {
-          setState(() {
-            elapsed = stopwatch.elapsed;
-          });
-        }
-      });
 
       setState(() {
         sessionStarted = true;
@@ -199,44 +210,6 @@ class _SessionPageState extends State<SessionPage> {
 
     if (!mounted) return;
 
-    final setDuration = elapsed.inSeconds;
-
-    sessionSets.add(
-      SessionSet(
-        weight: weight,
-        reps: currentReps,
-        duration: setDuration,
-        effortRate: effortRate,
-        failOnRep: failOnRep,
-        note: note,
-      ),
-    );
-
-    setState(() {
-      sessionStarted = false;
-    });
-
-    _timer?.cancel();
-    _timer = null;
-    stopwatch.reset();
-    elapsed = Duration();
-
-    final seToSave = SessionExerciseData(
-      sessionExercise: currentSE,
-      sets: sessionSets,
-    );
-
-    final sessionSaved = await sessionRepo.collection.get(session.id);
-    if (sessionSaved != null) {
-      await sessionRepo.createSession(session: session, exercises: [seToSave]);
-    } else {
-      // Next exercise or smth
-      await sessionRepo.addExercisesToSession(
-        session: session,
-        exercises: [seToSave],
-      );
-    }
-
     // Finish exercise or another set
     if (!lastExercise &&
         (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) {
@@ -255,6 +228,50 @@ class _SessionPageState extends State<SessionPage> {
         );
       },
     );
+
+    final setDuration = elapsed.inSeconds;
+    final setRestDuration = restElapsed.inSeconds;
+
+    sessionSets.add(
+      SessionSet(
+        weight: weight,
+        reps: currentReps,
+        duration: setDuration,
+        effortRate: effortRate,
+        restDuration: setRestDuration,
+        failOnRep: failOnRep,
+        note: note,
+      ),
+    );
+
+    setState(() {
+      sessionStarted = false;
+    });
+
+    // Stop work timer and reset, start rest timer
+    stopwatch.stop();
+    stopwatch.reset();
+    elapsed = Duration();
+    
+    restStopwatch.reset();
+    restStopwatch.start();
+    restElapsed = Duration();
+
+    final seToSave = SessionExerciseData(
+      sessionExercise: currentSE,
+      sets: sessionSets,
+    );
+
+    final sessionSaved = await sessionRepo.collection.get(session.id);
+    if (sessionSaved != null) {
+      await sessionRepo.createSession(session: session, exercises: [seToSave]);
+    } else {
+      // Next exercise or smth
+      await sessionRepo.addExercisesToSession(
+        session: session,
+        exercises: [seToSave],
+      );
+    }
 
     if (finishExercise == true) {
       final pos = exercises.indexOf(
@@ -289,6 +306,11 @@ class _SessionPageState extends State<SessionPage> {
         lastExercise = exercises.length == 1;
         progress++;
       });
+
+      // Reset rest timer for new exercise
+      restStopwatch.reset();
+      restStopwatch.start();
+      restElapsed = Duration();
     }
   }
 
@@ -340,7 +362,7 @@ class _SessionPageState extends State<SessionPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: progress / exercises.length,
+                    value: exercises.isEmpty ? 0 : (progress / exercises.length) - 0.1,
                     backgroundColor: Colors.grey[100],
                     valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.primary,
@@ -478,7 +500,7 @@ class _SessionPageState extends State<SessionPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          sessionStarted ? elapsed.mmss : "00:00",
+          sessionStarted ? elapsed.mmss : restElapsed.mmss,
           style: GoogleFonts.spaceMono(
             fontSize: 64,
             fontWeight: FontWeight.bold,

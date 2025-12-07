@@ -97,7 +97,6 @@ class _StartSessionPageState extends State<StartSessionPage> {
 
     if (s == null) {
       if (cancelOnDismiss && mounted) {
-        Toast(context).neutral(content: Text("Session Cancelled."));
         Navigator.pop(context);
       }
       return false;
@@ -171,7 +170,6 @@ class _StartSessionPageState extends State<StartSessionPage> {
 
   void cancelSession() {
     if (mounted) {
-      Toast(context).neutral(content: Text("Session Cancelled."));
       Navigator.pop(context);
     }
   }

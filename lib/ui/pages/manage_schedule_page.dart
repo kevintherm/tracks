@@ -11,7 +11,6 @@ import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/filter.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';
-import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';

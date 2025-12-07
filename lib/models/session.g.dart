@@ -105,12 +105,12 @@ Session _sessionDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Session(
+    end: reader.readDateTimeOrNull(offsets[1]),
     needSync: reader.readBoolOrNull(offsets[2]) ?? true,
     pocketbaseId: reader.readStringOrNull(offsets[3]),
     start: reader.readDateTime(offsets[4]),
   );
   object.created = reader.readDateTime(offsets[0]);
-  object.end = reader.readDateTimeOrNull(offsets[1]);
   object.id = id;
   object.updated = reader.readDateTime(offsets[5]);
   return object;

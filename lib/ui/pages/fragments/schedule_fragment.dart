@@ -14,7 +14,6 @@ import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/sessions_page.dart';
 import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/consts.dart';
-import 'package:tracks/utils/toast.dart';
 
 class ScheduleFragment extends StatefulWidget {
   const ScheduleFragment({super.key});

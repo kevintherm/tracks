@@ -52,8 +52,13 @@ const SessionSetSchema = CollectionSchema(
       name: r'reps',
       type: IsarType.long,
     ),
-    r'weight': PropertySchema(
+    r'restDuration': PropertySchema(
       id: 7,
+      name: r'restDuration',
+      type: IsarType.long,
+    ),
+    r'weight': PropertySchema(
+      id: 8,
       name: r'weight',
       type: IsarType.double,
     )
@@ -113,7 +118,8 @@ void _sessionSetSerialize(
   writer.writeString(offsets[4], object.note);
   writer.writeString(offsets[5], object.pocketbaseId);
   writer.writeLong(offsets[6], object.reps);
-  writer.writeDouble(offsets[7], object.weight);
+  writer.writeLong(offsets[7], object.restDuration);
+  writer.writeDouble(offsets[8], object.weight);
 }
 
 SessionSet _sessionSetDeserialize(
@@ -129,7 +135,8 @@ SessionSet _sessionSetDeserialize(
     needSync: reader.readBoolOrNull(offsets[3]) ?? true,
     note: reader.readStringOrNull(offsets[4]),
     reps: reader.readLong(offsets[6]),
-    weight: reader.readDouble(offsets[7]),
+    restDuration: reader.readLongOrNull(offsets[7]) ?? 0,
+    weight: reader.readDouble(offsets[8]),
   );
   object.id = id;
   object.pocketbaseId = reader.readStringOrNull(offsets[5]);
@@ -158,6 +165,8 @@ P _sessionSetDeserializeProp<P>(
     case 6:
       return (reader.readLong(offset)) as P;
     case 7:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 8:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -854,6 +863,62 @@ extension SessionSetQueryFilter
     });
   }
 
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      restDurationEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'restDuration',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      restDurationGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'restDuration',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      restDurationLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'restDuration',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition>
+      restDurationBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'restDuration',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<SessionSet, SessionSet, QAfterFilterCondition> weightEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1023,6 +1088,18 @@ extension SessionSetQuerySortBy
     });
   }
 
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByRestDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'restDuration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByRestDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'restDuration', Sort.desc);
+    });
+  }
+
   QueryBuilder<SessionSet, SessionSet, QAfterSortBy> sortByWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'weight', Sort.asc);
@@ -1134,6 +1211,18 @@ extension SessionSetQuerySortThenBy
     });
   }
 
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByRestDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'restDuration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByRestDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'restDuration', Sort.desc);
+    });
+  }
+
   QueryBuilder<SessionSet, SessionSet, QAfterSortBy> thenByWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'weight', Sort.asc);
@@ -1193,6 +1282,12 @@ extension SessionSetQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByRestDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'restDuration');
+    });
+  }
+
   QueryBuilder<SessionSet, SessionSet, QDistinct> distinctByWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'weight');
@@ -1247,6 +1342,12 @@ extension SessionSetQueryProperty
   QueryBuilder<SessionSet, int, QQueryOperations> repsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'reps');
+    });
+  }
+
+  QueryBuilder<SessionSet, int, QQueryOperations> restDurationProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'restDuration');
     });
   }
 

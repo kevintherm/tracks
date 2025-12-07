@@ -27,23 +27,28 @@ const WorkoutExercisesSchema = CollectionSchema(
       name: r'needSync',
       type: IsarType.bool,
     ),
-    r'pocketbaseId': PropertySchema(
+    r'order': PropertySchema(
       id: 2,
+      name: r'order',
+      type: IsarType.long,
+    ),
+    r'pocketbaseId': PropertySchema(
+      id: 3,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'reps': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'reps',
       type: IsarType.long,
     ),
     r'sets': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'sets',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -98,10 +103,11 @@ void _workoutExercisesSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeBool(offsets[1], object.needSync);
-  writer.writeString(offsets[2], object.pocketbaseId);
-  writer.writeLong(offsets[3], object.reps);
-  writer.writeLong(offsets[4], object.sets);
-  writer.writeDateTime(offsets[5], object.updatedAt);
+  writer.writeLong(offsets[2], object.order);
+  writer.writeString(offsets[3], object.pocketbaseId);
+  writer.writeLong(offsets[4], object.reps);
+  writer.writeLong(offsets[5], object.sets);
+  writer.writeDateTime(offsets[6], object.updatedAt);
 }
 
 WorkoutExercises _workoutExercisesDeserialize(
@@ -112,13 +118,14 @@ WorkoutExercises _workoutExercisesDeserialize(
 ) {
   final object = WorkoutExercises(
     needSync: reader.readBoolOrNull(offsets[1]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[2]),
-    reps: reader.readLongOrNull(offsets[3]) ?? 6,
-    sets: reader.readLongOrNull(offsets[4]) ?? 3,
+    order: reader.readLongOrNull(offsets[2]) ?? -1,
+    pocketbaseId: reader.readStringOrNull(offsets[3]),
+    reps: reader.readLongOrNull(offsets[4]) ?? 6,
+    sets: reader.readLongOrNull(offsets[5]) ?? 3,
   );
   object.createdAt = reader.readDateTime(offsets[0]);
   object.id = id;
-  object.updatedAt = reader.readDateTime(offsets[5]);
+  object.updatedAt = reader.readDateTime(offsets[6]);
   return object;
 }
 
@@ -134,12 +141,14 @@ P _workoutExercisesDeserializeProp<P>(
     case 1:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? -1) as P;
     case 3:
-      return (reader.readLongOrNull(offset) ?? 6) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset) ?? 3) as P;
+      return (reader.readLongOrNull(offset) ?? 6) as P;
     case 5:
+      return (reader.readLongOrNull(offset) ?? 3) as P;
+    case 6:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -360,6 +369,62 @@ extension WorkoutExercisesQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'needSync',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterFilterCondition>
+      orderEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterFilterCondition>
+      orderGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterFilterCondition>
+      orderLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'order',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterFilterCondition>
+      orderBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'order',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -751,6 +816,19 @@ extension WorkoutExercisesQuerySortBy
     });
   }
 
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy> sortByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy>
+      sortByOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.desc);
+    });
+  }
+
   QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy>
       sortByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
@@ -849,6 +927,19 @@ extension WorkoutExercisesQuerySortThenBy
     });
   }
 
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy> thenByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy>
+      thenByOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'order', Sort.desc);
+    });
+  }
+
   QueryBuilder<WorkoutExercises, WorkoutExercises, QAfterSortBy>
       thenByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
@@ -921,6 +1012,13 @@ extension WorkoutExercisesQueryWhereDistinct
   }
 
   QueryBuilder<WorkoutExercises, WorkoutExercises, QDistinct>
+      distinctByOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'order');
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, WorkoutExercises, QDistinct>
       distinctByPocketbaseId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
@@ -965,6 +1063,12 @@ extension WorkoutExercisesQueryProperty
   QueryBuilder<WorkoutExercises, bool, QQueryOperations> needSyncProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'needSync');
+    });
+  }
+
+  QueryBuilder<WorkoutExercises, int, QQueryOperations> orderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'order');
     });
   }
 
