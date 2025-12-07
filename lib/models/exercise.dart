@@ -19,7 +19,7 @@ class Exercise {
   late double caloriesBurned;
 
   bool needSync;
-  bool imported;
+  bool public;
 
   late DateTime createdAt;
   late DateTime updatedAt;
@@ -89,7 +89,7 @@ class Exercise {
     required this.caloriesBurned,
     this.pocketbaseId,
     this.needSync = true,
-    this.imported = true,
+    this.public = false,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 }

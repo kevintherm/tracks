@@ -212,7 +212,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           thumbnail: thumbnailPath,
           pocketbaseId: widget.exercise!.pocketbaseId,
           needSync: widget.exercise!.needSync,
-          imported: widget.exercise!.imported,
+          public: widget.exercise!.public,
         )..id = widget.exercise!.id;
 
         final muscleActivations = <MuscleActivationParam>[];

@@ -522,7 +522,7 @@ class _WorkoutCard extends StatelessWidget {
               ],
             ),
           ),
-          _ImportedBadge(isImported: false),
+          _PublicBadge(isPublic: workout.public),
         ],
       ),
     );
@@ -560,21 +560,21 @@ class _ExerciseStat extends StatelessWidget {
   }
 }
 
-class _ImportedBadge extends StatelessWidget {
-  final bool isImported;
+class _PublicBadge extends StatelessWidget {
+  final bool isPublic;
 
-  const _ImportedBadge({required this.isImported});
+  const _PublicBadge({required this.isPublic});
 
   @override
   Widget build(BuildContext context) {
-    if (!isImported) return const SizedBox.shrink();
+    if (!isPublic) return const SizedBox.shrink();
 
     return Positioned(
       right: 32 + 10,
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[900],
+          color: Colors.blue[700],
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(8),
             bottomRight: Radius.circular(8),
@@ -582,7 +582,7 @@ class _ImportedBadge extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         child: Text(
-          "Imported",
+          "Public",
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: 12,

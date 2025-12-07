@@ -32,25 +32,25 @@ const ExerciseSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'imported': PropertySchema(
-      id: 3,
-      name: r'imported',
-      type: IsarType.bool,
-    ),
     r'name': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'needSync': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'pocketbaseId',
       type: IsarType.string,
+    ),
+    r'public': PropertySchema(
+      id: 6,
+      name: r'public',
+      type: IsarType.bool,
     ),
     r'thumbnail': PropertySchema(
       id: 7,
@@ -128,10 +128,10 @@ void _exerciseSerialize(
   writer.writeDouble(offsets[0], object.caloriesBurned);
   writer.writeDateTime(offsets[1], object.createdAt);
   writer.writeString(offsets[2], object.description);
-  writer.writeBool(offsets[3], object.imported);
-  writer.writeString(offsets[4], object.name);
-  writer.writeBool(offsets[5], object.needSync);
-  writer.writeString(offsets[6], object.pocketbaseId);
+  writer.writeString(offsets[3], object.name);
+  writer.writeBool(offsets[4], object.needSync);
+  writer.writeString(offsets[5], object.pocketbaseId);
+  writer.writeBool(offsets[6], object.public);
   writer.writeString(offsets[7], object.thumbnail);
   writer.writeDateTime(offsets[8], object.updatedAt);
 }
@@ -145,10 +145,10 @@ Exercise _exerciseDeserialize(
   final object = Exercise(
     caloriesBurned: reader.readDouble(offsets[0]),
     description: reader.readStringOrNull(offsets[2]),
-    imported: reader.readBoolOrNull(offsets[3]) ?? true,
-    name: reader.readString(offsets[4]),
-    needSync: reader.readBoolOrNull(offsets[5]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[6]),
+    name: reader.readString(offsets[3]),
+    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
+    pocketbaseId: reader.readStringOrNull(offsets[5]),
+    public: reader.readBoolOrNull(offsets[6]) ?? false,
     thumbnail: reader.readStringOrNull(offsets[7]),
   );
   object.createdAt = reader.readDateTime(offsets[1]);
@@ -171,13 +171,13 @@ P _exerciseDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 4:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 6:
+    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
@@ -638,16 +638,6 @@ extension ExerciseQueryFilter
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> importedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imported',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -939,6 +929,16 @@ extension ExerciseQueryFilter
     });
   }
 
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> publicEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'public',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> thumbnailIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1183,18 +1183,6 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByImported() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imported', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByImportedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imported', Sort.desc);
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1228,6 +1216,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByPocketbaseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
     });
   }
 
@@ -1306,18 +1306,6 @@ extension ExerciseQuerySortThenBy
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByImported() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imported', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByImportedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imported', Sort.desc);
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1351,6 +1339,18 @@ extension ExerciseQuerySortThenBy
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByPocketbaseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
     });
   }
 
@@ -1400,12 +1400,6 @@ extension ExerciseQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByImported() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'imported');
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1423,6 +1417,12 @@ extension ExerciseQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'public');
     });
   }
 
@@ -1466,12 +1466,6 @@ extension ExerciseQueryProperty
     });
   }
 
-  QueryBuilder<Exercise, bool, QQueryOperations> importedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'imported');
-    });
-  }
-
   QueryBuilder<Exercise, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
@@ -1487,6 +1481,12 @@ extension ExerciseQueryProperty
   QueryBuilder<Exercise, String?, QQueryOperations> pocketbaseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<Exercise, bool, QQueryOperations> publicProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'public');
     });
   }
 

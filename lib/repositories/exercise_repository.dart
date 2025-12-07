@@ -70,7 +70,6 @@ class ExerciseRepository {
       }
     }
 
-    exercise.imported = false;
     exercise.needSync = true;
 
     await isar.writeTxn(() async {
@@ -484,7 +483,7 @@ class ExerciseRepository {
           (record.data['calories_burned'] as num?)?.toDouble() ?? 0.0,
       pocketbaseId: record.id,
       needSync: false,
-      imported: record.data['user'] != authService.currentUser?['id'],
+      public: record.data['public'] ?? false,
     );
 
     exercise.createdAt =

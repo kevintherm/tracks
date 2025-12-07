@@ -37,15 +37,15 @@ const WorkoutSchema = CollectionSchema(
       name: r'needSync',
       type: IsarType.bool,
     ),
-    r'owned': PropertySchema(
-      id: 4,
-      name: r'owned',
-      type: IsarType.bool,
-    ),
     r'pocketbaseId': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'pocketbaseId',
       type: IsarType.string,
+    ),
+    r'public': PropertySchema(
+      id: 5,
+      name: r'public',
+      type: IsarType.bool,
     ),
     r'thumbnail': PropertySchema(
       id: 6,
@@ -110,8 +110,8 @@ void _workoutSerialize(
   writer.writeString(offsets[1], object.description);
   writer.writeString(offsets[2], object.name);
   writer.writeBool(offsets[3], object.needSync);
-  writer.writeBool(offsets[4], object.owned);
-  writer.writeString(offsets[5], object.pocketbaseId);
+  writer.writeString(offsets[4], object.pocketbaseId);
+  writer.writeBool(offsets[5], object.public);
   writer.writeString(offsets[6], object.thumbnail);
   writer.writeDateTime(offsets[7], object.updatedAt);
 }
@@ -126,8 +126,8 @@ Workout _workoutDeserialize(
     description: reader.readStringOrNull(offsets[1]),
     name: reader.readString(offsets[2]),
     needSync: reader.readBoolOrNull(offsets[3]) ?? true,
-    owned: reader.readBoolOrNull(offsets[4]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[5]),
+    pocketbaseId: reader.readStringOrNull(offsets[4]),
+    public: reader.readBoolOrNull(offsets[5]) ?? false,
     thumbnail: reader.readStringOrNull(offsets[6]),
   );
   object.createdAt = reader.readDateTime(offsets[0]);
@@ -152,9 +152,9 @@ P _workoutDeserializeProp<P>(
     case 3:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
@@ -645,16 +645,6 @@ extension WorkoutQueryFilter
     });
   }
 
-  QueryBuilder<Workout, Workout, QAfterFilterCondition> ownedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'owned',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Workout, Workout, QAfterFilterCondition> pocketbaseIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -799,6 +789,16 @@ extension WorkoutQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'pocketbaseId',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterFilterCondition> publicEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'public',
+        value: value,
       ));
     });
   }
@@ -1058,18 +1058,6 @@ extension WorkoutQuerySortBy on QueryBuilder<Workout, Workout, QSortBy> {
     });
   }
 
-  QueryBuilder<Workout, Workout, QAfterSortBy> sortByOwned() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'owned', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Workout, Workout, QAfterSortBy> sortByOwnedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'owned', Sort.desc);
-    });
-  }
-
   QueryBuilder<Workout, Workout, QAfterSortBy> sortByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.asc);
@@ -1079,6 +1067,18 @@ extension WorkoutQuerySortBy on QueryBuilder<Workout, Workout, QSortBy> {
   QueryBuilder<Workout, Workout, QAfterSortBy> sortByPocketbaseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> sortByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> sortByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
     });
   }
 
@@ -1169,18 +1169,6 @@ extension WorkoutQuerySortThenBy
     });
   }
 
-  QueryBuilder<Workout, Workout, QAfterSortBy> thenByOwned() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'owned', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Workout, Workout, QAfterSortBy> thenByOwnedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'owned', Sort.desc);
-    });
-  }
-
   QueryBuilder<Workout, Workout, QAfterSortBy> thenByPocketbaseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.asc);
@@ -1190,6 +1178,18 @@ extension WorkoutQuerySortThenBy
   QueryBuilder<Workout, Workout, QAfterSortBy> thenByPocketbaseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pocketbaseId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> thenByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QAfterSortBy> thenByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
     });
   }
 
@@ -1246,16 +1246,16 @@ extension WorkoutQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Workout, Workout, QDistinct> distinctByOwned() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'owned');
-    });
-  }
-
   QueryBuilder<Workout, Workout, QDistinct> distinctByPocketbaseId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Workout, Workout, QDistinct> distinctByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'public');
     });
   }
 
@@ -1305,15 +1305,15 @@ extension WorkoutQueryProperty
     });
   }
 
-  QueryBuilder<Workout, bool, QQueryOperations> ownedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'owned');
-    });
-  }
-
   QueryBuilder<Workout, String?, QQueryOperations> pocketbaseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<Workout, bool, QQueryOperations> publicProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'public');
     });
   }
 

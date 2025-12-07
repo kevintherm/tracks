@@ -15,7 +15,7 @@ class Workout {
   String? thumbnail;
 
   bool needSync;
-  bool owned;
+  bool public;
 
   late DateTime createdAt;
   late DateTime updatedAt;
@@ -26,7 +26,7 @@ class Workout {
     this.description,
     this.thumbnail,
     this.needSync = true,
-    this.owned = true
+    this.public = false
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
