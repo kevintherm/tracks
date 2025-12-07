@@ -529,7 +529,7 @@ class _ExerciseCard extends StatelessWidget {
                   tag: 'exercise-${exercise.id}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: getImage(exercise.thumbnailLocal),
+                    child: getImage(exercise.thumbnail),
                   ),
                 ),
                 const SizedBox(width: 16),

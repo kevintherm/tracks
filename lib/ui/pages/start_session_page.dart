@@ -387,12 +387,12 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                         activity is WorkoutActivity &&
                                             (activity as WorkoutActivity)
                                                     .workout
-                                                    .thumbnailLocal !=
+                                                    .thumbnail !=
                                                 null
                                         ? getImage(
                                             (activity as WorkoutActivity)
                                                 .workout
-                                                .thumbnailLocal,
+                                                .thumbnail,
                                             width: 1000,
                                             height: 1000,
                                           )
@@ -521,7 +521,7 @@ class _ExerciseCard extends StatelessWidget {
               tag: 'exercise-${exerciseParam.exercise.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: getImage(exerciseParam.exercise.thumbnailLocal),
+                child: getImage(exerciseParam.exercise.thumbnail),
               ),
             ),
             const SizedBox(width: 16),

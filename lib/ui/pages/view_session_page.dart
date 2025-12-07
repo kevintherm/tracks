@@ -115,29 +115,11 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
     final workout = _session.workout.value;
     if (workout == null) return _buildPlaceholder();
 
-    // 1. Try Local Image
-    if (workout.thumbnailLocal != null && workout.thumbnailLocal!.isNotEmpty) {
-      final file = File(workout.thumbnailLocal!);
+    if (workout.thumbnail != null && workout.thumbnail!.isNotEmpty) {
+      final file = File(workout.thumbnail!);
       if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.cover);
+        return getImage(workout.thumbnail, width: double.infinity, height: double.infinity);
       }
-    }
-
-    // 2. Try Cloud Image
-    if (workout.thumbnailCloud != null && workout.thumbnailCloud!.isNotEmpty) {
-      String url = workout.thumbnailCloud!;
-      if (!url.startsWith('http')) {
-        if (workout.pocketbaseId != null) {
-          url =
-              '$backendUrlAndroid/api/files/workouts/${workout.pocketbaseId}/$url';
-        }
-      }
-
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
     }
 
     return _buildPlaceholder();
@@ -791,7 +773,7 @@ class _SessionExerciseCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: getImage(
-                    sessionExercise.exercise.value?.thumbnailLocal,
+                    sessionExercise.exercise.value?.thumbnail,
                     width: 50,
                     height: 50,
                   ),

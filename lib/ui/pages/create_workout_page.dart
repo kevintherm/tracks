@@ -73,7 +73,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           id: exercise.id.toString(),
           label: exercise.name,
           subtitle: exercise.description,
-          imagePath: exercise.thumbnailLocal,
+          imagePath: exercise.thumbnail,
         );
 
         // Apply to selected options
@@ -241,14 +241,13 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         } else if (_thumbnailRemoved) {
           thumbnailPath = null;
         } else {
-          thumbnailPath = widget.workout!.thumbnailLocal;
+          thumbnailPath = widget.workout!.thumbnail;
         }
 
         final updatedWorkout = Workout(
           name: name,
           description: description,
-          thumbnailLocal: thumbnailPath,
-          thumbnailCloud: widget.workout!.thumbnailCloud,
+          thumbnail: thumbnailPath,
           pocketbaseId: widget.workout!.pocketbaseId,
           needSync: widget.workout!.needSync,
         )..id = widget.workout!.id;
@@ -265,7 +264,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         final newWorkout = Workout(
           name: name,
           description: description,
-          thumbnailLocal: _thumbnailImage?.path,
+          thumbnail: _thumbnailImage?.path,
         );
 
         await workoutRepo.createWorkout(
@@ -302,7 +301,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                       id: exercise.id.toString(),
                       label: exercise.name,
                       subtitle: exercise.description,
-                      imagePath: exercise.thumbnailLocal,
+                      imagePath: exercise.thumbnail,
                     ),
                   )
                   .toList();
@@ -346,7 +345,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     // Thumbnail Section
                     _ThumbnailSection(
                       thumbnailImage: _thumbnailImage,
-                      existingThumbnailPath: widget.workout?.thumbnailLocal,
+                      existingThumbnailPath: widget.workout?.thumbnail,
                       thumbnailRemoved: _thumbnailRemoved,
                       onPickImage: _pickThumbnailImage,
                       onRemoveImage: _removeThumbnailImage,

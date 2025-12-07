@@ -40,7 +40,6 @@ class MuscleRepository {
         final muscle = Muscle(
           name: record.data['name'],
           description: record.data['description'],
-          thumbnailCloud: record.data['thumbnail'],
           pocketbaseId: record.id,
         );
 
@@ -49,7 +48,6 @@ class MuscleRepository {
         if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
           try {
             final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-            muscle.thumbnailCloud = cloudUrl;
 
             final localPath = await imageStorageService.downloadImageFromCloud(
               cloudUrl: cloudUrl,
@@ -57,7 +55,7 @@ class MuscleRepository {
             );
 
             if (localPath != null) {
-              muscle.thumbnailLocal = localPath;
+              muscle.thumbnail = localPath;
             }
 
           } catch (e) {

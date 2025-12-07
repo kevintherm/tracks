@@ -12,8 +12,7 @@ class Workout {
 
   String name;
   String? description;
-  String? thumbnailCloud;
-  String? thumbnailLocal;
+  String? thumbnail;
 
   bool needSync;
   bool owned;
@@ -25,8 +24,7 @@ class Workout {
     required this.name,
     this.pocketbaseId,
     this.description,
-    this.thumbnailCloud,
-    this.thumbnailLocal,
+    this.thumbnail,
     this.needSync = true,
     this.owned = true
   }) : createdAt = DateTime.now(),
@@ -75,6 +73,6 @@ class Workout {
 
   @ignore
   String get thumbnailFallback {
-    return thumbnailLocal ?? exercises.first.thumbnailLocal ?? 'assets/drawings/not-found.jpg';
+    return thumbnail ?? exercises.first.thumbnail ?? 'assets/drawings/not-found.jpg';
   }
 }

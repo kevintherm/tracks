@@ -722,7 +722,7 @@ class _ExerciseCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: getImage(
-                      exercise.thumbnailLocal,
+                      exercise.thumbnail,
                       width: 60,
                       height: 60,
                     ),

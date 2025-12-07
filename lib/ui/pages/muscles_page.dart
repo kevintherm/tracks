@@ -315,7 +315,7 @@ class _MuscleCard extends StatelessWidget {
               tag: 'muscle-${muscle.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: getImage(muscle.thumbnailLocal, width: 60, height: 60),
+                child: getImage(muscle.thumbnail, width: 60, height: 60),
               ),
             ),
             const SizedBox(width: 16),

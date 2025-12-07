@@ -55,18 +55,18 @@ class ExerciseRepository {
     required Exercise exercise,
     required List<MuscleActivationParam> muscles,
   }) async {
-    if (exercise.thumbnailLocal != null) {
+    if (exercise.thumbnail != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnailLocal!,
+          sourcePath: exercise.thumbnail!,
           directory: 'exercises',
           syncEnabled: false,
         );
 
-        exercise.thumbnailLocal = imageResult['localPath'];
+        exercise.thumbnail = imageResult['localPath'];
       } catch (e) {
         print('Failed to save exercise thumbnail: $e');
-        exercise.thumbnailLocal = null;
+        exercise.thumbnail = null;
       }
     }
 
@@ -104,14 +104,14 @@ class ExerciseRepository {
 
     // Handle thumbnail update if needed
     // Check if this is a NEW image (path changed or doesn't point to app directory yet)
-    if (exercise.thumbnailLocal != null) {
-      final isNewImage = oldExercise?.thumbnailLocal != exercise.thumbnailLocal;
+    if (exercise.thumbnail != null) {
+      final isNewImage = oldExercise?.thumbnail != exercise.thumbnail;
 
       if (isNewImage) {
         try {
-          if (oldExercise?.thumbnailLocal != null) {
+          if (oldExercise?.thumbnail != null) {
             await imageStorageService.deleteImage(
-              localPath: oldExercise!.thumbnailLocal,
+              localPath: oldExercise!.thumbnail,
               collection: PBCollections.exercises.value,
               recordId: oldExercise.pocketbaseId,
               fieldName: 'thumbnail',
@@ -120,15 +120,15 @@ class ExerciseRepository {
           }
 
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnailLocal!,
+            sourcePath: exercise.thumbnail!,
             directory: 'exercises',
             syncEnabled: false,
           );
 
-          exercise.thumbnailLocal = imageResult['localPath'];
+          exercise.thumbnail = imageResult['localPath'];
         } catch (e) {
-          if (oldExercise?.thumbnailLocal != null) {
-            exercise.thumbnailLocal = oldExercise!.thumbnailLocal;
+          if (oldExercise?.thumbnail != null) {
+            exercise.thumbnail = oldExercise!.thumbnail;
           }
         }
       }
@@ -176,10 +176,10 @@ class ExerciseRepository {
   }
 
   Future<void> deleteExercise(Exercise exercise) async {
-    if (exercise.thumbnailLocal != null) {
+    if (exercise.thumbnail != null) {
       try {
         await imageStorageService.deleteImage(
-          localPath: exercise.thumbnailLocal,
+          localPath: exercise.thumbnail,
           collection: PBCollections.exercises.value,
           recordId: exercise.pocketbaseId,
           fieldName: 'thumbnail',
@@ -266,10 +266,10 @@ class ExerciseRepository {
         junction.needSync = false;
       }
 
-      if (exercise.thumbnailLocal != null) {
+      if (exercise.thumbnail != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnailLocal!,
+            sourcePath: exercise.thumbnail!,
             directory: 'exercises',
             collection: PBCollections.exercises.value,
             pbRecord: record,
@@ -277,7 +277,7 @@ class ExerciseRepository {
             syncEnabled: true,
           );
 
-          exercise.thumbnailCloud = imageResult['cloudUrl'];
+          exercise.thumbnail = imageResult['localPath'];
         } catch (e) {
           print('Failed to upload exercise thumbnail to cloud: $e');
           // Continue without thumbnail sync
@@ -325,10 +325,10 @@ class ExerciseRepository {
           );
 
       // Handle thumbnail sync if exists
-      if (exercise.thumbnailLocal != null) {
+      if (exercise.thumbnail != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnailLocal!,
+            sourcePath: exercise.thumbnail!,
             directory: 'exercises',
             collection: PBCollections.exercises.value,
             pbRecord: await pb
@@ -338,12 +338,8 @@ class ExerciseRepository {
             syncEnabled: true,
           );
 
-          if (imageResult['cloudUrl'] != null) {
-            exercise.thumbnailCloud = imageResult['cloudUrl'];
-
-            if (imageResult['localPath'] != null) {
-              exercise.thumbnailLocal = imageResult['localPath'];
-            }
+          if (imageResult['localPath'] != null) {
+            exercise.thumbnail = imageResult['localPath'];
           }
         } catch (e) {
           // Continue with sync even if image upload fails
@@ -556,7 +552,6 @@ class ExerciseRepository {
 
     try {
       final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-      exercise.thumbnailCloud = cloudUrl;
 
       final localPath = await imageStorageService.downloadImageFromCloud(
         cloudUrl: cloudUrl,
@@ -564,7 +559,7 @@ class ExerciseRepository {
       );
 
       if (localPath != null) {
-        exercise.thumbnailLocal = localPath;
+        exercise.thumbnail = localPath;
       }
     } catch (e) {
       print('Failed to download thumbnail for exercise ${exercise.name}: $e');
@@ -583,13 +578,6 @@ class ExerciseRepository {
     try {
       final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
 
-      // Only download if URL changed
-      if (exists.thumbnailCloud == cloudUrl) {
-        return;
-      }
-
-      exists.thumbnailCloud = cloudUrl;
-
       final localPath = await imageStorageService.downloadImageFromCloud(
         cloudUrl: cloudUrl,
         directory: 'exercises',
@@ -597,14 +585,14 @@ class ExerciseRepository {
 
       if (localPath != null) {
         // Delete old local image if it exists
-        if (exists.thumbnailLocal != null) {
-          await imageStorageService.deleteLocalImage(exists.thumbnailLocal!);
+        if (exists.thumbnail != null) {
+          await imageStorageService.deleteLocalImage(exists.thumbnail!);
         }
-        exists.thumbnailLocal = localPath;
+        exists.thumbnail = localPath;
       }
     } catch (e) {
       print('Failed to update thumbnail for exercise ${exists.name}: $e');
-      // Keep existing thumbnailLocal if download fails
+      // Keep existing thumbnail if download fails
     }
   }
 

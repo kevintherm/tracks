@@ -6,6 +6,8 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 const String env = "local";
 const String appName = "Factual";
@@ -59,28 +61,44 @@ Future<bool> showConfirmDialog(
 
 Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
   final hasLocalImage = imagePath != null && File(imagePath).existsSync();
-  final cacheWidth = (width * 2).toInt(); // 2x for retina
 
-  Image image = Image.asset(
+  // Shimmer placeholder
+  Widget shimmerPlaceholder = Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: Container(
+      width: width,
+      height: height,
+      color: Colors.white,
+    ),
+  );
+
+  // Error/fallback placeholder
+  Widget errorPlaceholder = Image.asset(
     'assets/drawings/not-found.jpg',
     width: width,
     height: height,
     fit: BoxFit.cover,
-    cacheWidth: cacheWidth,
   );
 
   if (hasLocalImage) {
-    image = Image.file(
+    return Image.file(
       File(imagePath),
       width: width,
       height: height,
       fit: BoxFit.cover,
-      cacheWidth: cacheWidth,
-      errorBuilder: (context, error, stackTrace) => image,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: frame != null ? child : shimmerPlaceholder,
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => errorPlaceholder,
     );
   }
 
-  return image;
+  return errorPlaceholder;
 }
 
 Widget getImageColage(
@@ -138,7 +156,7 @@ Widget getWorkoutColage(
   if (workout.exercises.isNotEmpty) {
     images.addAll(
       workout.exercises
-          .map((e) => e.thumbnailLocal ?? '')
+          .map((e) => e.thumbnail ?? '')
           .where((t) => t.isNotEmpty)
           .take(3)
           .toList(),

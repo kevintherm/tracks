@@ -131,34 +131,12 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
   }
 
   Widget _buildMuscleImage() {
-    // 1. Try Local Image
-    if (_muscle.thumbnailLocal != null &&
-        _muscle.thumbnailLocal!.isNotEmpty) {
-      final file = File(_muscle.thumbnailLocal!);
+    if (_muscle.thumbnail != null && _muscle.thumbnail!.isNotEmpty) {
+      final file = File(_muscle.thumbnail!);
       if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.cover);
+        return getImage(_muscle.thumbnail, width: double.infinity, height: double.infinity);
       }
     }
-
-    // 2. Try Cloud Image
-    if (_muscle.thumbnailCloud != null &&
-        _muscle.thumbnailCloud!.isNotEmpty) {
-      String url = _muscle.thumbnailCloud!;
-      if (!url.startsWith('http')) {
-        if (_muscle.pocketbaseId != null) {
-          url =
-              '$backendUrlAndroid/api/files/muscles/${_muscle.pocketbaseId}/$url';
-        }
-      }
-
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
-    }
-
-    // 3. Fallback
     return _buildPlaceholder();
   }
 
@@ -357,36 +335,12 @@ class _ExerciseCard extends StatelessWidget {
   }
 
   Widget _buildExerciseImage() {
-    // 1. Try Local Image
-    if (exercise.thumbnailLocal != null &&
-        exercise.thumbnailLocal!.isNotEmpty) {
-      final file = File(exercise.thumbnailLocal!);
+    if (exercise.thumbnail != null && exercise.thumbnail!.isNotEmpty) {
+      final file = File(exercise.thumbnail!);
       if (file.existsSync()) {
-        return Image.file(file, width: 80, height: 80, fit: BoxFit.cover);
+        return getImage(exercise.thumbnail, width: 80, height: 80);
       }
     }
-
-    // 2. Try Cloud Image
-    if (exercise.thumbnailCloud != null &&
-        exercise.thumbnailCloud!.isNotEmpty) {
-      String url = exercise.thumbnailCloud!;
-      if (!url.startsWith('http')) {
-        if (exercise.pocketbaseId != null) {
-          url =
-              '$backendUrlAndroid/api/files/exercises/${exercise.pocketbaseId}/$url';
-        }
-      }
-
-      return Image.network(
-        url,
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
-    }
-
-    // 3. Fallback
     return _buildPlaceholder();
   }
 

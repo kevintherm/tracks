@@ -15,8 +15,7 @@ class Exercise {
   @Index()
   late String name;
   late String? description;
-  late String? thumbnailLocal;
-  late String? thumbnailCloud;
+  late String? thumbnail;
   late double caloriesBurned;
 
   bool needSync;
@@ -86,8 +85,7 @@ class Exercise {
   Exercise({
     required this.name,
     this.description,
-    this.thumbnailLocal,
-    this.thumbnailCloud,
+    this.thumbnail,
     required this.caloriesBurned,
     this.pocketbaseId,
     this.needSync = true,

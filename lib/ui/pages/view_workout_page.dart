@@ -240,32 +240,12 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
   }
 
   Widget _buildExerciseImage() {
-    // 1. Try Local Image
-    if (_workout.thumbnailLocal != null && _workout.thumbnailLocal!.isNotEmpty) {
-      final file = File(_workout.thumbnailLocal!);
+    if (_workout.thumbnail != null && _workout.thumbnail!.isNotEmpty) {
+      final file = File(_workout.thumbnail!);
       if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.cover);
+        return getImage(_workout.thumbnail, width: double.infinity, height: double.infinity);
       }
     }
-
-    // 2. Try Cloud Image
-    if (_workout.thumbnailCloud != null && _workout.thumbnailCloud!.isNotEmpty) {
-      String url = _workout.thumbnailCloud!;
-      if (!url.startsWith('http')) {
-        if (_workout.pocketbaseId != null) {
-          url =
-              '$backendUrlAndroid/api/files/exercises/${_workout.pocketbaseId}/$url';
-        }
-      }
-
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
-    }
-
-    // 3. Fallback
     return _buildPlaceholder();
   }
 
@@ -633,7 +613,7 @@ class _ExerciseCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: getImage(exercise.thumbnailLocal, width: 80, height: 80),
+              child: getImage(exercise.thumbnail, width: 80, height: 80),
             ),
             const SizedBox(width: 16),
             Expanded(
