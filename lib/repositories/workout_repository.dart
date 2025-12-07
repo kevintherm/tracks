@@ -12,11 +12,13 @@ class WorkoutConfigParam {
   Exercise exercise;
   int reps;
   int sets;
+  int order;
 
   WorkoutConfigParam({
     required this.exercise,
     required this.sets,
     required this.reps,
+    required this.order,
   });
 }
 
@@ -115,7 +117,7 @@ class WorkoutRepository {
           final sets = entry.sets;
           final reps = entry.reps;
 
-          final workoutExercise = WorkoutExercises(sets: sets, reps: reps)
+          final workoutExercise = WorkoutExercises(sets: sets, reps: reps, order: entry.order)
             ..workout.value = workout
             ..exercise.value = exercise;
 
@@ -196,7 +198,7 @@ class WorkoutRepository {
           final sets = entry.sets;
           final reps = entry.reps;
 
-          final workoutExercise = WorkoutExercises(sets: sets, reps: reps)
+          final workoutExercise = WorkoutExercises(sets: sets, reps: reps, order: entry.order)
             ..workout.value = workout
             ..exercise.value = exercise;
 
