@@ -26,29 +26,6 @@ class _HomePageState extends State<HomePage> {
   late NavigationProvider navigationProvider;
 
   @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(() async {
-        log('[Sync] Starting muscle sync..');
-        await context.read<MuscleRepository>().performInitialSync();
-
-        log('[Sync] Starting exercise sync..');
-        await context.read<ExerciseRepository>().performInitialSync();
-
-        log('[Sync] Starting workout sync..');
-        await context.read<WorkoutRepository>().performInitialSync();
-
-        log('[Sync] Starting schedule sync..');
-        await context.read<ScheduleRepository>().performInitialSync();
-
-        log('[Sync] Sync complete..');
-      }());
-    });
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     navigationProvider = Provider.of<NavigationProvider>(context);

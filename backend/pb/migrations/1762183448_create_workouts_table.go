@@ -42,8 +42,22 @@ func init() {
 			MimeTypes: []string{"image/jpg", "image/jpeg", "image/png", "image/gif", "image/heic"},
 		})
 
-		collection.ListRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
-		collection.ViewRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
+		collection.Fields.Add(&core.BoolField{
+			Name: "is_public",
+		})
+
+		collection.Fields.Add(&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		})
+		collection.Fields.Add(&core.AutodateField{
+			Name:     "updated",
+			OnCreate: true,
+			OnUpdate: true,
+		})
+
+		collection.ListRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		collection.ViewRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
 		collection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
 		collection.UpdateRule = types.Pointer(`
 			@request.auth.id != '' &&

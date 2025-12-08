@@ -41,7 +41,14 @@ class MuscleRepository {
           name: record.data['name'],
           description: record.data['description'],
           pocketbaseId: record.id,
+          needSync: false,
+          public: record.data['is_public'] ?? false,
         );
+
+        muscle.createdAt =
+            DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now();
+        muscle.updatedAt =
+            DateTime.tryParse(record.data['updated'] ?? '') ?? DateTime.now();
 
         final thumbnailField = record.data['thumbnail'];
         if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {

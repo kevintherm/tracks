@@ -59,6 +59,10 @@ func init() {
 			Required: false,
 		})
 
+		collection.Fields.Add(&core.BoolField{
+			Name: "is_public",
+		})
+
 		collection.Fields.Add(&core.AutodateField{
 			Name:     "created",
 			OnCreate: true,
@@ -69,8 +73,8 @@ func init() {
 			OnUpdate: true,
 		})
 
-		collection.ListRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
-		collection.ViewRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+		collection.ListRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		collection.ViewRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
 		collection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
 		collection.UpdateRule = types.Pointer(`
 			@request.auth.id != '' &&

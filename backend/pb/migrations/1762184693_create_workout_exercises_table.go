@@ -22,17 +22,19 @@ func init() {
 		collection := core.NewBaseCollection("workout_exercises")
 
 		collection.Fields.Add(&core.RelationField{
-			Name:         "workout",
-			MaxSelect:    1,
-			CollectionId: workoutsCollection.Id,
-			Required:     true,
+			Name:          "workout",
+			MaxSelect:     1,
+			CollectionId:  workoutsCollection.Id,
+			Required:      true,
+			CascadeDelete: true,
 		})
 
 		collection.Fields.Add(&core.RelationField{
-			Name:         "exercises",
-			MaxSelect:    100,
-			CollectionId: exercisesCollection.Id,
-			Required:     true,
+			Name:          "exercise",
+			MaxSelect:     1,
+			CollectionId:  exercisesCollection.Id,
+			Required:      true,
+			CascadeDelete: true,
 		})
 
 		collection.Fields.Add(&core.NumberField{

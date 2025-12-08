@@ -216,6 +216,7 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
+              'is_public': exercise.public,
             },
           );
 
@@ -298,6 +299,7 @@ class ExerciseRepository {
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
+              'is_public': exercise.public,
             },
           );
 
@@ -462,7 +464,7 @@ class ExerciseRepository {
           (record.data['calories_burned'] as num?)?.toDouble() ?? 0.0,
       pocketbaseId: record.id,
       needSync: false,
-      public: record.data['public'] ?? false,
+      public: record.data['is_public'] ?? false,
     );
 
     exercise.createdAt =

@@ -12,6 +12,19 @@ func init() {
 		// Create muscles collection
 		musclesCollection := core.NewBaseCollection("muscles")
 
+		usersCollection, err := app.FindCollectionByNameOrId("users")
+		if err != nil {
+			return err
+		}
+
+		musclesCollection.Fields.Add(&core.RelationField{
+			Name:          "user",
+			CascadeDelete: true,
+			CollectionId:  usersCollection.Id,
+			MaxSelect:     1,
+			Required:      false,
+		})
+
 		musclesCollection.Fields.Add(&core.TextField{
 			Name:     "name",
 			Required: true,
@@ -32,20 +45,31 @@ func init() {
 			MimeTypes: []string{"image/jpg", "image/jpeg", "image/png", "image/gif", "image/heic"},
 		})
 
-		musclesCollection.Fields.Add(&core.AutodateField{
-			Name:     "created",
-			OnCreate: true,
+		musclesCollection.Fields.Add(&core.BoolField{
+			Name: "is_public",
 		})
+
 		musclesCollection.Fields.Add(&core.AutodateField{
 			Name:     "updated",
 			OnCreate: true,
 			OnUpdate: true,
 		})
 
+		musclesCollection.ListRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		musclesCollection.ViewRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		musclesCollection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
+		musclesCollection.UpdateRule = types.Pointer(`
+			@request.auth.id != '' &&
+			user = @request.auth.id &&
+			(@request.body.user:isset = false || @request.body.user = @request.auth.id)
+		`)
+		musclesCollection.DeleteRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+
+		_ = app.Save(musclesCollection)
 		musclesCollection.ListRule = types.Pointer("")
 		musclesCollection.ViewRule = types.Pointer("")
 
-		err := app.Save(musclesCollection)
+		err = app.Save(musclesCollection)
 		if err != nil {
 			return err
 		}

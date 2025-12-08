@@ -265,6 +265,7 @@ class WorkoutRepository {
               'user': authService.currentUser?['id'],
               'name': workout.name,
               'description': workout.description,
+              'is_public': workout.public,
             },
           );
 
@@ -347,6 +348,7 @@ class WorkoutRepository {
               'user': authService.currentUser?['id'],
               'name': workout.name,
               'description': workout.description,
+              'is_public': workout.public,
             },
           );
 
@@ -457,6 +459,7 @@ class WorkoutRepository {
           description: record.data['description'],
           pocketbaseId: record.id,
           needSync: false,
+          public: record.data['is_public'] ?? false,
         );
 
         toInsert.createdAt =

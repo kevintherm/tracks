@@ -1,7 +1,6 @@
 package migrations
 
 import (
-	// Removed "bytes" as it's no longer needed for the download buffer
 	"context"
 	"encoding/json"
 	"fmt"
@@ -26,9 +25,15 @@ func FloorTo(x float64, decimals int) float64 {
 func init() {
 	m.Register(func(app core.App) error {
 
+		// Create admin user first
+		adminUserId, err := CreateAdminUser(app)
+		if err != nil {
+			return fmt.Errorf("failed to create admin user (major error): %w", err)
+		}
+
 		// SeedMusclesTable is critical: if it fails, exercises can't be linked.
 		// This is a "major error".
-		muscleIds, err := SeedMusclesTable(app)
+		muscleIds, err := SeedMusclesTable(app, adminUserId)
 		if err != nil {
 			return fmt.Errorf("failed to seed muscles (major error): %w", err)
 		}
@@ -36,7 +41,7 @@ func init() {
 		// SeedExercisesTable is also critical, but errors inside (like one
 		// record failing) will be handled individually.
 		// An error returned here is a "major error" (eg. file not found).
-		err = SeedExercisesTable(app, muscleIds)
+		err = SeedExercisesTable(app, muscleIds, adminUserId)
 		if err != nil {
 			return fmt.Errorf("failed to seed exercises (major error): %w", err)
 		}
@@ -46,6 +51,11 @@ func init() {
 
 		// These are "major errors" - if we can't find the collections,
 		// we can't truncate them.
+		usersCollection, err := app.FindCollectionByNameOrId("users")
+		if err != nil {
+			return err
+		}
+
 		musclesCollection, err := app.FindCollectionByNameOrId("muscles")
 		if err != nil {
 			return err
@@ -71,12 +81,36 @@ func init() {
 		if err := app.TruncateCollection(exercisesCollection); err != nil {
 			fmt.Printf("Warning: Failed to truncate collection 'exercises': %v\n", err)
 		}
+		if err := app.TruncateCollection(usersCollection); err != nil {
+			fmt.Printf("Warning: Failed to truncate collection 'users': %v\n", err)
+		}
 
 		return nil
 	})
 }
 
-func SeedExercisesTable(app core.App, muscleIds map[int]string) error {
+func CreateAdminUser(app core.App) (string, error) {
+	usersCollection, err := app.FindCollectionByNameOrId("users")
+	if err != nil {
+		return "", err
+	}
+
+	record := core.NewRecord(usersCollection)
+	record.Set("email", "tracks@tracks.com")
+	record.Set("password", "password123")
+	record.Set("passwordConfirm", "password123")
+	record.SetVerified(true)
+
+	err = app.Save(record)
+	if err != nil {
+		return "", fmt.Errorf("failed to create admin user: %w", err)
+	}
+
+	fmt.Printf("Created admin user: tracks@tracks.com\n")
+	return record.Id, nil
+}
+
+func SeedExercisesTable(app core.App, muscleIds map[int]string, adminUserId string) error {
 
 	// --- Major Errors ---
 	// If we can't find collections or read/parse the seed file, we must stop.
@@ -120,6 +154,8 @@ func SeedExercisesTable(app core.App, muscleIds map[int]string) error {
 		record.Set("name", m.Name)
 		record.Set("description", m.Description)
 		record.Set("calories_burned", FloorTo(m.CaloriesBurned, 2))
+		record.Set("user", adminUserId)
+		record.Set("is_public", true)
 
 		err = app.Save(record)
 		if err != nil {
@@ -155,7 +191,7 @@ func SeedExercisesTable(app core.App, muscleIds map[int]string) error {
 	return nil
 }
 
-func SeedMusclesTable(app core.App) (map[int]string, error) {
+func SeedMusclesTable(app core.App, adminUserId string) (map[int]string, error) {
 
 	// --- FIX: Increased timeout for all downloads ---
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second) // 2 minutes
@@ -227,6 +263,8 @@ func SeedMusclesTable(app core.App) (map[int]string, error) {
 		record := core.NewRecord(collection)
 		record.Set("name", m.Name)
 		record.Set("description", m.Description)
+		record.Set("user", adminUserId)
+		record.Set("is_public", true)
 
 		// Check if we successfully downloaded a file for this muscle
 		if localPath, ok := localFilePaths[m.ID]; ok {

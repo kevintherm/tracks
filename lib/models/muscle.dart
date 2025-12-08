@@ -13,6 +13,12 @@ class Muscle {
   late String? thumbnail;
   late String? pendingThumbnailPath;
 
+  bool needSync;
+  bool public;
+
+  late DateTime createdAt;
+  late DateTime updatedAt;
+
   Muscle({
     this.id = Isar.autoIncrement,
     required this.name,
@@ -20,5 +26,8 @@ class Muscle {
     this.thumbnail,
     this.pendingThumbnailPath,
     this.pocketbaseId,
-  });
+    this.needSync = true,
+    this.public = false,
+  }) : createdAt = DateTime.now(),
+       updatedAt = DateTime.now();
 }

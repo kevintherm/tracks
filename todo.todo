@@ -1,10 +1,7 @@
-- prioritize local data
-    - remove imported flag
-    - remove owned flag
-    - removed manual image handling, used cached image network for singular cache handling
-- add performed_count for cached occurances count (exercises, workouts) 
+- implement browse feature
 - add import json exercise
 - add import json workout
+- add performed_count for cached occurances count (exercises, workouts) 
 - validate min reps and set to be 1 in pb
 - integrate session with every single fucking things
     - session finish section (last week session)
@@ -50,6 +47,13 @@ session page
     - create schedule page
 
 #done
+- merge dynamics pb migrations
+- add is_public to exercises and workout
+- remove public cloud data
+- prioritize local data
+    - remove imported flag
+    - remove owned flag
+    - removed manual image handling, used cached image network for singular cache handling
 - add resting time to track session page
 - create view muscle detail page
 - mark schedule as completed 
