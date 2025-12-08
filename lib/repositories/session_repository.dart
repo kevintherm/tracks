@@ -63,20 +63,20 @@ class SessionRepository {
         .exercise((q) => q.idEqualTo(exerciseId))
         .watch(fireImmediately: true)
         .asyncMap((sessionExercises) async {
-      for (final se in sessionExercises) {
-        await se.session.load();
-      }
+          for (final se in sessionExercises) {
+            await se.session.load();
+          }
 
-      final valid = sessionExercises
-          .where((se) => se.session.value != null)
-          .toList();
+          final valid = sessionExercises
+              .where((se) => se.session.value != null)
+              .toList();
 
-      valid.sort(
-        (a, b) => b.session.value!.start.compareTo(a.session.value!.start),
-      );
+          valid.sort(
+            (a, b) => b.session.value!.start.compareTo(a.session.value!.start),
+          );
 
-      return valid;
-    });
+          return valid;
+        });
   }
 
   Future<void> createSession({

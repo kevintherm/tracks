@@ -10,6 +10,7 @@ class ListItem extends StatelessWidget {
   final bool isSelected;
   final ValueChanged<bool> onChanged;
   final String? imagePath;
+  final String? pendingImagePath;
   final String? subtitle;
 
   const ListItem({
@@ -19,6 +20,7 @@ class ListItem extends StatelessWidget {
     required this.isSelected,
     required this.onChanged,
     this.imagePath,
+    this.pendingImagePath,
     this.subtitle,
   });
 
@@ -36,7 +38,10 @@ class ListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         title: Row(
           children: [
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: getImage(imagePath)),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: getImage(imagePath, pendingPath: pendingImagePath),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

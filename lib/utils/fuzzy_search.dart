@@ -55,10 +55,9 @@ class FuzzySearch<T> {
       return MapEntry(item, score);
     });
 
-    final scoredFiltered = scored
-        .where((entry) => entry.value >= threshold)
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final scoredFiltered =
+        scored.where((entry) => entry.value >= threshold).toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     return scoredFiltered.map((e) => e.key).toList();
   }
@@ -104,8 +103,10 @@ class FuzzySearch<T> {
         } else if (isShortQuery && _isSubsequence(lowerQuery, fieldText)) {
           similarity = 0.85;
         } else {
-          similarity =
-              StringSimilarity.compareTwoStrings(fieldText, lowerQuery);
+          similarity = StringSimilarity.compareTwoStrings(
+            fieldText,
+            lowerQuery,
+          );
         }
 
         final weight = (fieldWeights != null && i < fieldWeights.length)
@@ -118,10 +119,9 @@ class FuzzySearch<T> {
       return MapEntry(item, maxScore);
     });
 
-    final scoredFiltered = scored
-        .where((entry) => entry.value >= threshold)
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final scoredFiltered =
+        scored.where((entry) => entry.value >= threshold).toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     return scoredFiltered.map((e) => e.key).toList();
   }

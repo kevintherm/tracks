@@ -32,19 +32,23 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
   }
 
   bool _isDateSelected(DateTime day) {
-    return _selectedDates.any((selectedDate) =>
-        selectedDate.year == day.year &&
-        selectedDate.month == day.month &&
-        selectedDate.day == day.day);
+    return _selectedDates.any(
+      (selectedDate) =>
+          selectedDate.year == day.year &&
+          selectedDate.month == day.month &&
+          selectedDate.day == day.day,
+    );
   }
 
   void _toggleDateSelection(DateTime day) {
     setState(() {
       if (_isDateSelected(day)) {
-        _selectedDates.removeWhere((selectedDate) =>
-            selectedDate.year == day.year &&
-            selectedDate.month == day.month &&
-            selectedDate.day == day.day);
+        _selectedDates.removeWhere(
+          (selectedDate) =>
+              selectedDate.year == day.year &&
+              selectedDate.month == day.month &&
+              selectedDate.day == day.day,
+        );
       } else {
         _selectedDates.add(day);
       }
@@ -64,8 +68,8 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
           color: isSelected
               ? AppColors.primary
               : isToday
-                  ? AppColors.lightPrimary.withValues(alpha: 0.3)
-                  : Colors.transparent,
+              ? AppColors.lightPrimary.withValues(alpha: 0.3)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
@@ -77,8 +81,8 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
               color: isSelected
                   ? Colors.white
                   : isToday
-                      ? AppColors.primary
-                      : Colors.black87,
+                  ? AppColors.primary
+                  : Colors.black87,
             ),
           ),
         ),
@@ -147,7 +151,8 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
       calendarBuilders: CalendarBuilders(
         dowBuilder: (context, day) {
           final text = DateFormat.E().format(day)[0];
-          final isWeekend = day.weekday == DateTime.saturday ||
+          final isWeekend =
+              day.weekday == DateTime.saturday ||
               day.weekday == DateTime.sunday;
 
           return Center(

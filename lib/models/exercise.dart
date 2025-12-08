@@ -16,6 +16,7 @@ class Exercise {
   late String name;
   late String? description;
   late String? thumbnail;
+  late String? pendingThumbnailPath;
   late double caloriesBurned;
 
   bool needSync;
@@ -28,12 +29,12 @@ class Exercise {
   List<Muscle> get muscles {
     final isar = Isar.getInstance();
     if (isar == null) return [];
-    
+
     final exerciseMuscles = isar.exerciseMuscles
         .filter()
         .exercise((q) => q.idEqualTo(id))
         .findAllSync();
-    
+
     return exerciseMuscles
         .map((em) => em.muscle.value)
         .whereType<Muscle>()
@@ -44,20 +45,22 @@ class Exercise {
   List<({Muscle muscle, int activation})> get musclesWithActivation {
     final isar = Isar.getInstance();
     if (isar == null) return [];
-    
+
     final exerciseMuscles = isar.exerciseMuscles
         .filter()
         .exercise((q) => q.idEqualTo(id))
         .findAllSync();
 
     exerciseMuscles.sort((a, b) => b.activation.compareTo(a.activation));
-    
+
     return exerciseMuscles
         .where((em) => em.muscle.value != null)
-        .map((em) => (
-          muscle: em.muscle.value!,
-          activation: em.activation.clamp(0, 100),
-        ))
+        .map(
+          (em) => (
+            muscle: em.muscle.value!,
+            activation: em.activation.clamp(0, 100),
+          ),
+        )
         .toList();
   }
 
@@ -70,12 +73,12 @@ class Exercise {
   List<Workout> get workouts {
     final isar = Isar.getInstance();
     if (isar == null) return [];
-    
+
     final workoutExercises = isar.workoutExercises
         .filter()
         .exercise((q) => q.idEqualTo(id))
         .findAllSync();
-    
+
     return workoutExercises
         .map((we) => we.workout.value)
         .whereType<Workout>()
@@ -86,6 +89,7 @@ class Exercise {
     required this.name,
     this.description,
     this.thumbnail,
+    this.pendingThumbnailPath,
     required this.caloriesBurned,
     this.pocketbaseId,
     this.needSync = true,

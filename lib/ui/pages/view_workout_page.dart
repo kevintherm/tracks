@@ -45,7 +45,10 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
     final workoutRepo = context.read<WorkoutRepository>();
 
     return StreamBuilder<Workout?>(
-      stream: workoutRepo.collection.watchObject(widget.workout.id, fireImmediately: true),
+      stream: workoutRepo.collection.watchObject(
+        widget.workout.id,
+        fireImmediately: true,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           _workout = snapshot.data!;
@@ -79,7 +82,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -133,13 +136,16 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                             ),
                           );
                         },
-                  child: _ExerciseCard(exercise: exercise, readonly: widget.asModal),
+                  child: _ExerciseCard(
+                    exercise: exercise,
+                    readonly: widget.asModal,
+                  ),
                 );
               },
             ),
           ],
         );
-      }
+      },
     );
   }
 
@@ -240,13 +246,12 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
   }
 
   Widget _buildExerciseImage() {
-    if (_workout.thumbnail != null && _workout.thumbnail!.isNotEmpty) {
-      final file = File(_workout.thumbnail!);
-      if (file.existsSync()) {
-        return getImage(_workout.thumbnail, width: double.infinity, height: double.infinity);
-      }
-    }
-    return _buildPlaceholder();
+    return getImage(
+      _workout.thumbnail,
+      pendingPath: _workout.pendingThumbnailPath,
+      width: double.infinity,
+      height: double.infinity,
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -282,9 +287,16 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
             ),
             if (!_workout.needSync)
               _buildChip(
-                Icon(MingCute.check_circle_fill, size: 16, color: AppColors.lightPrimary),
+                Icon(
+                  MingCute.check_circle_fill,
+                  size: 16,
+                  color: AppColors.lightPrimary,
+                ),
                 'Synced',
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               )
             else
               _buildChip(
@@ -294,7 +306,10 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                   color: AppColors.darkSecondary,
                 ),
                 'Not Synced',
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
           ],
         ),
@@ -336,9 +351,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: muscles
-              .map((muscle) => _buildMuscleChip(muscle))
-              .toList(),
+          children: muscles.map((muscle) => _buildMuscleChip(muscle)).toList(),
         ),
       ],
     );
@@ -349,9 +362,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ViewMusclePage(muscle: muscle),
-          ),
+          MaterialPageRoute(builder: (_) => ViewMusclePage(muscle: muscle)),
         );
       },
       child: _buildChip(
@@ -363,7 +374,8 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
 
   Widget _buildChip(Icon icon, String name, {EdgeInsets? padding}) {
     return Container(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -613,7 +625,12 @@ class _ExerciseCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: getImage(exercise.thumbnail, width: 80, height: 80),
+              child: getImage(
+                exercise.thumbnail,
+                pendingPath: exercise.pendingThumbnailPath,
+                width: 80,
+                height: 80,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

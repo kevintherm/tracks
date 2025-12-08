@@ -347,9 +347,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-                        
+
                                   const SizedBox(width: 16),
-                        
+
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -392,7 +392,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-                        
+
                             Positioned(
                               right: 32 + 10,
                               top: 0,
@@ -458,9 +458,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                                       height: 100,
                                     ),
                                   ),
-                        
+
                                   const SizedBox(width: 16),
-                        
+
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -503,7 +503,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 ],
                               ),
                             ),
-                        
+
                             Positioned(
                               right: 32 + 10,
                               top: 0,

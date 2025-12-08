@@ -28,7 +28,10 @@ class ImageStorageService {
     );
 
     String? cloudUrl;
-    if (syncEnabled && collection != null && pbRecord != null && fieldName != null) {
+    if (syncEnabled &&
+        collection != null &&
+        pbRecord != null &&
+        fieldName != null) {
       cloudUrl = await _uploadToCloud(
         localPath: localPath,
         collection: collection,
@@ -37,10 +40,7 @@ class ImageStorageService {
       );
     }
 
-    return {
-      'localPath': localPath,
-      'cloudUrl': cloudUrl,
-    };
+    return {'localPath': localPath, 'cloudUrl': cloudUrl};
   }
 
   Future<String> _saveToLocalDisk({
@@ -50,13 +50,14 @@ class ImageStorageService {
   }) async {
     try {
       final Directory appDir = await getApplicationDocumentsDirectory();
-      
+
       final Directory imageDir = Directory(path.join(appDir.path, directory));
       if (!await imageDir.exists()) {
         await imageDir.create(recursive: true);
       }
 
-      final String finalFileName = fileName ?? 
+      final String finalFileName =
+          fileName ??
           '${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
 
       final File sourceFile = File(sourcePath);
@@ -90,13 +91,13 @@ class ImageStorageService {
         filename: fileName,
       );
 
-      final updatedRecord = await pb.collection(collection).update(
-        recordId,
-        body: {
-          'user': authService.currentUser?['id']
-        },
-        files: [multipartFile],
-      );
+      final updatedRecord = await pb
+          .collection(collection)
+          .update(
+            recordId,
+            body: {'user': authService.currentUser?['id']},
+            files: [multipartFile],
+          );
 
       final updatedFileName = updatedRecord.getStringValue('thumbnail');
       final fileUrl = pb.files.getUrl(updatedRecord, updatedFileName);
@@ -131,12 +132,14 @@ class ImageStorageService {
       await deleteLocalImage(localPath);
     }
 
-    if (syncEnabled && collection != null && recordId != null && fieldName != null) {
+    if (syncEnabled &&
+        collection != null &&
+        recordId != null &&
+        fieldName != null) {
       try {
-        await pb.collection(collection).update(
-          recordId,
-          body: {fieldName: null},
-        );
+        await pb
+            .collection(collection)
+            .update(recordId, body: {fieldName: null});
       } catch (e) {
         // Failed to delete from cloud
       }
@@ -155,13 +158,13 @@ class ImageStorageService {
   }) async {
     try {
       final response = await http.get(Uri.parse(cloudUrl));
-      
+
       if (response.statusCode != 200) {
         return null;
       }
 
       final Directory appDir = await getApplicationDocumentsDirectory();
-      
+
       final Directory imageDir = Directory(path.join(appDir.path, directory));
       if (!await imageDir.exists()) {
         await imageDir.create(recursive: true);
@@ -173,8 +176,8 @@ class ImageStorageService {
       } else {
         final uri = Uri.parse(cloudUrl);
         final urlFileName = path.basename(uri.path);
-        finalFileName = urlFileName.isNotEmpty 
-            ? urlFileName 
+        finalFileName = urlFileName.isNotEmpty
+            ? urlFileName
             : '${DateTime.now().millisecondsSinceEpoch}.jpg';
       }
 

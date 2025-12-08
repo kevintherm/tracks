@@ -195,25 +195,28 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
     try {
       if (widget.exercise != null) {
+        String? pendingThumbnailPath;
+        String? thumbnailPath = widget.exercise!.thumbnail;
 
-        String? thumbnailPath;
         if (_thumbnailImage != null) {
-          thumbnailPath = _thumbnailImage!.path;
+          pendingThumbnailPath = _thumbnailImage!.path;
         } else if (_thumbnailRemoved) {
           thumbnailPath = null;
-        } else {
-          thumbnailPath = widget.exercise!.thumbnail;
+          pendingThumbnailPath = null;
         }
 
-        final updatedExercise = Exercise(
-          name: name,
-          description: description,
-          caloriesBurned: calories,
-          thumbnail: thumbnailPath,
-          pocketbaseId: widget.exercise!.pocketbaseId,
-          needSync: widget.exercise!.needSync,
-          public: widget.exercise!.public,
-        )..id = widget.exercise!.id;
+        final updatedExercise =
+            Exercise(
+                name: name,
+                description: description,
+                caloriesBurned: calories,
+                thumbnail: thumbnailPath,
+                pocketbaseId: widget.exercise!.pocketbaseId,
+                needSync: widget.exercise!.needSync,
+                public: widget.exercise!.public,
+              )
+              ..id = widget.exercise!.id
+              ..pendingThumbnailPath = pendingThumbnailPath;
 
         final muscleActivations = <MuscleActivationParam>[];
         for (final opt in _selectedOptions) {
@@ -232,15 +235,13 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           muscles: muscleActivations,
         );
         toast.success(content: const Text("Exercise updated!"));
-
       } else {
-
         final newExercise = Exercise(
           name: name,
           description: description,
           caloriesBurned: calories,
-          thumbnail: _thumbnailImage?.path,
-        );
+          thumbnail: null,
+        )..pendingThumbnailPath = _thumbnailImage?.path;
 
         final muscleActivations = <MuscleActivationParam>[];
         for (final opt in _selectedOptions) {
@@ -259,7 +260,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           muscles: muscleActivations,
         );
         toast.success(content: const Text("Exercise created!"));
-        
       }
 
       nav.pop(true);
@@ -288,6 +288,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     label: muscle.name,
                     subtitle: muscle.description,
                     imagePath: muscle.thumbnail,
+                    pendingImagePath: muscle.pendingThumbnailPath,
                   ),
                 )
                 .toList();
@@ -403,6 +404,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                           isSelected: isSelected,
                           onChanged: onChanged,
                           imagePath: option.imagePath,
+                          pendingImagePath: option.pendingImagePath,
                           subtitle: option.subtitle,
                         );
                       },
@@ -419,23 +421,22 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                       title:
                           "Configure Activation (${_selectedOptions.length})",
                       child: Column(
-                        children: List.generate(
-                          _selectedOptions.length,
-                          (index) {
-                            final option = _selectedOptions[index];
-                            final activation =
-                                _muscleActivations[option.id] ?? 50;
+                        children: List.generate(_selectedOptions.length, (
+                          index,
+                        ) {
+                          final option = _selectedOptions[index];
+                          final activation =
+                              _muscleActivations[option.id] ?? 50;
 
-                            return _ConfigurableExerciseCard(
-                              key: ValueKey(option.id),
-                              option: option,
-                              muscleActivation: activation,
-                              onActivationChanged: (value) =>
-                                  _updateMuscleActivation(option.id, value),
-                              onDelete: () => _removeSelectedMuscle(index),
-                            );
-                          },
-                        ),
+                          return _ConfigurableExerciseCard(
+                            key: ValueKey(option.id),
+                            option: option,
+                            muscleActivation: activation,
+                            onActivationChanged: (value) =>
+                                _updateMuscleActivation(option.id, value),
+                            onDelete: () => _removeSelectedMuscle(index),
+                          );
+                        }),
                       ),
                     ),
 

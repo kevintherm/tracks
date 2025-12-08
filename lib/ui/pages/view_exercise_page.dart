@@ -54,7 +54,10 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
     final exerciseRepo = context.read<ExerciseRepository>();
 
     return StreamBuilder<Exercise?>(
-      stream: exerciseRepo.collection.watchObject(_exercise.id, fireImmediately: true),
+      stream: exerciseRepo.collection.watchObject(
+        _exercise.id,
+        fireImmediately: true,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           _exercise = snapshot.data!;
@@ -143,13 +146,16 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
                             ),
                           );
                         },
-                  child: _RelatedWorkoutCard(workout: workout, readOnly: widget.asModal),
+                  child: _RelatedWorkoutCard(
+                    workout: workout,
+                    readOnly: widget.asModal,
+                  ),
                 );
               },
             ),
           ],
         );
-      }
+      },
     );
   }
 
@@ -185,7 +191,8 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: sessionExercises.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final se = sessionExercises[index];
                     final session = se.session.value!;
@@ -365,13 +372,12 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
   }
 
   Widget _buildExerciseImage() {
-    if (_exercise.thumbnail != null && _exercise.thumbnail!.isNotEmpty) {
-      final file = File(_exercise.thumbnail!);
-      if (file.existsSync()) {
-        return getImage(_exercise.thumbnail, width: double.infinity, height: double.infinity);
-      }
-    }
-    return _buildPlaceholder();
+    return getImage(
+      _exercise.thumbnail,
+      pendingPath: _exercise.pendingThumbnailPath,
+      width: double.infinity,
+      height: double.infinity,
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -554,9 +560,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: muscles
-              .map((muscle) => _buildMuscleChip(muscle))
-              .toList(),
+          children: muscles.map((muscle) => _buildMuscleChip(muscle)).toList(),
         ),
       ],
     );
@@ -567,9 +571,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ViewMusclePage(muscle: muscle),
-          ),
+          MaterialPageRoute(builder: (_) => ViewMusclePage(muscle: muscle)),
         );
       },
       child: _buildChip(
@@ -746,7 +748,12 @@ class _RelatedWorkoutCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: getImage(workout.thumbnail, width: 80, height: 80),
+              child: getImage(
+                workout.thumbnail,
+                pendingPath: workout.pendingThumbnailPath,
+                width: 80,
+                height: 80,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

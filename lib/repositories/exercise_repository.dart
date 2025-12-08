@@ -55,18 +55,18 @@ class ExerciseRepository {
     required Exercise exercise,
     required List<MuscleActivationParam> muscles,
   }) async {
-    if (exercise.thumbnail != null) {
+    if (exercise.pendingThumbnailPath != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: exercise.thumbnail!,
+          sourcePath: exercise.pendingThumbnailPath!,
           directory: 'exercises',
           syncEnabled: false,
         );
 
-        exercise.thumbnail = imageResult['localPath'];
+        exercise.pendingThumbnailPath = imageResult['localPath'];
       } catch (e) {
         print('Failed to save exercise thumbnail: $e');
-        exercise.thumbnail = null;
+        exercise.pendingThumbnailPath = null;
       }
     }
 
@@ -102,34 +102,17 @@ class ExerciseRepository {
     final oldExercise = await isar.exercises.get(exercise.id);
 
     // Handle thumbnail update if needed
-    // Check if this is a NEW image (path changed or doesn't point to app directory yet)
-    if (exercise.thumbnail != null) {
-      final isNewImage = oldExercise?.thumbnail != exercise.thumbnail;
+    if (exercise.pendingThumbnailPath != null) {
+      try {
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: exercise.pendingThumbnailPath!,
+          directory: 'exercises',
+          syncEnabled: false,
+        );
 
-      if (isNewImage) {
-        try {
-          if (oldExercise?.thumbnail != null) {
-            await imageStorageService.deleteImage(
-              localPath: oldExercise!.thumbnail,
-              collection: PBCollections.exercises.value,
-              recordId: oldExercise.pocketbaseId,
-              fieldName: 'thumbnail',
-              syncEnabled: false,
-            );
-          }
-
-          final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnail!,
-            directory: 'exercises',
-            syncEnabled: false,
-          );
-
-          exercise.thumbnail = imageResult['localPath'];
-        } catch (e) {
-          if (oldExercise?.thumbnail != null) {
-            exercise.thumbnail = oldExercise!.thumbnail;
-          }
-        }
+        exercise.pendingThumbnailPath = imageResult['localPath'];
+      } catch (e) {
+        exercise.pendingThumbnailPath = null;
       }
     }
 
@@ -265,10 +248,10 @@ class ExerciseRepository {
         junction.needSync = false;
       }
 
-      if (exercise.thumbnail != null) {
+      if (exercise.pendingThumbnailPath != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnail!,
+            sourcePath: exercise.pendingThumbnailPath!,
             directory: 'exercises',
             collection: PBCollections.exercises.value,
             pbRecord: record,
@@ -276,7 +259,10 @@ class ExerciseRepository {
             syncEnabled: true,
           );
 
-          exercise.thumbnail = imageResult['localPath'];
+          if (imageResult['cloudUrl'] != null) {
+            exercise.thumbnail = imageResult['cloudUrl'];
+            exercise.pendingThumbnailPath = null;
+          }
         } catch (e) {
           print('Failed to upload exercise thumbnail to cloud: $e');
           // Continue without thumbnail sync
@@ -324,10 +310,10 @@ class ExerciseRepository {
           );
 
       // Handle thumbnail sync if exists
-      if (exercise.thumbnail != null) {
+      if (exercise.pendingThumbnailPath != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: exercise.thumbnail!,
+            sourcePath: exercise.pendingThumbnailPath!,
             directory: 'exercises',
             collection: PBCollections.exercises.value,
             pbRecord: await pb
@@ -337,8 +323,9 @@ class ExerciseRepository {
             syncEnabled: true,
           );
 
-          if (imageResult['localPath'] != null) {
-            exercise.thumbnail = imageResult['localPath'];
+          if (imageResult['cloudUrl'] != null) {
+            exercise.thumbnail = imageResult['cloudUrl'];
+            exercise.pendingThumbnailPath = null;
           }
         } catch (e) {
           // Continue with sync even if image upload fails

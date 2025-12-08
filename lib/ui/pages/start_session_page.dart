@@ -393,6 +393,10 @@ class _StartSessionPageState extends State<StartSessionPage> {
                                             (activity as WorkoutActivity)
                                                 .workout
                                                 .thumbnail,
+                                            pendingPath:
+                                                (activity as WorkoutActivity)
+                                                    .workout
+                                                    .pendingThumbnailPath,
                                             width: 1000,
                                             height: 1000,
                                           )
@@ -521,7 +525,10 @@ class _ExerciseCard extends StatelessWidget {
               tag: 'exercise-${exerciseParam.exercise.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: getImage(exerciseParam.exercise.thumbnail),
+                child: getImage(
+                  exerciseParam.exercise.thumbnail,
+                  pendingPath: exerciseParam.exercise.pendingThumbnailPath,
+                ),
               ),
             ),
             const SizedBox(width: 16),

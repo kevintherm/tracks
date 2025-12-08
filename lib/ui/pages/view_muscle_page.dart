@@ -17,11 +17,7 @@ class ViewMusclePage extends StatefulWidget {
   final Muscle muscle;
   final bool asModal;
 
-  const ViewMusclePage({
-    super.key,
-    required this.muscle,
-    this.asModal = false,
-  });
+  const ViewMusclePage({super.key, required this.muscle, this.asModal = false});
 
   @override
   State<ViewMusclePage> createState() => _ViewMusclePageState();
@@ -41,7 +37,10 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     final muscleRepo = context.read<MuscleRepository>();
 
     return StreamBuilder<Muscle?>(
-      stream: muscleRepo.collection.watchObject(_muscle.id, fireImmediately: true),
+      stream: muscleRepo.collection.watchObject(
+        _muscle.id,
+        fireImmediately: true,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           _muscle = snapshot.data!;
@@ -131,13 +130,12 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
   }
 
   Widget _buildMuscleImage() {
-    if (_muscle.thumbnail != null && _muscle.thumbnail!.isNotEmpty) {
-      final file = File(_muscle.thumbnail!);
-      if (file.existsSync()) {
-        return getImage(_muscle.thumbnail, width: double.infinity, height: double.infinity);
-      }
-    }
-    return _buildPlaceholder();
+    return getImage(
+      _muscle.thumbnail,
+      pendingPath: _muscle.pendingThumbnailPath,
+      width: double.infinity,
+      height: double.infinity,
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -191,7 +189,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
 
   Widget _buildExercisesSection() {
     final isar = Isar.getInstance()!;
-    
+
     return StreamBuilder<List<ExerciseMuscles>>(
       stream: isar.exerciseMuscles
           .filter()
@@ -199,7 +197,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           .watch(fireImmediately: true),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
-        
+
         final exerciseMuscles = snapshot.data!;
         if (exerciseMuscles.isEmpty) return const SizedBox.shrink();
 
@@ -225,7 +223,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
               itemBuilder: (context, index) {
                 final em = exerciseMuscles[index];
                 final exercise = em.exercise.value;
-                
+
                 if (exercise == null) return const SizedBox.shrink();
 
                 return Pressable(
@@ -250,7 +248,10 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                             ),
                           );
                         },
-                  child: _ExerciseCard(exercise: exercise, activation: em.activation),
+                  child: _ExerciseCard(
+                    exercise: exercise,
+                    activation: em.activation,
+                  ),
                 );
               },
             ),
@@ -307,9 +308,14 @@ class _ExerciseCard extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getActivationColor(activation).withValues(alpha: 0.1),
+                          color: _getActivationColor(
+                            activation,
+                          ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -335,17 +341,21 @@ class _ExerciseCard extends StatelessWidget {
   }
 
   Widget _buildExerciseImage() {
-    if (exercise.thumbnail != null && exercise.thumbnail!.isNotEmpty) {
-      final file = File(exercise.thumbnail!);
-      if (file.existsSync()) {
-        return getImage(exercise.thumbnail, width: 80, height: 80);
-      }
-    }
-    return _buildPlaceholder();
+    return getImage(
+      exercise.thumbnail,
+      pendingPath: exercise.pendingThumbnailPath,
+      width: 80,
+      height: 80,
+    );
   }
 
   Widget _buildPlaceholder() {
-    return Image.asset('assets/drawings/not-found.jpg', width: 80, height: 80, fit: BoxFit.cover);
+    return Image.asset(
+      'assets/drawings/not-found.jpg',
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+    );
   }
 
   Color _getActivationColor(int activation) {

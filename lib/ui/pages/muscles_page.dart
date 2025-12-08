@@ -315,7 +315,12 @@ class _MuscleCard extends StatelessWidget {
               tag: 'muscle-${muscle.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: getImage(muscle.thumbnail, width: 60, height: 60),
+                child: getImage(
+                  muscle.thumbnail,
+                  pendingPath: muscle.pendingThumbnailPath,
+                  width: 60,
+                  height: 60,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -330,7 +335,8 @@ class _MuscleCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (muscle.description != null && muscle.description!.isNotEmpty)
+                  if (muscle.description != null &&
+                      muscle.description!.isNotEmpty)
                     Text(
                       muscle.description!,
                       maxLines: 2,

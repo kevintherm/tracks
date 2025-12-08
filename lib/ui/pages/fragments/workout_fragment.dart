@@ -352,9 +352,7 @@ class _ExerciseListItem extends StatelessWidget {
       child: Pressable(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ViewWorkoutPage(workout: workout),
-          ),
+          MaterialPageRoute(builder: (_) => ViewWorkoutPage(workout: workout)),
         ),
         child: _WorkoutCard(workout: workout),
       ),
@@ -492,7 +490,10 @@ class _WorkoutCard extends StatelessWidget {
                   tag: 'workout-${workout.id}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: getImage(workout.thumbnail),
+                    child: getImage(
+                      workout.thumbnail,
+                      pendingPath: workout.pendingThumbnailPath,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),

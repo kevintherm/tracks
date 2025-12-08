@@ -59,18 +59,17 @@ Future<bool> showConfirmDialog(
       false;
 }
 
-Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
-  final hasLocalImage = imagePath != null && File(imagePath).existsSync();
-
+Widget getImage(
+  String? imagePath, {
+  String? pendingPath,
+  double width = 100,
+  double height = 100,
+}) {
   // Shimmer placeholder
   Widget shimmerPlaceholder = Shimmer.fromColors(
     baseColor: Colors.grey[300]!,
     highlightColor: Colors.grey[100]!,
-    child: Container(
-      width: width,
-      height: height,
-      color: Colors.white,
-    ),
+    child: Container(width: width, height: height, color: Colors.white),
   );
 
   // Error/fallback placeholder
@@ -81,9 +80,11 @@ Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
     fit: BoxFit.cover,
   );
 
-  if (hasLocalImage) {
+  // Priority 1: Check for pending local image
+  final hasPendingImage = pendingPath != null && File(pendingPath).existsSync();
+  if (hasPendingImage) {
     return Image.file(
-      File(imagePath),
+      File(pendingPath),
       width: width,
       height: height,
       fit: BoxFit.cover,
@@ -98,6 +99,40 @@ Widget getImage(String? imagePath, {double width = 100, double height = 100}) {
     );
   }
 
+  // Priority 2: Check for network image from thumbnail
+  if (imagePath != null && imagePath.isNotEmpty) {
+    // Check if it's a URL (network image)
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return CachedNetworkImage(
+        imageUrl: imagePath,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => shimmerPlaceholder,
+        errorWidget: (context, url, error) => errorPlaceholder,
+      );
+    }
+
+    // Check if it's a local file
+    if (File(imagePath).existsSync()) {
+      return Image.file(
+        File(imagePath),
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded) return child;
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: frame != null ? child : shimmerPlaceholder,
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => errorPlaceholder,
+      );
+    }
+  }
+
+  // Priority 3: Fallback to not-found.jpg
   return errorPlaceholder;
 }
 

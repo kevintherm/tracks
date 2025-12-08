@@ -285,6 +285,8 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
                                                   BorderRadius.circular(12),
                                               child: getImage(
                                                 workout.thumbnailFallback,
+                                                pendingPath: workout
+                                                    .pendingThumbnailPath,
                                                 width: 80,
                                                 height: 80,
                                               ),
@@ -355,6 +357,8 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
                               borderRadius: BorderRadius.circular(12),
                               child: getImage(
                                 selectedWorkout!.thumbnailFallback,
+                                pendingPath:
+                                    selectedWorkout!.pendingThumbnailPath,
                                 width: 60,
                                 height: 60,
                               ),

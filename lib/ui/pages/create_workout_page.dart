@@ -19,6 +19,7 @@ import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
 class CreateWorkoutPage extends StatefulWidget {
@@ -238,23 +239,27 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
     try {
       if (widget.workout != null) {
-        String? thumbnailPath;
+        String? pendingThumbnailPath;
+        String? thumbnailPath = widget.workout!.thumbnail;
+
         if (_thumbnailImage != null) {
-          thumbnailPath = _thumbnailImage!.path;
+          pendingThumbnailPath = _thumbnailImage!.path;
         } else if (_thumbnailRemoved) {
           thumbnailPath = null;
-        } else {
-          thumbnailPath = widget.workout!.thumbnail;
+          pendingThumbnailPath = null;
         }
 
-        final updatedWorkout = Workout(
-          name: name,
-          description: description,
-          thumbnail: thumbnailPath,
-          pocketbaseId: widget.workout!.pocketbaseId,
-          needSync: widget.workout!.needSync,
-          public: widget.workout!.public,
-        )..id = widget.workout!.id;
+        final updatedWorkout =
+            Workout(
+                name: name,
+                description: description,
+                thumbnail: thumbnailPath,
+                pocketbaseId: widget.workout!.pocketbaseId,
+                needSync: widget.workout!.needSync,
+                public: widget.workout!.public,
+              )
+              ..id = widget.workout!.id
+              ..pendingThumbnailPath = pendingThumbnailPath;
 
         await workoutRepo.updateWorkout(
           workout: updatedWorkout,
@@ -266,8 +271,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         final newWorkout = Workout(
           name: name,
           description: description,
-          thumbnail: _thumbnailImage?.path,
-        );
+          thumbnail: null,
+        )..pendingThumbnailPath = _thumbnailImage?.path;
 
         await workoutRepo.createWorkout(
           workout: newWorkout,
@@ -468,7 +473,12 @@ class _ExerciseListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.all(8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: _buildImage(param.exercise.thumbnail),
+          child: getImage(
+            param.exercise.thumbnail,
+            pendingPath: param.exercise.pendingThumbnailPath,
+            width: 60,
+            height: 60,
+          ),
         ),
         title: Text(
           param.exercise.name,
@@ -499,60 +509,6 @@ class _ExerciseListItem extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildImage(String? imagePath) {
-    if (imagePath == null) {
-      return Image.asset(
-        'assets/drawings/not-found.jpg',
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      );
-    }
-
-    if (imagePath.startsWith('http')) {
-      return CachedNetworkImage(
-        imageUrl: imagePath,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(color: Colors.white),
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      );
-    }
-
-    if (imagePath.startsWith('/') || imagePath.contains('app_flutter')) {
-      return Image.file(
-        File(imagePath),
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Image.asset(
-          'assets/drawings/not-found.jpg',
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return Image.asset(
-      imagePath,
-      width: 60,
-      height: 60,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => Image.asset(
-        'assets/drawings/not-found.jpg',
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
       ),
     );
   }
@@ -697,7 +653,12 @@ class _ExerciseSelectionPageState extends State<_ExerciseSelectionPage> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: _buildImage(exercise.thumbnail),
+                                child: getImage(
+                                  exercise.thumbnail,
+                                  pendingPath: exercise.pendingThumbnailPath,
+                                  width: 60,
+                                  height: 60,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -761,39 +722,6 @@ class _ExerciseSelectionPageState extends State<_ExerciseSelectionPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildImage(String? imagePath) {
-    if (imagePath == null) {
-      return Image.asset(
-        'assets/drawings/not-found.jpg',
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      );
-    }
-
-    if (imagePath.startsWith('http')) {
-      return CachedNetworkImage(
-        imageUrl: imagePath,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(color: Colors.grey[200]),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      );
-    }
-
-    if (imagePath.startsWith('/') || imagePath.contains('app_flutter')) {
-      return Image.file(
-        File(imagePath),
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      );
-    }
-
-    return Image.asset(imagePath, width: 60, height: 60, fit: BoxFit.cover);
   }
 }
 
@@ -959,7 +887,11 @@ class _ThumbnailSection extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: _buildImage(imagePath),
+            child: getImage(
+              imagePath,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
           Positioned(
             top: 8,
@@ -1078,51 +1010,6 @@ class _ThumbnailSection extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildImage(String imagePath) {
-    if (imagePath.startsWith('http')) {
-      return CachedNetworkImage(
-        imageUrl: imagePath,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(color: Colors.white),
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      );
-    }
-
-    if (imagePath.startsWith('/') || imagePath.contains('app_flutter')) {
-      return Image.file(
-        File(imagePath),
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Image.asset(
-          'assets/drawings/not-found.jpg',
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return Image.asset(
-      imagePath,
-      width: double.infinity,
-      height: double.infinity,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => Image.asset(
-        'assets/drawings/not-found.jpg',
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
       ),
     );
   }

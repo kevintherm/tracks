@@ -57,7 +57,6 @@ class MuscleRepository {
             if (localPath != null) {
               muscle.thumbnail = localPath;
             }
-
           } catch (e) {
             // Continue without thumbnail
           }

@@ -38,13 +38,10 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
       children: <Widget>[
         Text(
           'How heavy was the weight?',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
-        
+
         TextField(
           controller: _controller,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -55,9 +52,7 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
             hintText: 'Enter weight (kg)',
             hintStyle: GoogleFonts.inter(color: Colors.grey),
             prefixIcon: Icon(MingCute.search_line),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           style: GoogleFonts.spaceMono(fontSize: 16),
@@ -68,9 +63,9 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
             }
           },
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
@@ -84,7 +79,8 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
                 value: _weight.floor(),
                 minValue: 1,
                 maxValue: 300,
-                onChanged: (value) => setState(() => _weight = value + (_weight % 1)),
+                onChanged: (value) =>
+                    setState(() => _weight = value + (_weight % 1)),
                 itemWidth: 60,
                 textStyle: GoogleFonts.spaceMono(
                   fontSize: 20,
@@ -106,7 +102,8 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
                 value: ((_weight % 1) * 10).round(),
                 minValue: 0,
                 maxValue: 9,
-                onChanged: (value) => setState(() => _weight = _weight.floor() + (value / 10)),
+                onChanged: (value) =>
+                    setState(() => _weight = _weight.floor() + (value / 10)),
                 itemWidth: 40,
                 textStyle: GoogleFonts.spaceMono(
                   fontSize: 20,
@@ -129,9 +126,9 @@ class _SessionFinishWeightDialogState extends State<SessionFinishWeightDialog> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         Row(
           children: [
             Expanded(

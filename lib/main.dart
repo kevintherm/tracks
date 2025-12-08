@@ -43,7 +43,7 @@ void main() async {
       ScheduleSchema,
       SessionSchema,
       SessionExerciseSchema,
-      SessionSetSchema
+      SessionSetSchema,
     ],
     directory: dir.path,
     inspector: true,
@@ -56,11 +56,11 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        
+
         Provider<AuthService>.value(value: authService),
         Provider<Isar>.value(value: isar),
         Provider<SharedPreferences>.value(value: prefs),
-        
+
         Provider(
           create: (context) => ExerciseRepository(
             context.read<Isar>(),

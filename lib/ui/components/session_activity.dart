@@ -14,7 +14,6 @@ sealed class SessionActivity {
     if (value is Exercise) return ExerciseActivity(value);
     throw ArgumentError("Unsupported type");
   }
-
 }
 
 class ScheduleActivity extends SessionActivity {
@@ -35,14 +34,17 @@ class ScheduleActivity extends SessionActivity {
   WorkoutExercises? getPlan(Exercise exercise) {
     final workout = schedule.workout.value;
     if (workout == null) return null;
-    
+
     final exerciseWithPlan = workout.exercisesWithPivot
         .where((e) => e.exercise.id == exercise.id)
         .firstOrNull;
-    
+
     if (exerciseWithPlan == null) return null;
-    
-    return WorkoutExercises(sets: exerciseWithPlan.sets, reps: exerciseWithPlan.reps);
+
+    return WorkoutExercises(
+      sets: exerciseWithPlan.sets,
+      reps: exerciseWithPlan.reps,
+    );
   }
 }
 
@@ -65,10 +67,13 @@ class WorkoutActivity extends SessionActivity {
     final exerciseWithPlan = workout.exercisesWithPivot
         .where((e) => e.exercise.id == exercise.id)
         .firstOrNull;
-    
+
     if (exerciseWithPlan == null) return null;
-    
-    return WorkoutExercises(sets: exerciseWithPlan.sets, reps: exerciseWithPlan.reps);
+
+    return WorkoutExercises(
+      sets: exerciseWithPlan.sets,
+      reps: exerciseWithPlan.reps,
+    );
   }
 }
 

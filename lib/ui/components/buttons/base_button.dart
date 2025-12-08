@@ -13,5 +13,4 @@ class BaseButton extends AppButton {
 
   @override
   Color get backgroundColor => Colors.white;
-
 }

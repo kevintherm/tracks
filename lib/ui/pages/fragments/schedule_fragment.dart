@@ -300,8 +300,8 @@ class _ScheduleCard extends StatelessWidget {
 
     final isCompleted = matchingSession != null && matchingSession.end != null;
     final isComing = DateTime.now().isAfter(
-          scheduleDateTime.add(Duration(minutes: schedule.plannedDuration)),
-        );
+      scheduleDateTime.add(Duration(minutes: schedule.plannedDuration)),
+    );
     final isMissed = !isCompleted && isComing;
 
     return Pressable(

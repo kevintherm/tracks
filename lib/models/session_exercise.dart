@@ -17,5 +17,9 @@ class SessionExercise {
   String exerciseName; // Snapshot only
   int order;
 
-  SessionExercise({required this.exerciseName, required this.order, this.needSync = true});
+  SessionExercise({
+    required this.exerciseName,
+    required this.order,
+    this.needSync = true,
+  });
 }

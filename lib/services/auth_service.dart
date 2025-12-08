@@ -13,7 +13,7 @@ class AuthService {
 
   AuthService(SharedPreferences prefs) {
     _prefs = prefs;
-    
+
     final controller = StreamController<Map<String, dynamic>?>.broadcast();
 
     // Emit the current user state on listen

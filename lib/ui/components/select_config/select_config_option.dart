@@ -2,12 +2,14 @@ class SelectConfigOption {
   final String id;
   final String label;
   final String? imagePath;
+  final String? pendingImagePath;
   final String? subtitle;
 
   const SelectConfigOption({
     required this.id,
     required this.label,
     this.imagePath,
+    this.pendingImagePath,
     this.subtitle,
   });
 

@@ -17,12 +17,12 @@ class Session {
 
   DateTime start;
   DateTime? end;
-  
+
   Session({
     this.pocketbaseId,
     this.needSync = true,
     required this.start,
-    this.end
+    this.end,
   }) : created = DateTime.now(),
        updated = DateTime.now();
 }

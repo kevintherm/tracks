@@ -21,13 +21,10 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
       children: <Widget>[
         Text(
           'Note',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
-        
+
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -44,9 +41,9 @@ class _SessionFinishNoteDialogState extends State<SessionFinishNoteDialog> {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         PrimaryButton(
           onTap: () {
             Navigator.of(context).pop(_note);

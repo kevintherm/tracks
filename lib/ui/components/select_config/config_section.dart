@@ -62,12 +62,12 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
   void _updateKeys() {
     // Clear position keys on update
     _positionKeys.clear();
-    
+
     // Create position keys for each index
     for (int i = 0; i < widget.selectedOptions.length; i++) {
       _positionKeys[i] = GlobalKey();
     }
-    
+
     // Keep item keys for tracking (not used for GlobalKey anymore)
     for (var option in widget.selectedOptions) {
       final id = widget.getId(option);
@@ -90,24 +90,26 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
             Navigator.pop(context);
             final option = widget.selectedOptions[currentIndex];
             final label = widget.getLabel(option);
-            
+
             // Track the reordered item
             setState(() {
               _lastReorderedItemId = widget.getId(option);
             });
-            
-            if(widget.enableReordering && widget.onReorder != null) widget.onReorder!(currentIndex, newIndex);
-            
+
+            if (widget.enableReordering && widget.onReorder != null)
+              widget.onReorder!(currentIndex, newIndex);
+
             if (widget.showReorderToast) {
-              Toast(context).success(
-                content: Text('Moved $label to ${newIndex + 1}'),
-              );
+              Toast(
+                context,
+              ).success(content: Text('Moved $label to ${newIndex + 1}'));
             }
-            
-            if (widget.autoScrollToReorderedItem && widget.scrollController != null) {
+
+            if (widget.autoScrollToReorderedItem &&
+                widget.scrollController != null) {
               _scrollToIndex(newIndex);
             }
-            
+
             // Clear the reordered item flag after animation completes
             Future.delayed(const Duration(milliseconds: 800), () {
               if (mounted) {
@@ -124,10 +126,10 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
 
   void _handleDelete(BuildContext context, int index) {
     if (widget.onDelete == null) return;
-    
+
     final option = widget.selectedOptions[index];
     final label = widget.getLabel(option);
-    
+
     if (widget.showDeleteConfirmation) {
       showDialog(
         context: context,
@@ -143,13 +145,9 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
               onPressed: () {
                 Navigator.pop(context);
                 widget.onDelete!(index);
-                Toast(context).success(
-                  content: Text('Removed $label'),
-                );
+                Toast(context).success(content: Text('Removed $label'));
               },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),
             ),
           ],
@@ -157,48 +155,49 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
       );
     } else {
       widget.onDelete!(index);
-      Toast(context).success(
-        content: Text('Removed $label'),
-      );
+      Toast(context).success(content: Text('Removed $label'));
     }
   }
 
   void _scrollToIndex(int index) {
-    if (widget.scrollController == null || !widget.scrollController!.hasClients) return;
-    
+    if (widget.scrollController == null || !widget.scrollController!.hasClients)
+      return;
+
     // Wait for the widget to rebuild and get the actual position
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (index >= widget.selectedOptions.length) return;
-      
+
       final key = _positionKeys[index];
-      
+
       if (key?.currentContext == null) return;
-      
+
       try {
-        final RenderBox? renderBox = key!.currentContext!.findRenderObject() as RenderBox?;
+        final RenderBox? renderBox =
+            key!.currentContext!.findRenderObject() as RenderBox?;
         if (renderBox == null || !renderBox.hasSize) return;
-        
+
         final position = renderBox.localToGlobal(Offset.zero);
         final itemHeight = renderBox.size.height;
-        
+
         // Get the current scroll offset
         final currentOffset = widget.scrollController!.offset;
-        
+
         // Calculate where the item currently is relative to the viewport
         final double itemTop = position.dy + currentOffset;
-        
+
         // Get viewport dimensions
-        final viewportHeight = widget.scrollController!.position.viewportDimension;
-        
+        final viewportHeight =
+            widget.scrollController!.position.viewportDimension;
+
         // Calculate target offset to center the item (or at least make it visible)
         double targetOffset = itemTop - (viewportHeight / 2) + (itemHeight / 2);
-        
+
         // Clamp to valid scroll range
         targetOffset = targetOffset.clamp(
           widget.scrollController!.position.minScrollExtent,
           widget.scrollController!.position.maxScrollExtent,
         );
-        
+
         // Scroll to the target position
         widget.scrollController!.animateTo(
           targetOffset,
@@ -215,54 +214,48 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(
-        widget.selectedOptions.length,
-        (index) {
-          final option = widget.selectedOptions[index];
-          final id = widget.getId(option);
-          final config = widget.configurations[id] ?? widget.defaultConfig();
-          final shouldAnimate = widget.enableReorderAnimation && _lastReorderedItemId == id;
+      children: List.generate(widget.selectedOptions.length, (index) {
+        final option = widget.selectedOptions[index];
+        final id = widget.getId(option);
+        final config = widget.configurations[id] ?? widget.defaultConfig();
+        final shouldAnimate =
+            widget.enableReorderAnimation && _lastReorderedItemId == id;
 
-          final cardWidget = widget.itemBuilder(
-            option,
-            index,
-            config,
-            widget.enableReordering ? () => _showReorderBottomSheet(context, index) : null,
-            widget.onDelete != null ? () => _handleDelete(context, index) : null,
-          );
+        final cardWidget = widget.itemBuilder(
+          option,
+          index,
+          config,
+          widget.enableReordering
+              ? () => _showReorderBottomSheet(context, index)
+              : null,
+          widget.onDelete != null ? () => _handleDelete(context, index) : null,
+        );
 
-          // Only animate the reordered item
-          if (!shouldAnimate) {
-            return Container(
-              key: _positionKeys[index],
-              child: cardWidget,
-            );
-          }
+        // Only animate the reordered item
+        if (!shouldAnimate) {
+          return Container(key: _positionKeys[index], child: cardWidget);
+        }
 
-          return Container(
-            key: _positionKeys[index],
-            child: TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.easeOutBack,
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (context, value, child) {
-                // Clamp the scale to prevent overshoot beyond 1.0
-                final scale = (0.8 + (value * 0.2)).clamp(0.0, 1.0);
-                final opacity = value.clamp(0.0, 1.0);
-                
-                return Transform.scale(
-                  scale: scale,
-                  child: Opacity(
-                    opacity: opacity,
-                    child: child,
-                  ),
-                );
-              },
-              child: cardWidget,
-            ),
-          );
-        },
-      ),
+        return Container(
+          key: _positionKeys[index],
+          child: TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutBack,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              // Clamp the scale to prevent overshoot beyond 1.0
+              final scale = (0.8 + (value * 0.2)).clamp(0.0, 1.0);
+              final opacity = value.clamp(0.0, 1.0);
+
+              return Transform.scale(
+                scale: scale,
+                child: Opacity(opacity: opacity, child: child),
+              );
+            },
+            child: cardWidget,
+          ),
+        );
+      }),
     );
   }
 }
@@ -299,18 +292,12 @@ class _ReorderBottomSheetState extends State<_ReorderBottomSheet>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
   }
@@ -343,8 +330,8 @@ class _ReorderBottomSheetState extends State<_ReorderBottomSheet>
                   Text(
                     'Change Position',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -355,9 +342,9 @@ class _ReorderBottomSheetState extends State<_ReorderBottomSheet>
               const SizedBox(height: 8),
               Text(
                 'Current position: ${widget.currentIndex + 1}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -421,10 +408,7 @@ class _AnimatedPositionTileState extends State<_AnimatedPositionTile>
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -502,8 +486,11 @@ class _AnimatedPositionTileState extends State<_AnimatedPositionTile>
                 ),
                 trailing: widget.isCurrentPosition
                     ? const Icon(Icons.check_circle, color: Colors.green)
-                    : const Icon(Icons.arrow_forward_ios,
-                        size: 16, color: Colors.grey),
+                    : const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
               ),
             ),
           );

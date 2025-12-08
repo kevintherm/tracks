@@ -22,7 +22,8 @@ class SelectSessionActivityModal extends StatefulWidget {
   const SelectSessionActivityModal({super.key, this.canPop = false});
 
   @override
-  State<SelectSessionActivityModal> createState() => _SelectSessionActivityModalState();
+  State<SelectSessionActivityModal> createState() =>
+      _SelectSessionActivityModalState();
 }
 
 class _SelectSessionActivityModalState extends State<SelectSessionActivityModal>
@@ -723,6 +724,7 @@ class _ExerciseCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     child: getImage(
                       exercise.thumbnail,
+                      pendingPath: exercise.pendingThumbnailPath,
                       width: 60,
                       height: 60,
                     ),

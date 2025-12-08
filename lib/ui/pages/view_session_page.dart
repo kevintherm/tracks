@@ -118,7 +118,12 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
     if (workout.thumbnail != null && workout.thumbnail!.isNotEmpty) {
       final file = File(workout.thumbnail!);
       if (file.existsSync()) {
-        return getImage(workout.thumbnail, width: double.infinity, height: double.infinity);
+        return getImage(
+          workout.thumbnail,
+          pendingPath: workout.pendingThumbnailPath,
+          width: double.infinity,
+          height: double.infinity,
+        );
       }
     }
 
@@ -774,6 +779,8 @@ class _SessionExerciseCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: getImage(
                     sessionExercise.exercise.value?.thumbnail,
+                    pendingPath:
+                        sessionExercise.exercise.value?.pendingThumbnailPath,
                     width: 50,
                     height: 50,
                   ),

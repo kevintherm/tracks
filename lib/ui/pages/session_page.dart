@@ -105,7 +105,6 @@ class _SessionPageState extends State<SessionPage> {
       lastExercise = exercises.length == 1;
     });
 
-
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (restStopwatch.isRunning) {
         setState(() {
@@ -252,7 +251,7 @@ class _SessionPageState extends State<SessionPage> {
     stopwatch.stop();
     stopwatch.reset();
     elapsed = Duration();
-    
+
     restStopwatch.reset();
     restStopwatch.start();
     restElapsed = Duration();
@@ -362,7 +361,9 @@ class _SessionPageState extends State<SessionPage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: exercises.isEmpty ? 0 : (progress / exercises.length) - 0.1,
+                    value: exercises.isEmpty
+                        ? 0
+                        : (progress / exercises.length) - 0.1,
                     backgroundColor: Colors.grey[100],
                     valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.primary,

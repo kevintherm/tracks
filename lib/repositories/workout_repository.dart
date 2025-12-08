@@ -93,17 +93,17 @@ class WorkoutRepository {
     required Workout workout,
     required List<WorkoutConfigParam> exercises,
   }) async {
-    if (workout.thumbnail != null) {
+    if (workout.pendingThumbnailPath != null) {
       try {
         final imageResult = await imageStorageService.saveImage(
-          sourcePath: workout.thumbnail!,
+          sourcePath: workout.pendingThumbnailPath!,
           directory: 'workouts',
           syncEnabled: false,
         );
 
-        workout.thumbnail = imageResult['localPath'];
+        workout.pendingThumbnailPath = imageResult['localPath'];
       } catch (e) {
-        workout.thumbnail = null;
+        workout.pendingThumbnailPath = null;
       }
     }
 
@@ -117,9 +117,10 @@ class WorkoutRepository {
           final sets = entry.sets;
           final reps = entry.reps;
 
-          final workoutExercise = WorkoutExercises(sets: sets, reps: reps, order: entry.order)
-            ..workout.value = workout
-            ..exercise.value = exercise;
+          final workoutExercise =
+              WorkoutExercises(sets: sets, reps: reps, order: entry.order)
+                ..workout.value = workout
+                ..exercise.value = exercise;
 
           await isar.workoutExercises.put(workoutExercise);
           await workoutExercise.workout.save();
@@ -141,36 +142,19 @@ class WorkoutRepository {
     final oldWorkout = await isar.workouts.get(workout.id);
 
     // Handle thumbnail update if needed
-    if (workout.thumbnail != null) {
-      final isNewImage = oldWorkout?.thumbnail != workout.thumbnail;
+    if (workout.pendingThumbnailPath != null) {
+      try {
+        // Save new image to local storage
+        final imageResult = await imageStorageService.saveImage(
+          sourcePath: workout.pendingThumbnailPath!,
+          directory: 'workouts',
+          syncEnabled: false,
+        );
 
-      if (isNewImage) {
-        try {
-          // Delete old image if exists
-          if (oldWorkout?.thumbnail != null) {
-            await imageStorageService.deleteImage(
-              localPath: oldWorkout!.thumbnail,
-              collection: PBCollections.workouts.value,
-              recordId: oldWorkout.pocketbaseId,
-              fieldName: 'thumbnail',
-              syncEnabled: false,
-            );
-          }
-
-          // Save new image to local storage
-          final imageResult = await imageStorageService.saveImage(
-            sourcePath: workout.thumbnail!,
-            directory: 'workouts',
-            syncEnabled: false,
-          );
-
-          workout.thumbnail = imageResult['localPath'];
-        } catch (e) {
-          // Keep old thumbnail path if new one fails
-          if (oldWorkout?.thumbnail != null) {
-            workout.thumbnail = oldWorkout!.thumbnail;
-          }
-        }
+        workout.pendingThumbnailPath = imageResult['localPath'];
+      } catch (e) {
+        // Keep old thumbnail path if new one fails
+        workout.pendingThumbnailPath = null;
       }
     }
 
@@ -198,9 +182,10 @@ class WorkoutRepository {
           final sets = entry.sets;
           final reps = entry.reps;
 
-          final workoutExercise = WorkoutExercises(sets: sets, reps: reps, order: entry.order)
-            ..workout.value = workout
-            ..exercise.value = exercise;
+          final workoutExercise =
+              WorkoutExercises(sets: sets, reps: reps, order: entry.order)
+                ..workout.value = workout
+                ..exercise.value = exercise;
 
           await isar.workoutExercises.put(workoutExercise);
           await workoutExercise.workout.save();
@@ -245,7 +230,10 @@ class WorkoutRepository {
         await isar.workoutExercises.delete(junction.id);
       }
 
-      final schedules = await isar.schedules.filter().workout((q) => q.idEqualTo(workout.id)).findAll();
+      final schedules = await isar.schedules
+          .filter()
+          .workout((q) => q.idEqualTo(workout.id))
+          .findAll();
       final scheduleIds = schedules.map((e) => e.id).toList();
       await isar.schedules.deleteAll(scheduleIds);
 
@@ -308,10 +296,10 @@ class WorkoutRepository {
         }
       }
 
-      if (workout.thumbnail != null) {
+      if (workout.pendingThumbnailPath != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: workout.thumbnail!,
+            sourcePath: workout.pendingThumbnailPath!,
             directory: 'workouts',
             collection: PBCollections.workouts.value,
             pbRecord: record,
@@ -319,7 +307,10 @@ class WorkoutRepository {
             syncEnabled: true,
           );
 
-          workout.thumbnail = imageResult['localPath'];
+          if (imageResult['cloudUrl'] != null) {
+            workout.thumbnail = imageResult['cloudUrl'];
+            workout.pendingThumbnailPath = null;
+          }
         } catch (e) {
           print('Failed to upload workout thumbnail to cloud: $e');
           // Continue without thumbnail sync
@@ -403,10 +394,10 @@ class WorkoutRepository {
       }
 
       // Handle thumbnail sync if exists
-      if (workout.thumbnail != null) {
+      if (workout.pendingThumbnailPath != null) {
         try {
           final imageResult = await imageStorageService.saveImage(
-            sourcePath: workout.thumbnail!,
+            sourcePath: workout.pendingThumbnailPath!,
             directory: 'workouts',
             collection: PBCollections.workouts.value,
             pbRecord: record,
@@ -414,8 +405,9 @@ class WorkoutRepository {
             syncEnabled: true,
           );
 
-          if (imageResult['localPath'] != null) {
-            workout.thumbnail = imageResult['localPath'];
+          if (imageResult['cloudUrl'] != null) {
+            workout.thumbnail = imageResult['cloudUrl'];
+            workout.pendingThumbnailPath = null;
           }
         } catch (e) {
           print('Failed updating workout thumbnail to cloud: $e');
@@ -525,9 +517,7 @@ class WorkoutRepository {
 
               if (localPath != null) {
                 if (exists.thumbnail != null) {
-                  await imageStorageService.deleteLocalImage(
-                    exists.thumbnail!,
-                  );
+                  await imageStorageService.deleteLocalImage(exists.thumbnail!);
                 }
                 exists.thumbnail = localPath;
               }

@@ -17,7 +17,9 @@ class SafeKeyboard extends StatelessWidget {
             bottom: MediaQuery.of(context).viewInsets.bottom + 16,
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - offsetBottom),
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight - offsetBottom,
+            ),
             child: IntrinsicHeight(child: child),
           ),
         );

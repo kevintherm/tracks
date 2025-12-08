@@ -11,12 +11,14 @@ class Muscle {
   late String name;
   late String? description;
   late String? thumbnail;
+  late String? pendingThumbnailPath;
 
   Muscle({
     this.id = Isar.autoIncrement,
     required this.name,
     this.description,
     this.thumbnail,
-    this.pocketbaseId
+    this.pendingThumbnailPath,
+    this.pocketbaseId,
   });
 }

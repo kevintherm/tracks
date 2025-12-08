@@ -7,7 +7,7 @@ import 'package:tracks/ui/components/buttons/tertiary_button.dart';
 
 class SessionFinishRepsDialog extends StatefulWidget {
   final int initialReps;
-  
+
   const SessionFinishRepsDialog({super.key, this.initialReps = 8});
 
   @override

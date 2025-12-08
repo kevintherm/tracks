@@ -51,32 +51,32 @@ class _SelectSetsRepsModalState extends State<SelectSetsRepsModal> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            
+
             const SizedBox(height: 24),
 
             Row(
-                children: [
-                  Expanded(
-                    child: _buildPicker(
-                      label: "Sets",
-                      value: sets,
-                      onChanged: (v) {
-                        setState(() => sets = v);
-                      },
-                    ),
+              children: [
+                Expanded(
+                  child: _buildPicker(
+                    label: "Sets",
+                    value: sets,
+                    onChanged: (v) {
+                      setState(() => sets = v);
+                    },
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildPicker(
-                      label: "Reps",
-                      value: reps,
-                      onChanged: (v) {
-                        setState(() => reps = v);
-                      },
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPicker(
+                    label: "Reps",
+                    value: reps,
+                    onChanged: (v) {
+                      setState(() => reps = v);
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
             const SizedBox(height: 24),
 

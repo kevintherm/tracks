@@ -13,6 +13,7 @@ class Workout {
   String name;
   String? description;
   String? thumbnail;
+  String? pendingThumbnailPath;
 
   bool needSync;
   bool public;
@@ -25,8 +26,9 @@ class Workout {
     this.pocketbaseId,
     this.description,
     this.thumbnail,
+    this.pendingThumbnailPath,
     this.needSync = true,
-    this.public = false
+    this.public = false,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
@@ -34,12 +36,12 @@ class Workout {
   List<Exercise> get exercises {
     final isar = Isar.getInstance();
     if (isar == null) return [];
-    
+
     final workoutExercises = isar.workoutExercises
         .filter()
         .workout((q) => q.idEqualTo(id))
         .findAllSync();
-    
+
     return workoutExercises
         .map((we) => we.exercise.value)
         .whereType<Exercise>()
@@ -50,19 +52,17 @@ class Workout {
   List<({Exercise exercise, int sets, int reps})> get exercisesWithPivot {
     final isar = Isar.getInstance();
     if (isar == null) return [];
-    
+
     final workoutExercises = isar.workoutExercises
         .filter()
         .workout((q) => q.idEqualTo(id))
         .findAllSync();
-    
+
     return workoutExercises
         .where((we) => we.exercise.value != null)
-        .map((we) => (
-          exercise: we.exercise.value!,
-          sets: we.sets,
-          reps: we.reps,
-        ))
+        .map(
+          (we) => (exercise: we.exercise.value!, sets: we.sets, reps: we.reps),
+        )
         .toList();
   }
 
@@ -73,6 +73,8 @@ class Workout {
 
   @ignore
   String get thumbnailFallback {
-    return thumbnail ?? exercises.first.thumbnail ?? 'assets/drawings/not-found.jpg';
+    return thumbnail ??
+        exercises.first.thumbnail ??
+        'assets/drawings/not-found.jpg';
   }
 }
