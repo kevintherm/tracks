@@ -99,8 +99,6 @@ class ExerciseRepository {
     required Exercise exercise,
     required List<MuscleActivationParam> muscles,
   }) async {
-    final oldExercise = await isar.exercises.get(exercise.id);
-
     // Handle thumbnail update if needed
     if (exercise.pendingThumbnailPath != null) {
       try {
@@ -158,18 +156,12 @@ class ExerciseRepository {
   }
 
   Future<void> deleteExercise(Exercise exercise) async {
-    if (exercise.thumbnail != null) {
+    if (exercise.pendingThumbnailPath != null) {
       try {
-        await imageStorageService.deleteImage(
-          localPath: exercise.thumbnail,
-          collection: PBCollections.exercises.value,
-          recordId: exercise.pocketbaseId,
-          fieldName: 'thumbnail',
-          syncEnabled: false, // We're deleting the entire row anyway
+        await imageStorageService.deleteLocalImage(
+          exercise.pendingThumbnailPath!,
         );
-      } catch (e) {
-        // Continue with deletion even if image deletion fails
-      }
+      } catch (e) {}
     }
 
     await isar.writeTxn(() async {
@@ -529,57 +521,24 @@ class ExerciseRepository {
     exercisesToSave.add(exists);
   }
 
-  /// Download thumbnail from cloud for an exercise
   Future<void> _downloadThumbnail(dynamic record, Exercise exercise) async {
     final thumbnailField = record.data['thumbnail'];
     if (thumbnailField == null || thumbnailField.toString().isEmpty) {
       return;
     }
 
-    try {
-      final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-
-      final localPath = await imageStorageService.downloadImageFromCloud(
-        cloudUrl: cloudUrl,
-        directory: 'exercises',
-      );
-
-      if (localPath != null) {
-        exercise.thumbnail = localPath;
-      }
-    } catch (e) {
-      print('Failed to download thumbnail for exercise ${exercise.name}: $e');
-      // Continue without thumbnail
-    }
+    exercise.thumbnail = pb.files.getUrl(record, thumbnailField).toString();
   }
 
-  /// Update thumbnail for existing exercise if cloud version changed
   Future<void> _updateThumbnail(dynamic record, Exercise exists) async {
     final thumbnailField = record.data['thumbnail'];
 
     if (thumbnailField == null || thumbnailField.toString().isEmpty) {
-      return; // Cloud has no thumbnail - keep local one
+      exists.thumbnail = null;
+      return;
     }
 
-    try {
-      final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-
-      final localPath = await imageStorageService.downloadImageFromCloud(
-        cloudUrl: cloudUrl,
-        directory: 'exercises',
-      );
-
-      if (localPath != null) {
-        // Delete old local image if it exists
-        if (exists.thumbnail != null) {
-          await imageStorageService.deleteLocalImage(exists.thumbnail!);
-        }
-        exists.thumbnail = localPath;
-      }
-    } catch (e) {
-      print('Failed to update thumbnail for exercise ${exists.name}: $e');
-      // Keep existing thumbnail if download fails
-    }
+    exists.thumbnail = pb.files.getUrl(record, thumbnailField).toString();
   }
 
   /// Add exercise-muscle relationships for a new exercise from cloud

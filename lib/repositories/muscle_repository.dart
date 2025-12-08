@@ -43,23 +43,9 @@ class MuscleRepository {
           pocketbaseId: record.id,
         );
 
-        // Download thumbnail from cloud if exists
         final thumbnailField = record.data['thumbnail'];
         if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-          try {
-            final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-
-            final localPath = await imageStorageService.downloadImageFromCloud(
-              cloudUrl: cloudUrl,
-              directory: 'muscles',
-            );
-
-            if (localPath != null) {
-              muscle.thumbnail = localPath;
-            }
-          } catch (e) {
-            // Continue without thumbnail
-          }
+          muscle.thumbnail = pb.files.getUrl(record, thumbnailField).toString();
         }
 
         await isar.muscles.put(muscle);

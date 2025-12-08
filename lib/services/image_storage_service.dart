@@ -5,7 +5,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/services/auth_service.dart';
 
-/// Service for handling image storage both locally and in the cloud
 class ImageStorageService {
   final PocketBase pb;
   final AuthService authService;
@@ -48,26 +47,20 @@ class ImageStorageService {
     required String directory,
     String? fileName,
   }) async {
-    try {
-      final Directory appDir = await getApplicationDocumentsDirectory();
+    final appDir = await getApplicationDocumentsDirectory();
+    final imageDir = Directory(path.join(appDir.path, directory));
 
-      final Directory imageDir = Directory(path.join(appDir.path, directory));
-      if (!await imageDir.exists()) {
-        await imageDir.create(recursive: true);
-      }
-
-      final String finalFileName =
-          fileName ??
-          '${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-
-      final File sourceFile = File(sourcePath);
-      final String destinationPath = path.join(imageDir.path, finalFileName);
-      final File destinationFile = await sourceFile.copy(destinationPath);
-
-      return destinationFile.path;
-    } catch (e) {
-      rethrow;
+    if (!await imageDir.exists()) {
+      await imageDir.create(recursive: true);
     }
+
+    final finalFileName =
+        fileName ??
+        '${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+    final destinationPath = path.join(imageDir.path, finalFileName);
+    final destinationFile = await File(sourcePath).copy(destinationPath);
+
+    return destinationFile.path;
   }
 
   Future<String?> _uploadToCloud({
@@ -77,12 +70,8 @@ class ImageStorageService {
     required String fieldName,
   }) async {
     try {
-      final File imageFile = File(localPath);
-      if (!await imageFile.exists()) {
-        return null;
-      }
-
-      final recordId = record.id;
+      final imageFile = File(localPath);
+      if (!await imageFile.exists()) return null;
 
       final fileName = path.basename(localPath);
       final multipartFile = await http.MultipartFile.fromPath(
@@ -94,15 +83,13 @@ class ImageStorageService {
       final updatedRecord = await pb
           .collection(collection)
           .update(
-            recordId,
+            record.id,
             body: {'user': authService.currentUser?['id']},
             files: [multipartFile],
           );
 
       final updatedFileName = updatedRecord.getStringValue('thumbnail');
-      final fileUrl = pb.files.getUrl(updatedRecord, updatedFileName);
-
-      return fileUrl.toString();
+      return pb.files.getUrl(updatedRecord, updatedFileName).toString();
     } catch (e) {
       return null;
     }
@@ -110,7 +97,7 @@ class ImageStorageService {
 
   Future<bool> deleteLocalImage(String localPath) async {
     try {
-      final File file = File(localPath);
+      final file = File(localPath);
       if (await file.exists()) {
         await file.delete();
         return true;
@@ -140,14 +127,12 @@ class ImageStorageService {
         await pb
             .collection(collection)
             .update(recordId, body: {fieldName: null});
-      } catch (e) {
-        // Failed to delete from cloud
-      }
+      } catch (e) {}
     }
   }
 
   Future<String> getLocalPath(String directory, String fileName) async {
-    final Directory appDir = await getApplicationDocumentsDirectory();
+    final appDir = await getApplicationDocumentsDirectory();
     return path.join(appDir.path, directory, fileName);
   }
 
@@ -158,36 +143,31 @@ class ImageStorageService {
   }) async {
     try {
       final response = await http.get(Uri.parse(cloudUrl));
+      if (response.statusCode != 200) return null;
 
-      if (response.statusCode != 200) {
-        return null;
-      }
+      final appDir = await getApplicationDocumentsDirectory();
+      final imageDir = Directory(path.join(appDir.path, directory));
 
-      final Directory appDir = await getApplicationDocumentsDirectory();
-
-      final Directory imageDir = Directory(path.join(appDir.path, directory));
       if (!await imageDir.exists()) {
         await imageDir.create(recursive: true);
       }
 
-      String finalFileName;
-      if (fileName != null) {
-        finalFileName = fileName;
-      } else {
-        final uri = Uri.parse(cloudUrl);
-        final urlFileName = path.basename(uri.path);
-        finalFileName = urlFileName.isNotEmpty
-            ? urlFileName
-            : '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      }
+      final finalFileName = fileName ?? _extractFileNameFromUrl(cloudUrl);
+      final destinationPath = path.join(imageDir.path, finalFileName);
+      final destinationFile = File(destinationPath);
 
-      final String destinationPath = path.join(imageDir.path, finalFileName);
-      final File destinationFile = File(destinationPath);
       await destinationFile.writeAsBytes(response.bodyBytes);
-
       return destinationFile.path;
     } catch (e) {
       return null;
     }
+  }
+
+  String _extractFileNameFromUrl(String cloudUrl) {
+    final uri = Uri.parse(cloudUrl);
+    final urlFileName = path.basename(uri.path);
+    return urlFileName.isNotEmpty
+        ? urlFileName
+        : '${DateTime.now().millisecondsSinceEpoch}.jpg';
   }
 }

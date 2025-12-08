@@ -205,18 +205,12 @@ class WorkoutRepository {
   }
 
   Future<void> deleteWorkout(Workout workout) async {
-    if (workout.thumbnail != null) {
+    if (workout.pendingThumbnailPath != null) {
       try {
-        await imageStorageService.deleteImage(
-          localPath: workout.thumbnail,
-          collection: PBCollections.workouts.value,
-          recordId: workout.pocketbaseId,
-          fieldName: 'thumbnail',
-          syncEnabled: false,
+        await imageStorageService.deleteLocalImage(
+          workout.pendingThumbnailPath!,
         );
-      } catch (e) {
-        // Continue with deletion even if image deletion fails
-      }
+      } catch (e) {}
     }
 
     await isar.writeTxn(() async {
@@ -470,23 +464,11 @@ class WorkoutRepository {
         toInsert.updatedAt =
             DateTime.tryParse(record.data['updated']) ?? DateTime.now();
 
-        // Download thumbnail from cloud if exists
         final thumbnailField = record.data['thumbnail'];
         if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-          try {
-            final cloudUrl = pb.files.getUrl(record, thumbnailField).toString();
-
-            final localPath = await imageStorageService.downloadImageFromCloud(
-              cloudUrl: cloudUrl,
-              directory: 'workouts',
-            );
-
-            if (localPath != null) {
-              toInsert.thumbnail = localPath;
-            }
-          } catch (e) {
-            // Continue without thumbnail
-          }
+          toInsert.thumbnail = pb.files
+              .getUrl(record, thumbnailField)
+              .toString();
         }
 
         workoutsToSave.add(toInsert);
@@ -501,29 +483,13 @@ class WorkoutRepository {
             ..description = record.data['description']
             ..updatedAt = cloudLastUpdated;
 
-          // Download image from cloud and update the thumbnail
           final thumbnailField = record.data['thumbnail'];
           if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-            try {
-              final cloudUrl = pb.files
-                  .getUrl(record, thumbnailField)
-                  .toString();
-
-              final localPath = await imageStorageService
-                  .downloadImageFromCloud(
-                    cloudUrl: cloudUrl,
-                    directory: 'workouts',
-                  );
-
-              if (localPath != null) {
-                if (exists.thumbnail != null) {
-                  await imageStorageService.deleteLocalImage(exists.thumbnail!);
-                }
-                exists.thumbnail = localPath;
-              }
-            } catch (e) {
-              // Keep existing thumbnail if download fails
-            }
+            exists.thumbnail = pb.files
+                .getUrl(record, thumbnailField)
+                .toString();
+          } else {
+            exists.thumbnail = null;
           }
 
           workoutsToSave.add(exists);

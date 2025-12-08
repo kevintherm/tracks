@@ -518,6 +518,7 @@ class _ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('${exercise.thumbnail}');
     return AppContainer(
       child: Stack(
         children: [

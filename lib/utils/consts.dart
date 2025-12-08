@@ -65,6 +65,7 @@ Widget getImage(
   double width = 100,
   double height = 100,
 }) {
+  print('imagePath: ${imagePath}, pending: ${pendingPath}');
   // Shimmer placeholder
   Widget shimmerPlaceholder = Shimmer.fromColors(
     baseColor: Colors.grey[300]!,
@@ -99,9 +100,8 @@ Widget getImage(
     );
   }
 
-  // Priority 2: Check for network image from thumbnail
+  // Priority 2: Check for network image from thumbnail (backend URL only)
   if (imagePath != null && imagePath.isNotEmpty) {
-    // Check if it's a URL (network image)
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return CachedNetworkImage(
         imageUrl: imagePath,
@@ -110,24 +110,6 @@ Widget getImage(
         fit: BoxFit.cover,
         placeholder: (context, url) => shimmerPlaceholder,
         errorWidget: (context, url, error) => errorPlaceholder,
-      );
-    }
-
-    // Check if it's a local file
-    if (File(imagePath).existsSync()) {
-      return Image.file(
-        File(imagePath),
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-          if (wasSynchronouslyLoaded) return child;
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: frame != null ? child : shimmerPlaceholder,
-          );
-        },
-        errorBuilder: (context, error, stackTrace) => errorPlaceholder,
       );
     }
   }
