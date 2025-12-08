@@ -228,7 +228,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                             padding: const EdgeInsets.only(left: 20),
                             decoration: BoxDecoration(
                               color: Colors.green[200],
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16.00),
                             ),
                             child: const Icon(Icons.edit, color: Colors.white),
                           ),
@@ -237,7 +237,7 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
                             padding: const EdgeInsets.only(right: 20),
                             decoration: BoxDecoration(
                               color: Colors.red[200],
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16.00),
                             ),
                             child: const Icon(
                               Icons.delete,
@@ -290,15 +290,15 @@ class _SearchBar extends StatelessWidget {
                 horizontal: 16,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
             ),

@@ -13,7 +13,7 @@ class AiRecommendation extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(16.00),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

@@ -220,7 +220,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                             padding: const EdgeInsets.only(left: 20),
                             decoration: BoxDecoration(
                               color: Colors.green[200],
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16.00),
                             ),
                             child: const Icon(Icons.edit, color: Colors.white),
                           ),

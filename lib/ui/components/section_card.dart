@@ -70,7 +70,7 @@ class BasicCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(16.00),
           color: Colors.white,
           boxShadow: _kCardShadow,
         ),

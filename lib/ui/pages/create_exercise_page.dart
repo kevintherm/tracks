@@ -348,7 +348,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                           decoration: InputDecoration(
                             labelText: 'Name',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                         ),
@@ -360,7 +360,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                             labelText: 'Description',
                             alignLabelWithHint: true,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                         ),
@@ -380,7 +380,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                             labelText: 'Calories Burned (Kkal/Set)',
                             alignLabelWithHint: true,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                         ),

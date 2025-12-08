@@ -28,7 +28,7 @@ abstract class AppButton extends StatelessWidget {
     return Opacity(
       opacity: isDisabled ? 0.5 : 1.0,
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(32)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.00)),
         child: Pressable(
           onTap: isDisabled ? null : onTap,
           child: Container(

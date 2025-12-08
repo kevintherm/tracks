@@ -4,7 +4,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 
 const OutlineInputBorder kSearchBorder = OutlineInputBorder(
-  borderRadius: BorderRadius.all(Radius.circular(32)),
+  borderRadius: BorderRadius.all(Radius.circular(16.00)),
   borderSide: BorderSide.none,
 );
 

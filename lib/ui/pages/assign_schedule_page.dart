@@ -463,15 +463,15 @@ class _SearchBar extends StatelessWidget {
                 horizontal: 16,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
             ),

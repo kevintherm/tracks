@@ -441,7 +441,7 @@ class _ScheduleCard extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(16.00),
               color: Colors.white,
             ),
             child: Stack(
@@ -530,8 +530,8 @@ class _ScheduleCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(32),
-                          bottomRight: Radius.circular(32),
+                          topRight: Radius.circular(16.00),
+                          bottomRight: Radius.circular(16.00),
                         ),
                       ),
                     ),
@@ -575,8 +575,8 @@ class _OnComingBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? Colors.grey[900] : Colors.grey[600],
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+            bottomLeft: Radius.circular(16.00),
+            topRight: Radius.circular(16.00),
           ),
         ),
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
@@ -614,7 +614,7 @@ class _WorkoutCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(16.00),
           color: Colors.white,
         ),
         child: Stack(
@@ -672,8 +672,8 @@ class _WorkoutCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
+                      topRight: Radius.circular(16.00),
+                      bottomRight: Radius.circular(16.00),
                     ),
                   ),
                 ),
@@ -711,7 +711,7 @@ class _ExerciseCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(16.00),
           color: Colors.white,
         ),
         child: Stack(
@@ -778,8 +778,8 @@ class _ExerciseCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
+                      topRight: Radius.circular(16.00),
+                      bottomRight: Radius.circular(16.00),
                     ),
                   ),
                 ),
@@ -818,15 +818,15 @@ class _SearchBar extends StatelessWidget {
                 horizontal: 16,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(16.00),
                 borderSide: BorderSide.none,
               ),
             ),

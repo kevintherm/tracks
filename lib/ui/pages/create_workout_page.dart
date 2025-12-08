@@ -345,7 +345,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         decoration: InputDecoration(
                           labelText: 'Name',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(32),
+                            borderRadius: BorderRadius.circular(16.00),
                           ),
                         ),
                       ),
@@ -357,7 +357,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                           labelText: 'Description',
                           alignLabelWithHint: true,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(32),
+                            borderRadius: BorderRadius.circular(16.00),
                           ),
                         ),
                       ),
@@ -577,7 +577,7 @@ class _ExerciseSelectionPageState extends State<_ExerciseSelectionPage> {
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   hintText: "Search...",
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(Iconsax.search_normal_1_outline),
                   filled: true,
                   fillColor: Colors.grey[200],
                   contentPadding: const EdgeInsets.symmetric(

@@ -57,7 +57,7 @@ class _ModalOptionsState extends State<ModalOptions> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
+                        borderRadius: BorderRadius.circular(16.00),
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(

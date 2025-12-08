@@ -380,7 +380,7 @@ class _SessionPageState extends State<SessionPage> {
               await showModalBottomSheet(
                 context: context,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.00)),
                 ),
                 builder: (context) => ModalOptions(),
               );

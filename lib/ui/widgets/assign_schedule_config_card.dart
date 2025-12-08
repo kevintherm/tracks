@@ -230,7 +230,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(16.00),
                   ),
                   padding: const EdgeInsets.symmetric(
                     vertical: 6,
@@ -295,7 +295,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(16.00),
                   ),
                   padding: const EdgeInsets.symmetric(
                     vertical: 6,
@@ -322,7 +322,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(16.00),
                   ),
                   padding: const EdgeInsets.symmetric(
                     vertical: 6,
@@ -398,7 +398,7 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.00)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -515,7 +515,7 @@ class _RecurrenceTypePickerDialogState
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.00)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -634,7 +634,7 @@ class _SelectedDatesPickerState extends State<_SelectedDatesPicker> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.00)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: SingleChildScrollView(

@@ -126,17 +126,15 @@ class _HomeFragmentState extends State<HomeFragment> {
                 // Search bar
                 Pressable(
                   onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      builder: (context) => SearchPage(),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SearchPage()),
                     );
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -183,7 +181,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                           : null,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
+                          borderRadius: BorderRadius.circular(24),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -274,7 +272,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                               : null,
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                               color: Theme.of(context).cardColor,
                               boxShadow: [
                                 BoxShadow(
