@@ -17,7 +17,6 @@ import 'package:tracks/ui/pages/session_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
-import 'package:tracks/utils/toast.dart';
 
 class _ExerciseParam {
   Exercise exercise;

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';

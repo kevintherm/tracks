@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -252,10 +251,6 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
       width: double.infinity,
       height: double.infinity,
     );
-  }
-
-  Widget _buildPlaceholder() {
-    return Image.asset('assets/drawings/not-found.jpg', fit: BoxFit.cover);
   }
 
   Widget _buildHeader() {

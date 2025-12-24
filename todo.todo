@@ -1,6 +1,8 @@
-- implement browse feature
+- create muscle page
+- add import json muscle
 - add import json exercise
 - add import json workout
+- implement browse feature
 - add performed_count for cached occurances count (exercises, workouts) 
 - validate min reps and set to be 1 in pb
 - integrate session with every single fucking things

@@ -96,8 +96,9 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
               _lastReorderedItemId = widget.getId(option);
             });
 
-            if (widget.enableReordering && widget.onReorder != null)
+            if (widget.enableReordering && widget.onReorder != null) {
               widget.onReorder!(currentIndex, newIndex);
+            }
 
             if (widget.showReorderToast) {
               Toast(
@@ -160,8 +161,9 @@ class _ConfigSectionState<T, C> extends State<ConfigSection<T, C>> {
   }
 
   void _scrollToIndex(int index) {
-    if (widget.scrollController == null || !widget.scrollController!.hasClients)
+    if (widget.scrollController == null || !widget.scrollController!.hasClients) {
       return;
+    }
 
     // Wait for the widget to rebuild and get the actual position
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -65,7 +65,7 @@ Widget getImage(
   double width = 100,
   double height = 100,
 }) {
-  print('imagePath: ${imagePath}, pending: ${pendingPath}');
+  print('imagePath: $imagePath, pending: $pendingPath');
   // Shimmer placeholder
   Widget shimmerPlaceholder = Shimmer.fromColors(
     baseColor: Colors.grey[300]!,

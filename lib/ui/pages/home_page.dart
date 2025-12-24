@@ -1,11 +1,5 @@
-import 'dart:async';
-import 'dart:developer';
 
 import 'package:icons_plus/icons_plus.dart';
-import 'package:tracks/repositories/exercise_repository.dart';
-import 'package:tracks/repositories/muscle_repository.dart';
-import 'package:tracks/repositories/schedule_repository.dart';
-import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';

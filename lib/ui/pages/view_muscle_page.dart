@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -136,10 +135,6 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
       width: double.infinity,
       height: double.infinity,
     );
-  }
-
-  Widget _buildPlaceholder() {
-    return Image.asset('assets/drawings/not-found.jpg', fit: BoxFit.cover);
   }
 
   Widget _buildHeader() {
@@ -346,15 +341,6 @@ class _ExerciseCard extends StatelessWidget {
       pendingPath: exercise.pendingThumbnailPath,
       width: 80,
       height: 80,
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return Image.asset(
-      'assets/drawings/not-found.jpg',
-      width: 80,
-      height: 80,
-      fit: BoxFit.cover,
     );
   }
 
