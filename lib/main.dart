@@ -49,9 +49,6 @@ void main() async {
     inspector: true,
   );
 
-  // await SyncService.initialize();
-  // await DatabaseSeeder(isar).seedDatabase();
-
   runApp(
     MultiProvider(
       providers: [

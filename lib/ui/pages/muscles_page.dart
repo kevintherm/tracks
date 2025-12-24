@@ -9,6 +9,7 @@ import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/create_muscle_page.dart';
 import 'package:tracks/ui/pages/view_muscle_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
@@ -57,7 +58,7 @@ class _MusclesPageState extends State<MusclesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _MusclesAppBar(),
+              const _AppBar(),
 
               _SearchBar(controller: searchController),
 
@@ -135,8 +136,8 @@ class _MusclesPageState extends State<MusclesPage> {
   }
 }
 
-class _MusclesAppBar extends StatelessWidget {
-  const _MusclesAppBar();
+class _AppBar extends StatelessWidget {
+  const _AppBar();
 
   @override
   Widget build(BuildContext context) {
@@ -145,30 +146,55 @@ class _MusclesAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _BackButton(),
+          Tooltip(
+            message: "Back",
+            child: Pressable(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(
+                Iconsax.arrow_left_2_outline,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
           Text(
             "Muscles",
             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(width: 48), // Spacer to balance back button
+          _buildActionButtons(context),
         ],
       ),
     );
   }
-}
 
-class _BackButton extends StatelessWidget {
-  const _BackButton();
-
-  @override
-  Widget build(BuildContext context) {
+  _buildActionButtons(context) {
     return Row(
       children: [
         Tooltip(
-          message: "Back",
+          message: "Import Muscles",
           child: Pressable(
-            onTap: () => Navigator.of(context).pop(),
-            child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const Placeholder(child: Text("Import Muscles")),
+                ),
+              );
+            },
+            child: const Icon(Iconsax.import_1_outline, size: 28),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Create New Muscle',
+          child: Pressable(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateMusclePage()),
+              );
+            },
+            child: const Icon(Iconsax.add_outline, size: 32),
           ),
         ),
       ],
@@ -188,6 +214,7 @@ class _SearchBar extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            autofocus: false,
             controller: controller,
             decoration: InputDecoration(
               hintText: "Search",
@@ -316,8 +343,8 @@ class _MuscleCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: getImage(
-                  muscle.thumbnail,
-                  pendingPath: muscle.pendingThumbnailPath,
+                  muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
+                  pendingPath: muscle.pendingThumbnailPaths.isNotEmpty ? muscle.pendingThumbnailPaths.first : null,
                   width: 60,
                   height: 60,
                 ),

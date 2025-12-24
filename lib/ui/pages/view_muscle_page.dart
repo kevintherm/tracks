@@ -1,4 +1,6 @@
+import 'dart:ui';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -9,8 +11,10 @@ import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/create_muscle_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/consts.dart';
+import 'package:tracks/utils/toast.dart';
 
 class ViewMusclePage extends StatefulWidget {
   final Muscle muscle;
@@ -73,6 +77,60 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     );
   }
 
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final toast = Toast(context);
+    final nav = Navigator.of(context);
+    final musclerepo = context.read<MuscleRepository>();
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return _ModalPadding(child: _ConfirmDeleteDialog(muscle: _muscle));
+      },
+    );
+
+    if (confirmed == true) {
+      await musclerepo.deleteMuscle(_muscle);
+      toast.success(content: const Text("Muscle deleted."));
+      nav.pop(true);
+    }
+  }
+
+  void _openImagesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Center(
+            child: CarouselSlider.builder(
+              itemCount: _muscle.safeThumbnails.items.length,
+              itemBuilder: (context, index, realIndex) {
+                final image = _muscle.safeThumbnails.items[index];
+                return GestureDetector(
+                  onTap: () {},
+                  child: ClipRRect(
+                    borderRadius: BorderRadiusGeometry.circular(16),
+                    child: _buildMuscleImage(
+                      image,
+                      pending: _muscle.safeThumbnails.pending,
+                    ),
+                  ),
+                );
+              },
+              options: CarouselOptions(
+                aspectRatio: 1/1,
+                enlargeCenterPage: true,
+                autoPlay: true,
+                enableInfiniteScroll: false,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
       expandedHeight: 300,
@@ -117,21 +175,73 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                 ),
               ),
             ]
-          : [],
+          : [
+              Tooltip(
+                message: "Action",
+                child: Pressable(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                leading: Icon(MingCute.pencil_line),
+                                title: Text('Edit Muscle'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          CreateMusclePage(muscle: _muscle),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Iconsax.trash_bold),
+                                title: Text('Delete Exercise'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _showDeleteConfirmation(context);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Icon(Iconsax.menu_outline, color: Colors.grey[700]),
+                ),
+              ),
+            ],
       actionsPadding: EdgeInsets.only(right: 16),
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'muscle-${_muscle.id}',
-          child: _buildMuscleImage(),
+          child: Pressable(
+            onTap: () => _openImagesDialog(),
+            child: _buildMuscleImage(
+              _muscle.safeThumbnails.items.first,
+              pending: _muscle.safeThumbnails.pending,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildMuscleImage() {
+  Widget _buildMuscleImage(String imagePath, {bool pending = false}) {
     return getImage(
-      _muscle.thumbnail,
-      pendingPath: _muscle.pendingThumbnailPath,
+      pending ? null : imagePath,
+      pendingPath: pending ? imagePath : null,
       width: double.infinity,
       height: double.infinity,
     );
@@ -348,5 +458,93 @@ class _ExerciseCard extends StatelessWidget {
     if (activation >= 80) return Colors.green;
     if (activation >= 50) return Colors.orange;
     return Colors.red;
+  }
+}
+
+class _ModalPadding extends StatelessWidget {
+  final Widget child;
+
+  const _ModalPadding({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 24),
+      child: child,
+    );
+  }
+}
+
+class _ConfirmDeleteDialog extends StatelessWidget {
+  const _ConfirmDeleteDialog({required this.muscle});
+
+  final Muscle muscle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
+        const SizedBox(height: 16),
+        Text(
+          'Delete Muscle?',
+          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Are you sure you want to delete "${muscle.name}"? This action cannot be undone.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: Pressable(
+                onTap: () => Navigator.pop(context, false),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Pressable(
+                onTap: () => Navigator.pop(context, true),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.red[400],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'Delete',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

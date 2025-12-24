@@ -74,7 +74,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           id: muscle.id.toString(),
           label: muscle.name,
           subtitle: muscle.description,
-          imagePath: muscle.thumbnail,
+          imagePath: muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
         );
 
         // Apply to selected options
@@ -287,8 +287,8 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     id: muscle.id.toString(),
                     label: muscle.name,
                     subtitle: muscle.description,
-                    imagePath: muscle.thumbnail,
-                    pendingImagePath: muscle.pendingThumbnailPath,
+                    imagePath: muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
+                    pendingImagePath: muscle.pendingThumbnailPaths.isNotEmpty ? muscle.pendingThumbnailPaths.first : null,
                   ),
                 )
                 .toList();

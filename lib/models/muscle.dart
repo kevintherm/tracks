@@ -10,24 +10,26 @@ class Muscle {
 
   late String name;
   late String? description;
-  late String? thumbnail;
-  late String? pendingThumbnailPath;
+  List<String> thumbnails = [];
+  List<String> pendingThumbnailPaths = [];
 
   bool needSync;
-  bool public;
 
   late DateTime createdAt;
   late DateTime updatedAt;
+
+  @ignore
+  ({bool pending, List<String> items}) get safeThumbnails =>
+      pendingThumbnailPaths.isNotEmpty
+      ? (pending: true, items: pendingThumbnailPaths)
+      : (pending: false, items: thumbnails);
 
   Muscle({
     this.id = Isar.autoIncrement,
     required this.name,
     this.description,
-    this.thumbnail,
-    this.pendingThumbnailPath,
     this.pocketbaseId,
     this.needSync = true,
-    this.public = false,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 }

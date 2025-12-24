@@ -138,8 +138,6 @@ class WorkoutRepository {
     required Workout workout,
     required List<WorkoutConfigParam> exercises,
   }) async {
-    // Get old workout to compare
-    final oldWorkout = await isar.workouts.get(workout.id);
 
     // Handle thumbnail update if needed
     if (workout.pendingThumbnailPath != null) {

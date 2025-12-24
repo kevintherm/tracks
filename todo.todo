@@ -1,4 +1,3 @@
-- create muscle page
 - add import json muscle
 - add import json exercise
 - add import json workout
@@ -49,6 +48,7 @@ session page
     - create schedule page
 
 #done
+- create muscle page
 - merge dynamics pb migrations
 - add is_public to exercises and workout
 - remove public cloud data
