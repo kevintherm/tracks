@@ -9,6 +9,7 @@ import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/confirm_dialog.dart';
 import 'package:tracks/ui/pages/create_muscle_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/consts.dart';
@@ -95,7 +96,13 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       builder: (_) {
-        return _ModalPadding(child: _ConfirmDeleteDialog(muscle: _muscle));
+        return _ModalPadding(
+          child: ConfirmDialog(
+            itemName: _muscle.name,
+            entityType: 'Muscle',
+            confirmType: ConfirmType.delete,
+          ),
+        );
       },
     );
 
@@ -211,7 +218,8 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => CreateMusclePage(muscle: _muscle),
+                                      builder: (_) =>
+                                          CreateMusclePage(muscle: _muscle),
                                     ),
                                   );
                                 },
@@ -487,80 +495,6 @@ class _ModalPadding extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 32, left: 16, right: 16, top: 24),
       child: child,
-    );
-  }
-}
-
-class _ConfirmDeleteDialog extends StatelessWidget {
-  const _ConfirmDeleteDialog({required this.muscle});
-
-  final Muscle muscle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
-        const SizedBox(height: 16),
-        Text(
-          'Delete Muscle?',
-          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Are you sure you want to delete "${muscle.name}"? This action cannot be undone.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: Pressable(
-                onTap: () => Navigator.pop(context, false),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    'Cancel',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Pressable(
-                onTap: () => Navigator.pop(context, true),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.red[400],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    'Delete',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

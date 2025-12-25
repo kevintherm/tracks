@@ -9,10 +9,13 @@ import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/services/import_service.dart';
+import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_muscle_page.dart';
 import 'package:tracks/ui/pages/view_muscle_page.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
+import 'package:tracks/utils/toast.dart';
 
 class MusclesPage extends StatefulWidget {
   const MusclesPage({super.key});
@@ -166,21 +169,49 @@ class _AppBar extends StatelessWidget {
     );
   }
 
-  _buildActionButtons(context) {
+  _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Tooltip(
           message: "Import Muscles",
           child: Pressable(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const Placeholder(child: Text("Import Muscles")),
-                ),
-              );
-            },
+            onTap: () => showModalBottomSheet(
+              context: context,
+              builder: (_) => PickAndImportDialog(
+                title: "Import Muscles",
+                description:
+                    "Select a JSON file (.json) containing muscle data.",
+                itemNameExtractor: (item) =>
+                    item['name']?.toString() ?? 'Unknown',
+                itemDescriptionExtractor: (item) {
+                  if (item is! Map) return '';
+
+                  final List<String> parts = [];
+
+                  // Check for nested exercises
+                  if (item['exercises'] is List) {
+                    final count = (item['exercises'] as List).length;
+                    if (count > 0) {
+                      parts.add('$count exercise${count != 1 ? "s" : ""}');
+                    }
+                  }
+
+                  return parts.isEmpty ? '' : parts.join(' • ');
+                },
+                onImport: (items) async {
+                  final importService = context.read<ImportService>();
+                  await importService.importMuscles(items);
+
+                  if (context.mounted) {
+                    Toast(context).success(
+                      content: Text(
+                        '${items.length} muscle(s) imported successfully',
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
             child: const Icon(Iconsax.import_1_outline, size: 28),
           ),
         ),
@@ -191,7 +222,9 @@ class _AppBar extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateMusclePage()),
+                MaterialPageRoute(
+                  builder: (context) => const CreateMusclePage(),
+                ),
               );
             },
             child: const Icon(Iconsax.add_outline, size: 32),
@@ -344,7 +377,9 @@ class _MuscleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: getImage(
                   muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
-                  pendingPath: muscle.pendingThumbnailPaths.isNotEmpty ? muscle.pendingThumbnailPaths.first : null,
+                  pendingPath: muscle.pendingThumbnailPaths.isNotEmpty
+                      ? muscle.pendingThumbnailPaths.first
+                      : null,
                   width: 60,
                   height: 60,
                 ),
