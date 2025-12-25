@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Push Up",
+    "description": "A classic bodyweight exercise that targets the chest, shoulders, and triceps.",
+    "thumbnail": null,
+    "caloriesBurned": 0.5,
+    "muscles": ["Chest", "Triceps", "Shoulders"]
+  },
+  {
+    "name": "Pull Up",
+    "description": "An upper-body strength exercise. The pull-up is a closed-chain movement where the body is suspended by the hands and pulls up.",
+    "thumbnail": null,
+    "caloriesBurned": 1.0,
+    "muscles": ["Back", "Biceps"]
+  },
+  {
+    "name": "Squat",
+    "description": "A compound, full-body exercise that trains primarily the muscles of the thighs, hips and buttocks, quadriceps femoris muscle, hamstrings.",
+    "thumbnail": null,
+    "caloriesBurned": 0.8,
+    "muscles": ["Quads", "Glutes", "Hamstrings"]
+  },
+  {
+    "name": "Deadlift",
+    "description": "A weight training exercise in which a loaded barbell or bar is lifted off the ground to the level of the hips, torso perpendicular to the floor, before being placed back on the ground.",
+    "thumbnail": null,
+    "caloriesBurned": 1.2,
+    "muscles": ["Back", "Hamstrings", "Glutes"]
+  },
+  {
+    "name": "Bench Press",
+    "description": "An upper-body weight training exercise in which the trainee presses a weight upwards while lying on a weight training bench.",
+    "thumbnail": null,
+    "caloriesBurned": 0.7,
+    "muscles": ["Chest", "Triceps", "Shoulders"]
+  },
+  {
+    "name": "Plank",
+    "description": "An isometric core strength exercise that involves maintaining a position similar to a push-up for the maximum possible time.",
+    "thumbnail": null,
+    "caloriesBurned": 0.3,
+    "muscles": ["Abs"]
+  }
+]

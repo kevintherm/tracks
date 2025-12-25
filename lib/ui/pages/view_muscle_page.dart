@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,6 +47,20 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           _muscle = snapshot.data!;
         }
 
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                fatalError,
+                style: GoogleFonts.inter(
+                  color: Colors.red,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          );
+        }
+
         return Scaffold(
           backgroundColor: Colors.white,
           body: CustomScrollView(
@@ -77,22 +89,23 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     );
   }
 
-  Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final toast = Toast(context);
-    final nav = Navigator.of(context);
+  Future<void> _showDeleteConfirmation() async {
     final musclerepo = context.read<MuscleRepository>();
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (_) {
         return _ModalPadding(child: _ConfirmDeleteDialog(muscle: _muscle));
       },
     );
 
     if (confirmed == true) {
       await musclerepo.deleteMuscle(_muscle);
-      toast.success(content: const Text("Muscle deleted."));
-      nav.pop(true);
+
+      if (!mounted) return;
+
+      Toast(context).success(content: const Text("Muscle deleted."));
+      Navigator.pop(context);
     }
   }
 
@@ -119,7 +132,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                 );
               },
               options: CarouselOptions(
-                aspectRatio: 1/1,
+                aspectRatio: 1 / 1,
                 enlargeCenterPage: true,
                 autoPlay: true,
                 enableInfiniteScroll: false,
@@ -198,18 +211,17 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          CreateMusclePage(muscle: _muscle),
+                                      builder: (_) => CreateMusclePage(muscle: _muscle),
                                     ),
                                   );
                                 },
                               ),
                               ListTile(
                                 leading: Icon(Iconsax.trash_bold),
-                                title: Text('Delete Exercise'),
+                                title: Text('Delete Muscle'),
                                 onTap: () {
                                   Navigator.pop(context);
-                                  _showDeleteConfirmation(context);
+                                  _showDeleteConfirmation();
                                 },
                               ),
                             ],
@@ -227,9 +239,13 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
         background: Hero(
           tag: 'muscle-${_muscle.id}',
           child: Pressable(
-            onTap: () => _openImagesDialog(),
+            onTap: _muscle.safeThumbnails.items.isEmpty
+                ? null
+                : () => _openImagesDialog(),
             child: _buildMuscleImage(
-              _muscle.safeThumbnails.items.first,
+              _muscle.safeThumbnails.items.isEmpty
+                  ? ""
+                  : _muscle.safeThumbnails.items.first,
               pending: _muscle.safeThumbnails.pending,
             ),
           ),

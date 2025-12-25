@@ -2,6 +2,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/ui/pages/edit_password_page.dart';
 import 'package:tracks/ui/pages/edit_profile_page.dart';
+import 'package:tracks/ui/pages/import_data_page.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/pages/login_with_email_page.dart';
@@ -95,6 +96,16 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             label: 'Sync to Cloud',
             icon: Icon(Iconsax.cloud_outline),
             action: (context) => _showSyncToggleSheet(context),
+          ),
+          _SectionItem(
+            label: 'Import Data',
+            icon: Icon(Iconsax.document_upload_outline),
+            action: (context) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ImportDataPage()),
+              );
+            },
           ),
         ],
       ),

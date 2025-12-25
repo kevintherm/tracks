@@ -1,6 +1,7 @@
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
+import 'package:tracks/ui/pages/import_data_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
@@ -77,6 +78,16 @@ class _HomeFragmentState extends State<HomeFragment> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ManageSchedulePage()),
+          );
+        },
+      },
+      {
+        'icon': Iconsax.document_upload_outline,
+        'title': 'Import Data',
+        'action': (context) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ImportDataPage()),
           );
         },
       },

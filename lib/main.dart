@@ -18,6 +18,7 @@ import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/services/auth_service.dart';
+import 'package:tracks/services/import_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -57,6 +58,7 @@ void main() async {
         Provider<AuthService>.value(value: authService),
         Provider<Isar>.value(value: isar),
         Provider<SharedPreferences>.value(value: prefs),
+        Provider(create: (context) => ImportService(context.read<Isar>())),
 
         Provider(
           create: (context) => ExerciseRepository(
