@@ -1,6 +1,7 @@
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
+import 'package:tracks/ui/pages/explore_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
@@ -28,8 +29,6 @@ class _HomeFragmentState extends State<HomeFragment> {
         'subtitle': 'Start a new',
         'title': 'Session',
         'action': (context) async {
-          // Create session data
-
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => StartSessionPage()),
@@ -38,9 +37,14 @@ class _HomeFragmentState extends State<HomeFragment> {
       },
       {
         'icon': Iconsax.search_favorite_outline,
-        'subtitle': 'See more splits!',
+        'subtitle': 'See other splits!',
         'title': 'Explore',
-        'action': (context) async {},
+        'action': (context) async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ExplorePage()),
+          );
+        },
       },
     ];
 

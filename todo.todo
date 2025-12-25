@@ -1,7 +1,7 @@
-- add import json exercise
-- add import json workout
 - implement browse feature
-- add performed_count for cached occurances count (exercises, workouts) 
+- add performed_count for cached occurances count (exercises, workouts)
+- deploy V1 !!!!
+
 - validate min reps and set to be 1 in pb
 - integrate session with every single fucking things
     - session finish section (last week session)
@@ -47,6 +47,8 @@ session page
     - create schedule page
 
 #done
+- add import json exercise
+- add import json workout
 - add import json muscle
 - create muscle page
 - merge dynamics pb migrations
