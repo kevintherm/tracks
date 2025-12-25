@@ -9,9 +9,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/muscle.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/services/import_service.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/components/section_card.dart';
+import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
@@ -228,7 +231,14 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
                       Row(
                         children: [
                           Pressable(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MusclesPage(showImport: true),
+                                ),
+                              );
+                            },
                             child: Text(
                               "Create via Import (JSON)",
                               style: GoogleFonts.inter(color: Colors.grey[700]),

@@ -18,7 +18,9 @@ import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
 class MusclesPage extends StatefulWidget {
-  const MusclesPage({super.key});
+  final bool showImport;
+  
+  const MusclesPage({super.key, this.showImport = false});
 
   @override
   State<MusclesPage> createState() => _MusclesPageState();
@@ -42,6 +44,39 @@ class _MusclesPageState extends State<MusclesPage> {
         });
       });
     });
+
+    if (widget.showImport) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showImportDialog();
+      });
+    }
+  }
+
+  void _showImportDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => PickAndImportDialog(
+        title: "Import Muscles",
+        description:
+            "Select a JSON file (.json) containing muscle data.",
+        itemNameExtractor: (item) =>
+            item['name']?.toString() ?? 'Unknown',
+        onImport: (items) async {
+          final importService = ImportService(
+            context.read<MuscleRepository>().isar,
+          );
+          await importService.importMuscles(items);
+
+          if (context.mounted) {
+            Toast(context).success(
+              content: Text(
+                '${items.length} muscle(s) imported successfully',
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
   @override
@@ -175,43 +210,10 @@ class _AppBar extends StatelessWidget {
         Tooltip(
           message: "Import Muscles",
           child: Pressable(
-            onTap: () => showModalBottomSheet(
-              context: context,
-              builder: (_) => PickAndImportDialog(
-                title: "Import Muscles",
-                description:
-                    "Select a JSON file (.json) containing muscle data.",
-                itemNameExtractor: (item) =>
-                    item['name']?.toString() ?? 'Unknown',
-                itemDescriptionExtractor: (item) {
-                  if (item is! Map) return '';
-
-                  final List<String> parts = [];
-
-                  // Check for nested exercises
-                  if (item['exercises'] is List) {
-                    final count = (item['exercises'] as List).length;
-                    if (count > 0) {
-                      parts.add('$count exercise${count != 1 ? "s" : ""}');
-                    }
-                  }
-
-                  return parts.isEmpty ? '' : parts.join(' • ');
-                },
-                onImport: (items) async {
-                  final importService = context.read<ImportService>();
-                  await importService.importMuscles(items);
-
-                  if (context.mounted) {
-                    Toast(context).success(
-                      content: Text(
-                        '${items.length} muscle(s) imported successfully',
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
+            onTap: () {
+              final state = context.findAncestorStateOfType<_MusclesPageState>();
+              state?._showImportDialog();
+            },
             child: const Icon(Iconsax.import_1_outline, size: 28),
           ),
         ),

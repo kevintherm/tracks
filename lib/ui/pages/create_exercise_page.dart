@@ -19,6 +19,7 @@ import 'package:tracks/ui/components/select_config/list_item.dart';
 import 'package:tracks/ui/components/select_config/select_config.dart';
 import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/ui/components/select_config/select_config_option.dart';
+import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/toast.dart';
 
@@ -456,7 +457,14 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                         Row(
                           children: [
                             Pressable(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ExercisesPage(showImport: true),
+                                  ),
+                                );
+                              },
                               child: Text(
                                 "Create via Import (JSON)",
                                 style: GoogleFonts.inter(

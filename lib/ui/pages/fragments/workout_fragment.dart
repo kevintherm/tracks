@@ -6,8 +6,10 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/repositories/workout_repository.dart';
+import 'package:tracks/services/import_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
 import 'package:tracks/utils/consts.dart';
@@ -48,6 +50,52 @@ class _WorkoutFragmentState extends State<WorkoutFragment> {
     super.dispose();
   }
 
+  void _showImportDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => PickAndImportDialog(
+        title: "Import Workouts",
+        description: "Select a JSON file (.json) containing workout data.",
+        itemNameExtractor: (item) => item['name']?.toString() ?? 'Unknown',
+        itemDescriptionExtractor: (item) {
+          if (item is! Map) return '';
+
+          final List<String> parts = [];
+
+          if (item['exercises'] is List) {
+            final count = (item['exercises'] as List).length;
+            if (count > 0) {
+              final muscleCount = (item['exercises'] as List)
+                  .map(
+                    (e) => e['muscles'] is List
+                        ? (e['muscles'] as List).length
+                        : 0,
+                  )
+                  .reduce((v, e) => v + e);
+              if (muscleCount > 0) {
+                parts.add(
+                  '$count exercise${count != 1 ? "s" : ""}, $muscleCount muscle${muscleCount != 1 ? 's' : ''}',
+                );
+              }
+            }
+          }
+
+          return parts.isEmpty ? '' : parts.join(' • ');
+        },
+        onImport: (items) async {
+          final importService = context.read<ImportService>();
+          await importService.importWorkouts(items);
+
+          if (context.mounted) {
+            Toast(context).success(
+              content: Text('${items.length} workout(s) imported successfully'),
+            );
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final workoutRepo = context.read<WorkoutRepository>();
@@ -55,7 +103,7 @@ class _WorkoutFragmentState extends State<WorkoutFragment> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _AppBar(),
+        _AppBar(showImportDialog: _showImportDialog),
 
         _SearchBar(controller: searchController),
 
@@ -131,7 +179,9 @@ class _WorkoutFragmentState extends State<WorkoutFragment> {
 }
 
 class _AppBar extends StatelessWidget {
-  const _AppBar();
+  const _AppBar({required this.showImportDialog});
+
+  final void Function() showImportDialog;
 
   @override
   Widget build(BuildContext context) {
@@ -144,51 +194,34 @@ class _AppBar extends StatelessWidget {
             "Workout",
             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          _ActionButtons(),
+          Row(
+            children: [
+              Tooltip(
+                message: "Explore Workouts",
+                child: Pressable(
+                  onTap: showImportDialog,
+                  child: const Icon(Iconsax.import_1_outline, size: 28),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: 'Create New Workout',
+                child: Pressable(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreateWorkoutPage(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Iconsax.add_outline, size: 32),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Tooltip(
-          message: "Explore Workouts",
-          child: Pressable(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const Placeholder(child: Text("Explore Workouts")),
-                ),
-              );
-            },
-            child: const Icon(Iconsax.import_1_outline, size: 28),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Tooltip(
-          message: 'Create New Workout',
-          child: Pressable(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateWorkoutPage(),
-                ),
-              );
-            },
-            child: const Icon(Iconsax.add_outline, size: 32),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -6,9 +6,11 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tracks/models/exercise.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/services/import_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
 import 'package:tracks/utils/consts.dart';
@@ -16,7 +18,9 @@ import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
 class ExercisesPage extends StatefulWidget {
-  const ExercisesPage({super.key});
+  final bool showImport;
+  
+  const ExercisesPage({super.key, this.showImport = false});
 
   @override
   State<ExercisesPage> createState() => _ExercisesPageState();
@@ -40,6 +44,51 @@ class _ExercisesPageState extends State<ExercisesPage> {
         });
       });
     });
+
+    if (widget.showImport) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showImportDialog();
+      });
+    }
+  }
+
+  void _showImportDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => PickAndImportDialog(
+        title: "Import Exercises",
+        description:
+            "Select a JSON file (.json) containing exercise data.",
+        itemNameExtractor: (item) =>
+            item['name']?.toString() ?? 'Unknown',
+        itemDescriptionExtractor: (item) {
+          if (item is! Map) return '';
+
+          final List<String> parts = [];
+
+          if (item['muscles'] is List) {
+            final count = (item['muscles'] as List).length;
+            if (count > 0) {
+              parts.add('$count muscle${count != 1 ? "s" : ""}');
+            }
+          }
+
+          return parts.isEmpty ? '' : parts.join(' • ');
+        },
+        onImport: (items) async {
+          final importService = context.read<ImportService>();
+          await importService.importExercises(items);
+
+          if (context.mounted) {
+            Toast(context).success(
+              content: Text(
+                '${items.length} exercise(s) imported successfully',
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
   @override
@@ -189,15 +238,42 @@ class _ActionButtons extends StatelessWidget {
         Tooltip(
           message: "Import Exercises",
           child: Pressable(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const Placeholder(child: Text("Import Exercises")),
-                ),
-              );
-            },
+            onTap: () => showModalBottomSheet(
+              context: context,
+              builder: (_) => PickAndImportDialog(
+                title: "Import Exercises",
+                description:
+                    "Select a JSON file (.json) containing exercise data.",
+                itemNameExtractor: (item) =>
+                    item['name']?.toString() ?? 'Unknown',
+                itemDescriptionExtractor: (item) {
+                  if (item is! Map) return '';
+
+                  final List<String> parts = [];
+
+                  if (item['muscles'] is List) {
+                    final count = (item['muscles'] as List).length;
+                    if (count > 0) {
+                      parts.add('$count muscle${count != 1 ? "s" : ""}');
+                    }
+                  }
+
+                  return parts.isEmpty ? '' : parts.join(' • ');
+                },
+                onImport: (items) async {
+                  final importService = context.read<ImportService>();
+                  await importService.importExercises(items);
+
+                  if (context.mounted) {
+                    Toast(context).success(
+                      content: Text(
+                        '${items.length} exercise(s) imported successfully',
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
             child: const Icon(Iconsax.import_1_outline, size: 28),
           ),
         ),
