@@ -259,7 +259,8 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
   }
 
   Widget _buildMuscleImage(String imagePath) {
-    final isUrl = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+    final isUrl =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
     return getImage(
       isUrl ? imagePath : null,
       pendingPath: isUrl ? null : imagePath,
@@ -286,9 +287,6 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
   }
 
   Widget _buildDescription() {
-    if (_muscle.description == null || _muscle.description!.isEmpty) {
-      return const SizedBox.shrink();
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -301,14 +299,25 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          _muscle.description!,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.grey[600],
-            height: 1.6,
+        if (_muscle.description != null && _muscle.description!.isNotEmpty)
+          Text(
+            _muscle.description!,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+              height: 1.6,
+            ),
+          )
+        else
+          Text(
+            'No Description',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+              height: 1.6,
+              fontStyle: FontStyle.italic,
+            ),
           ),
-        ),
       ],
     );
   }

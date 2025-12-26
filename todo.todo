@@ -1,6 +1,11 @@
 - implement browse feature
+    - view user profile
+    - copy user workout, exercise
 - add performed_count for cached occurances count (exercises, workouts)
 - deploy V1 !!!!
+
+- optimize
+    -https://docs.flutter.dev/tools/devtools/inspector#highlight-oversized-images
 
 - validate min reps and set to be 1 in pb
 - integrate session with every single fucking things

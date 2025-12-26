@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/explore_profile_page.dart';
+import 'package:tracks/ui/pages/search_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 
 class ExplorePage extends StatefulWidget {
@@ -59,35 +61,46 @@ class _ExplorePageState extends State<ExplorePage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                child: Pressable(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SearchPage(scope: SearchPageScope.explore),
                       ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: "Search users, workouts...",
-                      hintStyle: GoogleFonts.inter(
-                        color: Colors.grey[400],
-                        fontSize: 15,
-                      ),
-                      prefixIcon: Icon(
-                        Iconsax.search_normal_1_outline,
-                        color: Colors.grey[400],
-                        size: 20,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
                         horizontal: 16,
-                        vertical: 16,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Iconsax.search_normal_1_outline, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Search",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -305,6 +318,12 @@ class _ExplorePageState extends State<ExplorePage> {
                     workouts: 24,
                     followers: "12.5K",
                     avatarColor: AppColors.secondary,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExploreProfilePage(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _CreatorCard(
@@ -313,6 +332,12 @@ class _ExplorePageState extends State<ExplorePage> {
                     workouts: 18,
                     followers: "8.2K",
                     avatarColor: AppColors.primary,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExploreProfilePage(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _CreatorCard(
@@ -321,6 +346,12 @@ class _ExplorePageState extends State<ExplorePage> {
                     workouts: 32,
                     followers: "15.8K",
                     avatarColor: AppColors.accent,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExploreProfilePage(),
+                      ),
+                    ),
                   ),
                 ]),
               ),
@@ -339,7 +370,10 @@ class _ExplorePageState extends State<ExplorePage> {
                       },
                       child: Row(
                         children: [
-                          Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+                          Icon(
+                            Iconsax.arrow_left_2_outline,
+                            color: Colors.grey[700],
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             "Back to Home",
@@ -560,6 +594,7 @@ class _CreatorCard extends StatelessWidget {
   final int workouts;
   final String followers;
   final Color avatarColor;
+  final void Function() onTap;
 
   const _CreatorCard({
     required this.name,
@@ -567,14 +602,13 @@ class _CreatorCard extends StatelessWidget {
     required this.workouts,
     required this.followers,
     required this.avatarColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Pressable(
-      onTap: () {
-        // TODO: Navigate to user profile
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

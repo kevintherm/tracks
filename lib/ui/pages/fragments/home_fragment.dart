@@ -1,3 +1,5 @@
+import 'package:provider/provider.dart';
+import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
@@ -19,72 +21,72 @@ class HomeFragment extends StatefulWidget {
 }
 
 class _HomeFragmentState extends State<HomeFragment> {
-  // final _pb = PocketBaseService.instance;
+  final quickAccess = [
+    {
+      'icon': Iconsax.thorchain_rune_outline,
+      'subtitle': 'Start a new',
+      'title': 'Session',
+      'action': (context) async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => StartSessionPage()),
+        );
+      },
+    },
+    {
+      'icon': Iconsax.search_favorite_outline,
+      'subtitle': 'See other splits!',
+      'title': 'Explore',
+      'action': (context) async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ExplorePage()),
+        );
+      },
+    },
+  ];
+
+  final quickChips = [
+    {
+      'icon': Iconsax.scan_outline,
+      'title': 'Scan Calories',
+      'action': (context) async {},
+    },
+    {
+      'icon': Iconsax.weight_1_outline,
+      'title': 'All Exercises',
+      'action': (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ExercisesPage()),
+        );
+      },
+    },
+    {
+      'icon': MingCute.fitness_line,
+      'title': 'All Muscles',
+      'action': (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MusclesPage()),
+        );
+      },
+    },
+    {
+      'icon': Iconsax.calendar_1_outline,
+      'title': 'Manage Schedule',
+      'action': (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ManageSchedulePage()),
+        );
+      },
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final quickAccess = [
-      {
-        'icon': Iconsax.thorchain_rune_outline,
-        'subtitle': 'Start a new',
-        'title': 'Session',
-        'action': (context) async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StartSessionPage()),
-          );
-        },
-      },
-      {
-        'icon': Iconsax.search_favorite_outline,
-        'subtitle': 'See other splits!',
-        'title': 'Explore',
-        'action': (context) async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ExplorePage()),
-          );
-        },
-      },
-    ];
-
-    final quickChips = [
-      {
-        'icon': Iconsax.scan_outline,
-        'title': 'Scan Calories',
-        'action': (context) async {},
-      },
-      {
-        'icon': Iconsax.weight_1_outline,
-        'title': 'All Exercises',
-        'action': (context) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ExercisesPage()),
-          );
-        },
-      },
-      {
-        'icon': MingCute.fitness_line,
-        'title': 'All Muscles',
-        'action': (context) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => MusclesPage()),
-          );
-        },
-      },
-      {
-        'icon': Iconsax.calendar_1_outline,
-        'title': 'Manage Schedule',
-        'action': (context) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ManageSchedulePage()),
-          );
-        },
-      },
-    ];
+    final auth = context.read<AuthService>();
 
     return SingleChildScrollView(
       child: Column(
@@ -108,7 +110,7 @@ class _HomeFragmentState extends State<HomeFragment> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hello, Human!',
+                  'Hello, ${auth.user?.name ?? 'Human'}!',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w300,
