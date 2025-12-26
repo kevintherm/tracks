@@ -1,9 +1,13 @@
 - implement browse feature
+    - add custom api endpoint
+        - trending workouts
+        -popular creators
     - view user profile
     - copy user workout, exercise
 - add performed_count for cached occurances count (exercises, workouts)
 - deploy V1 !!!!
 
+- implement filter on exercises page, workouts page, session page, schedule page, muscles page
 - optimize
     -https://docs.flutter.dev/tools/devtools/inspector#highlight-oversized-images
 

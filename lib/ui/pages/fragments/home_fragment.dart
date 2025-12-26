@@ -4,6 +4,7 @@ import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
+import 'package:tracks/ui/pages/explore_page.dart';
 import 'package:tracks/ui/pages/fragments/workout_fragment.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
@@ -39,7 +40,11 @@ class _HomeFragmentState extends State<HomeFragment> {
       'subtitle': 'See other splits!',
       'title': 'Explore',
       'action': (BuildContext context) async {
-        context.read<NavigationProvider>().setSelectedIndex(2);
+        // context.read<NavigationProvider>().setSelectedIndex(2);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ExplorePage()),
+        );
       },
     },
   ];

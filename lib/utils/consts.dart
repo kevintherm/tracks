@@ -19,6 +19,7 @@ const Duration snackBarShort = Duration(seconds: 1, milliseconds: 500);
 const Duration snackBarMedium = Duration(seconds: 3);
 const Duration snackBarLong = Duration(seconds: 5);
 const int scheduleIncludedSessionRange = 120; // 2 Hours after scheduled time
+const String tracksAccountID = "v8e3avji5vd82oc";
 
 String errorClient(ClientException e) {
   log(e.toString());
@@ -256,6 +257,27 @@ extension StringCap on String {
   }
 }
 
+extension CompactNumber on int {
+  String toCompact() {
+    if (this < 1000) return toString();
+
+    if (this < 1000000) {
+      return _format(this / 1000, 'k');
+    } else {
+      return _format(this / 1000000, 'M');
+    }
+  }
+
+  String _format(double v, String suffix) {
+    String result = v.toStringAsFixed(1).replaceAll('.', ',');
+    if (result.endsWith(',0')) {
+      result = result.substring(0, result.length - 2);
+    }
+    return '$result$suffix';
+  }
+}
+
+
 bool isToday(DateTime date) {
   final now = DateTime.now();
   return date.year == now.year &&
@@ -264,6 +286,7 @@ bool isToday(DateTime date) {
 }
 
 enum PBCollections {
+  users("users"),
   schedules("schedules"),
   workoutExercises("workout_exercises"),
   workouts("workouts"),

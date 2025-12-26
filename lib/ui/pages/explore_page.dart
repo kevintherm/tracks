@@ -1,10 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:pocketbase/pocketbase.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:tracks/models/user.dart';
+import 'package:tracks/models/workout.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/explore_profile_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -15,11 +23,49 @@ class ExplorePage extends StatefulWidget {
 
 class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController _searchController = TextEditingController();
+  final pb = PocketBaseService.instance.client;
+
+  late final Future<List<User>> _popularCreators = _fetchPopularCreators();
+  late final Future<List<Workout>> _trendingWorkouts = _fetchTrendingWorkouts();
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<List<User>> _fetchPopularCreators() async {
+    try {
+      final records = await pb
+          .collection(PBCollections.users.value)
+          .getFullList(
+            batch: 10,
+            filter: 'id != "$tracksAccountID"',
+            sort: '-total_copies,-followers',
+          );
+      return records.map((e) => User.fromRecord(e)).toList();
+    } catch (e) {
+      log('[ERROR] $e');
+      return [];
+    }
+  }
+
+  Future<List<Workout>> _fetchTrendingWorkouts() async {
+    try {
+      final records = await pb
+          .collection(PBCollections.workouts.value)
+          .getList(
+            page: 1,
+            perPage: 10,
+            sort: '-created',
+            filter: 'is_public = true',
+            expand: 'exercises',
+          );
+      return records.items.map((e) => Workout.fromRecord(e)).toList();
+    } catch (e) {
+      log('[ERROR] $e');
+      return [];
+    }
   }
 
   @override
@@ -113,15 +159,20 @@ class _ExplorePageState extends State<ExplorePage> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
             // System Account - Featured Section
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(16),
                 child: Pressable(
                   onTap: () {
-                    // TODO: Navigate to system profile
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ExploreProfilePage(userId: tracksAccountID);
+                        },
+                      ),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(20),
@@ -238,42 +289,62 @@ class _ExplorePageState extends State<ExplorePage> {
 
             // Trending Workouts List
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: 200,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _TrendingWorkoutCard(
-                      title: "Full Body Burn",
-                      author: "@fitcoach",
-                      exercises: 12,
-                      duration: "45 min",
-                      gradient: [AppColors.secondary, AppColors.darkSecondary],
-                      copies: 234,
-                      imagePath:
-                          'assets/drawings/not-found.jpg', // Example with image
+              child: FutureBuilder<List<Workout>>(
+                future: _trendingWorkouts,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: 3,
+                        itemBuilder: (context, index) =>
+                            const _TrendingWorkoutSkeleton(),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return SizedBox(
+                      height: 200,
+                      child: Center(child: Text('Error loading workouts')),
+                    );
+                  }
+
+                  final workouts = snapshot.data ?? [];
+                  if (workouts.isEmpty) {
+                    return SizedBox(
+                      height: 200,
+                      child: Center(child: Text('No trending workouts found')),
+                    );
+                  }
+
+                  return SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: workouts.length,
+                      itemBuilder: (context, index) {
+                        final workout = workouts[index];
+                        return _TrendingWorkoutCard(
+                          title: workout.name,
+                          author: "Tracks User", // Placeholder
+                          exercises:
+                              0, // Placeholder as we can't easily get count
+                          duration: "N/A", // Placeholder
+                          gradient: [
+                            AppColors.secondary,
+                            AppColors.darkSecondary,
+                          ], // Placeholder
+                          copies: 0, // Placeholder
+                          imagePath: workout.thumbnail,
+                        );
+                      },
                     ),
-                    _TrendingWorkoutCard(
-                      title: "Core Crusher",
-                      author: "@absmaster",
-                      exercises: 8,
-                      duration: "20 min",
-                      gradient: [AppColors.lightPrimary, AppColors.primary],
-                      copies: 189,
-                      // No image - just gradient
-                    ),
-                    _TrendingWorkoutCard(
-                      title: "Leg Day",
-                      author: "@gymrat",
-                      exercises: 10,
-                      duration: "50 min",
-                      gradient: [AppColors.accent, AppColors.darkAccent],
-                      copies: 156,
-                      // No image - just gradient
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
 
@@ -313,53 +384,63 @@ class _ExplorePageState extends State<ExplorePage> {
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
             // Popular Creators List
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _CreatorCard(
-                    name: "Sarah Mitchell",
-                    username: "@sarahfit",
-                    workouts: 24,
-                    followers: "12.5K",
-                    avatarColor: AppColors.secondary,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ExploreProfilePage(),
+            FutureBuilder<List<User>>(
+              future: _popularCreators,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => const _CreatorSkeleton(),
+                        childCount: 5,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _CreatorCard(
-                    name: "Mike Johnson",
-                    username: "@mikegains",
-                    workouts: 18,
-                    followers: "8.2K",
-                    avatarColor: AppColors.primary,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ExploreProfilePage(),
-                      ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(child: Text('Error loading creators')),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _CreatorCard(
-                    name: "Emma Wilson",
-                    username: "@emmawilson",
-                    workouts: 32,
-                    followers: "15.8K",
-                    avatarColor: AppColors.accent,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ExploreProfilePage(),
-                      ),
+                  );
+                }
+
+                final users = snapshot.data ?? [];
+                if (users.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(child: Text('No creators found')),
                     ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final user = users[index];
+                      return _CreatorCard(
+                        name: user.name.isNotEmpty ? user.name : user.username,
+                        username: "@${user.username}",
+                        workouts: 0, // Placeholder
+                        followers: user.followers.toCompact(),
+                        avatarColor: AppColors.primary, // Placeholder
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ExploreProfilePage(userId: user.id),
+                          ),
+                        ),
+                      );
+                    }, childCount: users.length),
                   ),
-                ]),
-              ),
+                );
+              },
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -406,20 +487,10 @@ class _TrendingWorkoutCard extends StatelessWidget {
               // Background: Image or Gradient
               if (imagePath != null)
                 Positioned.fill(
-                  child: Image.asset(
-                    imagePath!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: gradient,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                      );
-                    },
+                  child: getImage(
+                    imagePath,
+                    width: double.infinity,
+                    height: double.infinity,
                   ),
                 ),
               if (imagePath == null)
@@ -688,6 +759,117 @@ class _CreatorCard extends StatelessWidget {
             const SizedBox(width: 8),
             Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[300]),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrendingWorkoutSkeleton extends StatelessWidget {
+  const _TrendingWorkoutSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 170,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 100,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(width: 100, height: 14, color: Colors.white),
+                  const SizedBox(height: 8),
+                  Container(width: 60, height: 12, color: Colors.white),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Container(width: 40, height: 12, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Container(width: 40, height: 12, color: Colors.white),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CreatorSkeleton extends StatelessWidget {
+  const _CreatorSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(width: 120, height: 16, color: Colors.white),
+                    const SizedBox(height: 6),
+                    Container(width: 80, height: 12, color: Colors.white),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(width: 40, height: 12, color: Colors.white),
+                  const SizedBox(height: 6),
+                  Container(width: 40, height: 12, color: Colors.white),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
