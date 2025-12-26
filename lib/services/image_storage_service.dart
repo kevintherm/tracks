@@ -20,7 +20,7 @@ class ImageStorageService {
     String? fieldName,
     bool syncEnabled = true,
   }) async {
-    final localPath = await _saveToLocalDisk(
+    final localPath = await saveToLocalDisk(
       sourcePath: sourcePath,
       directory: directory,
       fileName: fileName,
@@ -31,7 +31,7 @@ class ImageStorageService {
         collection != null &&
         pbRecord != null &&
         fieldName != null) {
-      cloudUrl = await _uploadToCloud(
+      cloudUrl = await uploadToCloud(
         localPath: localPath,
         collection: collection,
         record: pbRecord,
@@ -42,7 +42,7 @@ class ImageStorageService {
     return {'localPath': localPath, 'cloudUrl': cloudUrl};
   }
 
-  Future<String> _saveToLocalDisk({
+  Future<String> saveToLocalDisk({
     required String sourcePath,
     required String directory,
     String? fileName,
@@ -63,7 +63,7 @@ class ImageStorageService {
     return destinationFile.path;
   }
 
-  Future<String?> _uploadToCloud({
+  Future<String?> uploadToCloud({
     required String localPath,
     required String collection,
     required RecordModel record,
@@ -92,6 +92,33 @@ class ImageStorageService {
       return pb.files.getUrl(updatedRecord, updatedFileName).toString();
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<List<http.MultipartFile>> prepareMultipartBatch({
+    required List<String> localPaths,
+    required String fieldName,
+  }) async {
+    try {
+      final files = <http.MultipartFile>[];
+
+      for (final p in localPaths) {
+        final imageFile = File(p);
+        if (!await imageFile.exists()) continue;
+
+        final fileName = path.basename(p);
+        final multipartFile = await http.MultipartFile.fromPath(
+          fieldName,
+          p,
+          filename: fileName,
+        );
+
+        files.add(multipartFile);
+      }
+
+      return files;
+    } catch (e) {
+      return [];
     }
   }
 

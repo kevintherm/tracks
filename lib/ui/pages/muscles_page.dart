@@ -377,11 +377,8 @@ class _MuscleCard extends StatelessWidget {
               tag: 'muscle-${muscle.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: getImage(
-                  muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
-                  pendingPath: muscle.pendingThumbnailPaths.isNotEmpty
-                      ? muscle.pendingThumbnailPaths.first
-                      : null,
+                child: getSafeImage(
+                  muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : '',
                   width: 60,
                   height: 60,
                 ),

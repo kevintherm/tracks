@@ -47,6 +47,7 @@ session page
     - create schedule page
 
 #done
+- fix bug muscle thumbnails: track removed images
 - add import json exercise
 - add import json workout
 - add import json muscle

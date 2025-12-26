@@ -39,26 +39,20 @@ func init() {
 
 		collection.Fields.Add(&core.NumberField{
 			Name:    "sets",
-			Min:     types.Pointer(0.0),
+			Min:     types.Pointer(1.0),
 			Max:     types.Pointer(100.0),
 			OnlyInt: true,
 		})
 
 		collection.Fields.Add(&core.NumberField{
 			Name:    "reps",
-			Min:     types.Pointer(0.0),
+			Min:     types.Pointer(1.0),
 			Max:     types.Pointer(100.0),
 			OnlyInt: true,
 		})
 
-		collection.ListRule = types.Pointer(`
-			workout.user = null ||
-			(@request.auth.id != '' && workout.user = @request.auth.id)
-		`)
-		collection.ViewRule = types.Pointer(`
-			workout.user = null ||
-			(@request.auth.id != '' && workout.user = @request.auth.id)
-		`)
+		collection.ListRule = types.Pointer("workout.user = null || (@request.auth.id != '' && workout.user = @request.auth.id)")
+		collection.ViewRule = types.Pointer("workout.user = null || (@request.auth.id != '' && workout.user = @request.auth.id)")
 		collection.CreateRule = types.Pointer(`
 			@request.auth.id != '' &&
 			workout.user = @request.auth.id

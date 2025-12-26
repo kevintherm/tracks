@@ -11,9 +11,9 @@ class AuthUser {
     required this.email,
   });
 
-  factory AuthUser.fromMap(Map<String, dynamic> data, String uid) {
+  factory AuthUser.fromMap(Map<String, dynamic> data, String id) {
     return AuthUser(
-      id: uid,
+      id: id,
       avatar: data['avatar'] ?? '',
       name: data['name'] ?? '',
       email: data['email'] ?? '',

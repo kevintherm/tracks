@@ -289,7 +289,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     label: muscle.name,
                     subtitle: muscle.description,
                     imagePath: muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
-                    pendingImagePath: muscle.pendingThumbnailPaths.isNotEmpty ? muscle.pendingThumbnailPaths.first : null,
                   ),
                 )
                 .toList();

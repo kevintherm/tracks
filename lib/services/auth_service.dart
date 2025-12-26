@@ -68,6 +68,16 @@ class AuthService {
     }
   }
 
+  AuthUser? get user {
+    final record = _pb.authStore.record;
+    if (record == null) return null;
+    
+    final data = record.toJson();
+    final uid = data['id'] as String? ?? '';
+    
+    return AuthUser.fromMap(data, uid);
+  }
+
   Future<void> signUpWithEmail({
     required String name,
     required String email,

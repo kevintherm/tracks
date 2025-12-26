@@ -37,15 +37,15 @@ const MuscleSchema = CollectionSchema(
       name: r'needSync',
       type: IsarType.bool,
     ),
-    r'pendingThumbnailPaths': PropertySchema(
-      id: 4,
-      name: r'pendingThumbnailPaths',
-      type: IsarType.stringList,
-    ),
     r'pocketbaseId': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'pocketbaseId',
       type: IsarType.string,
+    ),
+    r'removedThumbnails': PropertySchema(
+      id: 5,
+      name: r'removedThumbnails',
+      type: IsarType.stringList,
     ),
     r'thumbnails': PropertySchema(
       id: 6,
@@ -85,17 +85,17 @@ int _muscleEstimateSize(
     }
   }
   bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.pendingThumbnailPaths.length * 3;
-  {
-    for (var i = 0; i < object.pendingThumbnailPaths.length; i++) {
-      final value = object.pendingThumbnailPaths[i];
-      bytesCount += value.length * 3;
-    }
-  }
   {
     final value = object.pocketbaseId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.removedThumbnails.length * 3;
+  {
+    for (var i = 0; i < object.removedThumbnails.length; i++) {
+      final value = object.removedThumbnails[i];
+      bytesCount += value.length * 3;
     }
   }
   bytesCount += 3 + object.thumbnails.length * 3;
@@ -118,8 +118,8 @@ void _muscleSerialize(
   writer.writeString(offsets[1], object.description);
   writer.writeString(offsets[2], object.name);
   writer.writeBool(offsets[3], object.needSync);
-  writer.writeStringList(offsets[4], object.pendingThumbnailPaths);
-  writer.writeString(offsets[5], object.pocketbaseId);
+  writer.writeString(offsets[4], object.pocketbaseId);
+  writer.writeStringList(offsets[5], object.removedThumbnails);
   writer.writeStringList(offsets[6], object.thumbnails);
   writer.writeDateTime(offsets[7], object.updatedAt);
 }
@@ -135,10 +135,10 @@ Muscle _muscleDeserialize(
     id: id,
     name: reader.readString(offsets[2]),
     needSync: reader.readBoolOrNull(offsets[3]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[5]),
+    pocketbaseId: reader.readStringOrNull(offsets[4]),
   );
   object.createdAt = reader.readDateTime(offsets[0]);
-  object.pendingThumbnailPaths = reader.readStringList(offsets[4]) ?? [];
+  object.removedThumbnails = reader.readStringList(offsets[5]) ?? [];
   object.thumbnails = reader.readStringList(offsets[6]) ?? [];
   object.updatedAt = reader.readDateTime(offsets[7]);
   return object;
@@ -160,9 +160,9 @@ P _muscleDeserializeProp<P>(
     case 3:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 4:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringList(offset) ?? []) as P;
     case 6:
       return (reader.readStringList(offset) ?? []) as P;
     case 7:
@@ -650,233 +650,6 @@ extension MuscleQueryFilter on QueryBuilder<Muscle, Muscle, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'pendingThumbnailPaths',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementContains(String value,
-          {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'pendingThumbnailPaths',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementMatches(String pattern,
-          {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'pendingThumbnailPaths',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pendingThumbnailPaths',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'pendingThumbnailPaths',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
-      pendingThumbnailPathsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'pendingThumbnailPaths',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
   QueryBuilder<Muscle, Muscle, QAfterFilterCondition> pocketbaseIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1020,6 +793,233 @@ extension MuscleQueryFilter on QueryBuilder<Muscle, Muscle, QFilterCondition> {
         property: r'pocketbaseId',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'removedThumbnails',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementContains(String value,
+          {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'removedThumbnails',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementMatches(String pattern,
+          {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'removedThumbnails',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'removedThumbnails',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'removedThumbnails',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      removedThumbnailsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'removedThumbnails',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1487,16 +1487,16 @@ extension MuscleQueryWhereDistinct on QueryBuilder<Muscle, Muscle, QDistinct> {
     });
   }
 
-  QueryBuilder<Muscle, Muscle, QDistinct> distinctByPendingThumbnailPaths() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'pendingThumbnailPaths');
-    });
-  }
-
   QueryBuilder<Muscle, Muscle, QDistinct> distinctByPocketbaseId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QDistinct> distinctByRemovedThumbnails() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'removedThumbnails');
     });
   }
 
@@ -1544,16 +1544,16 @@ extension MuscleQueryProperty on QueryBuilder<Muscle, Muscle, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Muscle, List<String>, QQueryOperations>
-      pendingThumbnailPathsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'pendingThumbnailPaths');
-    });
-  }
-
   QueryBuilder<Muscle, String?, QQueryOperations> pocketbaseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<Muscle, List<String>, QQueryOperations>
+      removedThumbnailsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'removedThumbnails');
     });
   }
 

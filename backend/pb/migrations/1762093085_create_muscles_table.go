@@ -55,8 +55,8 @@ func init() {
 			OnUpdate: true,
 		})
 
-		musclesCollection.ListRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
-		musclesCollection.ViewRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		musclesCollection.ListRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
+		musclesCollection.ViewRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
 		musclesCollection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
 		musclesCollection.UpdateRule = types.Pointer(`
 			@request.auth.id != '' &&

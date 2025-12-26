@@ -64,11 +64,11 @@ func init() {
 			OnUpdate: true,
 		})
 
-		collection.ListRule = types.Pointer("@request.auth.id = \"\" || workout.user = null || workout.user.id = @request.auth.id")
-		collection.ViewRule = types.Pointer("@request.auth.id = \"\" || workout.user = null || workout.user.id = @request.auth.id")
-		collection.CreateRule = types.Pointer("@request.auth.id = \"\" || workout.user = null || workout.user.id = @request.auth.id")
-		collection.UpdateRule = types.Pointer("@request.auth.id = \"\" || workout.user = null || workout.user.id = @request.auth.id")
-		collection.DeleteRule = types.Pointer("@request.auth.id = \"\" || workout.user = null || workout.user.id = @request.auth.id")
+		collection.ListRule = types.Pointer("workout.user = null || (@request.auth.id != '' && workout.user = @request.auth.id)")
+		collection.ViewRule = types.Pointer("workout.user = null || (@request.auth.id != '' && workout.user = @request.auth.id)")
+		collection.CreateRule = types.Pointer("@request.auth.id != '' && workout.user = @request.auth.id")
+		collection.UpdateRule = types.Pointer("@request.auth.id != '' && workout.user = @request.auth.id")
+		collection.DeleteRule = types.Pointer("@request.auth.id != '' && workout.user = @request.auth.id")
 
 		err = app.Save(collection)
 		if err != nil {

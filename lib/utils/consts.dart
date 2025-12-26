@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/workout.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -111,6 +112,62 @@ Widget getImage(
         errorWidget: (context, url, error) => errorPlaceholder,
       );
     }
+  }
+
+  // Priority 3: Fallback to not-found.jpg
+  return errorPlaceholder;
+}
+
+Widget getSafeImage(
+  String imagePath, {
+  bool pbUrl = false,
+  double width = 100,
+  double height = 100,
+}) {
+  // Shimmer placeholder
+  Widget shimmerPlaceholder = Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: Container(width: width, height: height, color: Colors.white),
+  );
+
+  // Error/fallback placeholder
+  Widget errorPlaceholder = Image.asset(
+    'assets/drawings/not-found.jpg',
+    width: width,
+    height: height,
+    fit: BoxFit.cover,
+  );
+
+  // Priority 1: Check for pending local image
+  final hasPendingImage = File(imagePath).existsSync();
+  if (hasPendingImage) {
+    return Image.file(
+      File(imagePath),
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: frame != null ? child : shimmerPlaceholder,
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => errorPlaceholder,
+    );
+  }
+
+  // Priority 2: Check for network image from thumbnail (backend URL only)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return CachedNetworkImage(
+      imageUrl: imagePath,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      placeholder: (context, url) => shimmerPlaceholder,
+      errorWidget: (context, url, error) => errorPlaceholder,
+    );
   }
 
   // Priority 3: Fallback to not-found.jpg
@@ -282,4 +339,19 @@ extension OrdinalExt on int {
     if (mod10 == 3 && mod100 != 13) return "${this}rd";
     return "${this}th";
   }
+}
+
+String getFileName(String input) {
+  if (input.isEmpty) return '';
+
+  // Try URL first
+  final uri = Uri.tryParse(input);
+
+  if (uri != null && uri.hasScheme && uri.pathSegments.isNotEmpty) {
+    return Uri.decodeComponent(uri.pathSegments.last);
+  }
+
+  // Fallback: treat as file path or filename
+  final parts = input.split(RegExp(r'[\\/]+'));
+  return parts.isNotEmpty ? parts.last : '';
 }

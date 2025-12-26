@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -31,23 +30,16 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
 
-  late Muscle _muscle;
-  final List<String> _selectedThumbnails = [];
+  final Muscle _muscle = Muscle(name: "");
 
   @override
   void initState() {
     super.initState();
     if (widget.muscle != null) {
-      _muscle = widget.muscle!;
+      _muscle.id = widget.muscle!.id;
+      _muscle.updateFrom(widget.muscle!);
       _nameController.text = _muscle.name;
       _descController.text = _muscle.description ?? '';
-      _selectedThumbnails.addAll(
-        _muscle.pendingThumbnailPaths.isNotEmpty
-            ? _muscle.pendingThumbnailPaths
-            : _muscle.thumbnails,
-      );
-    } else {
-      _muscle = Muscle(name: "");
     }
   }
 
@@ -97,7 +89,7 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
       );
 
       if (image != null) {
-        setState(() => _selectedThumbnails.add(image.path));
+        setState(() => _muscle.thumbnails.add(image.path));
       }
     } catch (e) {
       toast.error(content: Text("Failed to pick image: $e"));
@@ -105,7 +97,8 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
   }
 
   void _removeThumbnailImage(String image) {
-    setState(() => _selectedThumbnails.remove(image));
+    setState(() => _muscle.thumbnails.remove(image));
+    _muscle.removedThumbnails.add(image);
   }
 
   Future<void> _save() async {
@@ -122,7 +115,7 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
 
       _muscle.name = _nameController.text;
       _muscle.description = _descController.text;
-      _muscle.pendingThumbnailPaths = _selectedThumbnails;
+      _muscle.thumbnails = _muscle.thumbnails;
 
       await muscleRepo.saveMuscle(_muscle);
 
@@ -175,7 +168,7 @@ class _CreateMusclePageState extends State<CreateMusclePage> {
 
                 // Thumbnail Section
                 _ThumbnailSection(
-                  images: _selectedThumbnails,
+                  images: _muscle.thumbnails,
                   onPickImage: _pickThumbnailImage,
                   onRemoveImage: _removeThumbnailImage,
                 ),
@@ -359,13 +352,7 @@ class _ThumbnailSectionState extends State<_ThumbnailSection> {
               borderRadius: BorderRadius.circular(isSelected ? 14 : 16),
               child: AspectRatio(
                 aspectRatio: 1 / 1,
-                child: Image.file(
-                  File(image),
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  cacheWidth: 500,
-                ),
+                child: getSafeImage(image, width: double.infinity, height: double.infinity)
               ),
             ),
             if (actions)
@@ -376,7 +363,14 @@ class _ThumbnailSectionState extends State<_ThumbnailSection> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Pressable(
-                      onTap: () => widget.onRemoveImage(image),
+                      onTap: () {
+                        widget.onRemoveImage(image);
+                        setState(() {
+                          if (selectedIndex > widget.images.length - 1) {
+                            selectedIndex = 0;
+                          }
+                        });
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.red.shade400,

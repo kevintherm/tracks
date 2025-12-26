@@ -124,17 +124,14 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           onTap: () => Navigator.pop(context),
           child: Center(
             child: CarouselSlider.builder(
-              itemCount: _muscle.safeThumbnails.items.length,
+              itemCount: _muscle.safeThumbnails.length,
               itemBuilder: (context, index, realIndex) {
-                final image = _muscle.safeThumbnails.items[index];
+                final image = _muscle.safeThumbnails[index];
                 return GestureDetector(
                   onTap: () {},
                   child: ClipRRect(
                     borderRadius: BorderRadiusGeometry.circular(16),
-                    child: _buildMuscleImage(
-                      image,
-                      pending: _muscle.safeThumbnails.pending,
-                    ),
+                    child: _buildMuscleImage(image),
                   ),
                 );
               },
@@ -247,14 +244,13 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
         background: Hero(
           tag: 'muscle-${_muscle.id}',
           child: Pressable(
-            onTap: _muscle.safeThumbnails.items.isEmpty
+            onTap: _muscle.safeThumbnails.isEmpty
                 ? null
                 : () => _openImagesDialog(),
             child: _buildMuscleImage(
-              _muscle.safeThumbnails.items.isEmpty
+              _muscle.safeThumbnails.isEmpty
                   ? ""
-                  : _muscle.safeThumbnails.items.first,
-              pending: _muscle.safeThumbnails.pending,
+                  : _muscle.safeThumbnails.first,
             ),
           ),
         ),
@@ -262,10 +258,11 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     );
   }
 
-  Widget _buildMuscleImage(String imagePath, {bool pending = false}) {
+  Widget _buildMuscleImage(String imagePath) {
+    final isUrl = imagePath.startsWith('http://') || imagePath.startsWith('https://');
     return getImage(
-      pending ? null : imagePath,
-      pendingPath: pending ? imagePath : null,
+      isUrl ? imagePath : null,
+      pendingPath: isUrl ? null : imagePath,
       width: double.infinity,
       height: double.infinity,
     );

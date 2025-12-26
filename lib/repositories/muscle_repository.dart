@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/muscle.dart';
@@ -8,11 +11,11 @@ import 'package:tracks/utils/consts.dart';
 class MuscleRepository {
   final Isar isar;
   final PocketBase pb;
-  final AuthService authService;
-  late final ImageStorageService imageStorageService;
+  final AuthService auth;
+  late final ImageStorageService imageService;
 
-  MuscleRepository(this.isar, this.pb, this.authService) {
-    imageStorageService = ImageStorageService(pb, authService);
+  MuscleRepository(this.isar, this.pb, this.auth) {
+    imageService = ImageStorageService(pb, auth);
   }
 
   IsarCollection<Muscle> get collection => isar.muscles;
@@ -22,53 +25,72 @@ class MuscleRepository {
   }
 
   Future<void> saveMuscle(Muscle muscle) async {
-    // Handle thumbnail update if needed
-    if (muscle.pendingThumbnailPaths.isNotEmpty) {
-      try {
-        for (final path in muscle.pendingThumbnailPaths) {
-          final imageResult = await imageStorageService.saveImage(
-            sourcePath: path,
-            directory: 'exercises',
-            syncEnabled: false,
-          );
+    final exists = await isar.muscles.where().idEqualTo(muscle.id).findFirst();
 
-          if (imageResult['local_path'] != null) {
-            muscle.pendingThumbnailPaths.add(imageResult['localPath']!);
-          }
-        }
-      } catch (e) {
-        print('Failed to save muscle thumbnail: $e');
-        muscle.pendingThumbnailPaths = [];
+    if (exists != null) {
+      muscle.updatedAt = DateTime.now();
+    }
+
+    final updatedThumbnails = <String>[];
+
+    for (final path in muscle.thumbnails) {
+      if (path.startsWith('http://') ||
+          path.startsWith('https://') ||
+          !path.contains('cache')) {
+        updatedThumbnails.add(path);
+        continue;
+      }
+
+      final localPath = await imageService.saveToLocalDisk(
+        sourcePath: path,
+        directory: 'muscles',
+      );
+
+      updatedThumbnails.add(localPath);
+    }
+
+    muscle.thumbnails = updatedThumbnails;
+
+    // Delete local removed thumbnails
+    final deletedThumbnails = <String>[];
+    for (final path in muscle.removedThumbnails) {
+      if (path.startsWith('http://') || path.startsWith('https://')) continue;
+
+      final exists = await File(path).exists();
+      if (exists) {
+        await File(path).delete();
+        deletedThumbnails.add(path);
       }
     }
+    muscle.removedThumbnails.removeWhere((e) => deletedThumbnails.contains(e));
 
     if (muscle.pocketbaseId != null) {
       muscle.needSync = true;
     }
 
-    // Update local DB
     await isar.writeTxn(() async {
       await isar.muscles.put(muscle);
     });
 
-    // Sync to cloud if enabled
     await _saveMuscleOnCloud(muscle);
   }
 
   Future<void> deleteMuscle(Muscle muscle) async {
-    if (muscle.pendingThumbnailPaths.isNotEmpty) {
-      try {
-        for (final path in muscle.pendingThumbnailPaths) {
-          await imageStorageService.deleteLocalImage(path);
+    // Delete local thumbnail files
+    try {
+      for (final thumbnail in muscle.thumbnails) {
+        if (!thumbnail.startsWith('http://') &&
+            !thumbnail.startsWith('https://')) {
+          await imageService.deleteLocalImage(thumbnail);
         }
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
 
     await isar.writeTxn(() async {
       await isar.muscles.delete(muscle.id);
     });
 
-    if (authService.isSyncEnabled && muscle.pocketbaseId != null) {
+    if (auth.isSyncEnabled && muscle.pocketbaseId != null) {
       try {
         await pb
             .collection(PBCollections.muscles.value)
@@ -83,100 +105,138 @@ class MuscleRepository {
 
   // Update an existing muscle on the cloud
   Future<void> _saveMuscleOnCloud(Muscle muscle) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
-      
-      final body = {
-              'user': authService.currentUser?['id'],
-              'name': muscle.name,
-            };
+      final localPaths = <String>[];
+      final cloudUrls = <String>[];
 
-      final RecordModel record;
-      if (muscle.pocketbaseId == null) {
-        record = await pb.collection(PBCollections.muscles.value).create(body: body);
-      } else {
-        record = await pb.collection(PBCollections.muscles.value).update(muscle.pocketbaseId!, body: body);
-      }
-
-      // Handle thumbnail sync if exists
-      if (muscle.pendingThumbnailPaths.isNotEmpty) {
-        try {
-          for (final path in muscle.pendingThumbnailPaths) {
-            final imageResult = await imageStorageService.saveImage(
-              sourcePath: path,
-              directory: 'muscles',
-              collection: PBCollections.muscles.value,
-              pbRecord: record,
-              fieldName: 'thumbnails',
-              syncEnabled: true,
-            );
-
-            if (imageResult['cloudUrl'] != null) {
-              muscle.thumbnails = imageResult['cloudUrl'] as List<String>;
-              muscle.pendingThumbnailPaths = [];
-            }
-          }
-        } catch (e) {
-          print('Failed to upload muscle thumbnail to cloud: $e');
-          // Continue without thumbnail sync
+      for (final thumbnail in muscle.thumbnails) {
+        if (thumbnail.startsWith('http://') ||
+            thumbnail.startsWith('https://')) {
+          cloudUrls.add(thumbnail);
+        } else {
+          localPaths.add(thumbnail);
         }
       }
 
+      final removedThumbnails = muscle.removedThumbnails.map((e) => getFileName(e)).toList();
+
+      final body = {
+        'user': auth.user?.id,
+        ...muscle.toPayload(),
+        'thumbnails-': removedThumbnails
+      };
+
+      final files = await imageService.prepareMultipartBatch(
+        localPaths: localPaths,
+        fieldName: 'thumbnails+',
+      );
+
+      RecordModel record;
+      if (muscle.pocketbaseId == null) {
+        record = await pb
+            .collection(PBCollections.muscles.value)
+            .create(body: body, files: files);
+      } else {
+        record = await pb
+            .collection(PBCollections.muscles.value)
+            .update(muscle.pocketbaseId!, body: body, files: files);
+      }
+
+      muscle.pocketbaseId = record.id;
       muscle.needSync = false;
+
+      muscle.thumbnails = record
+          .getListValue<String>('thumbnails')
+          .map((e) => '${pb.files.getURL(record, e)}')
+          .toList();
+
+      muscle.removedThumbnails.clear();
+
+      // Delete local files after successful upload
+      for (final localPath in localPaths) {
+        try {
+          await imageService.deleteLocalImage(localPath);
+        } catch (e) {
+          log('Failed to delete local thumbnail: $e');
+        }
+      }
 
       // Write update to local DB
       await isar.writeTxn(() async {
         await isar.muscles.put(muscle);
       });
+    } on ClientException catch (e) {
+      if (e.statusCode == 404) {
+        muscle.pocketbaseId = null;
+        await isar.writeTxn(() async {
+          await isar.muscles.put(muscle);
+        });
+      }
+      log('Failed to save muscle to cloud: $e');
     } catch (e) {
-      // muscle remains marked as needsSync = true
+      log('Failed to save muscle to cloud: $e');
     }
   }
 
   Future<void> performInitialSync() async {
-    // if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
-    final muscleRecords = await pb
-        .collection(PBCollections.muscles.value)
-        .getFullList();
+    log('[Sync] Performing sync muscle...');
 
-    await isar.writeTxn(() async {
-      for (final record in muscleRecords) {
+    await _uploadLocalMuscles();
+    await _downloadAndMergeCloudMuscles();
+
+    log('[Sync] DONE sync muscle...');
+  }
+
+  Future<void> _uploadLocalMuscles() async {
+    final localItems = await isar.muscles
+        .filter()
+        .pocketbaseIdIsNull()
+        .findAll();
+
+    for (final m in localItems) {
+      await _saveMuscleOnCloud(m);
+    }
+  }
+
+  Future<void> _downloadAndMergeCloudMuscles() async {
+    try {
+      final pbRecords = await pb
+          .collection(PBCollections.muscles.value)
+          .getFullList(filter: 'user = "${auth.user?.id}"');
+
+      final List<Muscle> musclesToSave = [];
+
+      for (final record in pbRecords) {
+        final fromRecord = Muscle.fromRecord(
+          record,
+          (thumb) => pb.files.getURL(record, thumb).toString(),
+        );
+
         final exists = await isar.muscles
             .filter()
             .pocketbaseIdEqualTo(record.id)
             .findFirst();
 
-        if (exists != null) continue;
-
-        final muscle = Muscle(
-          name: record.data['name'],
-          description: record.data['description'],
-          pocketbaseId: record.id,
-          needSync: false
-        );
-
-        muscle.createdAt =
-            DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now();
-        muscle.updatedAt =
-            DateTime.tryParse(record.data['updated'] ?? '') ?? DateTime.now();
-
-        final thumbnailField = record.data['thumbnail'];
-        if (thumbnailField != null) {
-          if (thumbnailField is List) {
-            muscle.thumbnails = thumbnailField
-                .map((thumb) => pb.files.getUrl(record, thumb).toString())
-                .toList();
-          } else if (thumbnailField.toString().isNotEmpty) {
-            muscle.thumbnails = [
-              pb.files.getUrl(record, thumbnailField).toString(),
-            ];
-          }
+        if (exists != null) {
+          exists.updateFrom(fromRecord);
+          musclesToSave.add(exists);
+        } else {
+          musclesToSave.add(fromRecord);
         }
-
-        await isar.muscles.put(muscle);
       }
-    });
+
+      if (musclesToSave.isNotEmpty) {
+        await isar.writeTxn(() async {
+          await isar.muscles.putAll(musclesToSave);
+        });
+      }
+    } catch (e) {
+      log('Failed to download and merge cloud muscles: $e');
+      rethrow;
+    }
   }
 }

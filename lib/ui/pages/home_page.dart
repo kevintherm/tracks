@@ -1,5 +1,12 @@
 
+import 'dart:async';
+
 import 'package:icons_plus/icons_plus.dart';
+import 'package:tracks/repositories/exercise_repository.dart';
+import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/repositories/schedule_repository.dart';
+import 'package:tracks/repositories/session_repository.dart';
+import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
@@ -23,6 +30,16 @@ class _HomePageState extends State<HomePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     navigationProvider = Provider.of<NavigationProvider>(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(context.read<MuscleRepository>().performInitialSync());
+    unawaited(context.read<ExerciseRepository>().performInitialSync());
+    unawaited(context.read<WorkoutRepository>().performInitialSync());
+    unawaited(context.read<ScheduleRepository>().performInitialSync());
+    unawaited(context.read<SessionRepository>().performInitialSync());
   }
 
   int get _selectedIndex => navigationProvider.selectedIndex;
