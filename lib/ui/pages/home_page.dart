@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:icons_plus/icons_plus.dart';
@@ -8,13 +7,13 @@ import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/ui/components/blur_away.dart';
+import 'package:tracks/ui/pages/explore_page.dart';
 import 'package:tracks/ui/pages/fragments/home_fragment.dart';
 import 'package:tracks/ui/pages/fragments/profile_fragment.dart';
 import 'package:tracks/ui/pages/fragments/schedule_fragment.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tracks/ui/pages/fragments/workout_fragment.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,16 +24,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late NavigationProvider navigationProvider;
+  late PageController _pageController;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     navigationProvider = Provider.of<NavigationProvider>(context);
+    navigationProvider.addListener(_onNavigationChanged);
   }
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     unawaited(context.read<MuscleRepository>().performInitialSync());
     unawaited(context.read<ExerciseRepository>().performInitialSync());
     unawaited(context.read<WorkoutRepository>().performInitialSync());
@@ -42,12 +44,25 @@ class _HomePageState extends State<HomePage> {
     unawaited(context.read<SessionRepository>().performInitialSync());
   }
 
+  @override
+  void dispose() {
+    navigationProvider.removeListener(_onNavigationChanged);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onNavigationChanged() {
+    if (_pageController.page?.round() != _selectedIndex) {
+      _pageController.jumpToPage(_selectedIndex);
+    }
+  }
+
   int get _selectedIndex => navigationProvider.selectedIndex;
 
   final List<Widget> pages = [
     HomeFragment(),
     ScheduleFragment(),
-    WorkoutFragment(),
+    ExplorePage(),
     ProfileFragment(),
   ];
   final _navigationItems = [
@@ -62,9 +77,9 @@ class _HomePageState extends State<HomePage> {
       selectedIcon: const Icon(Iconsax.calendar_2_bold),
     ),
     NavigationDestination(
-      label: "Workouts",
-      icon: const Icon(Iconsax.weight_1_outline),
-      selectedIcon: const Icon(Iconsax.weight_1_bold),
+      label: "Explore",
+      icon: const Icon(Iconsax.search_favorite_1_outline),
+      selectedIcon: const Icon(Iconsax.search_favorite_1_bold),
     ),
     NavigationDestination(
       label: 'Profile',
@@ -77,13 +92,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlurAway(
       child: Scaffold(
-        body: SafeArea(child: pages[_selectedIndex]),
+        body: SafeArea(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              navigationProvider.setSelectedIndex(index);
+            },
+            children: pages,
+          ),
+        ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           onDestinationSelected: (value) {
-            setState(() {
-              navigationProvider.setSelectedIndex(value);
-            });
+            navigationProvider.setSelectedIndex(value);
           },
           destinations: _navigationItems,
         ),

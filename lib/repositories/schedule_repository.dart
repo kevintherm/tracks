@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/schedule.dart';
@@ -240,11 +242,15 @@ class ScheduleRepository {
   Future<void> performInitialSync() async {
     if (!authService.isSyncEnabled) return;
 
+    log('[Sync][Schedule] Starting...');
+
     // 1. Upload local-only to cloud
     await _uploadLocalSchedules();
 
     // 2. Download and merge cloud schedules
     await _downloadAndMergeCloudSchedules();
+
+    log('[Sync][Schedule] Done.');
   }
 
   Future<void> _uploadLocalSchedules() async {

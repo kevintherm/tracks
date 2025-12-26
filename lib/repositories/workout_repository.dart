@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
@@ -138,7 +140,6 @@ class WorkoutRepository {
     required Workout workout,
     required List<WorkoutConfigParam> exercises,
   }) async {
-
     // Handle thumbnail update if needed
     if (workout.pendingThumbnailPath != null) {
       try {
@@ -429,16 +430,26 @@ class WorkoutRepository {
   Future<void> performInitialSync() async {
     if (!authService.isSyncEnabled) return;
 
-    // 1. Upload local-only workouts
+    log('[Sync][Workout] Starting...');
+
+    await _uploadLocalWorkouts();
+    await _downloadAndMergeCloudWorkouts();
+
+    log('[Sync][Workout] Done.');
+  }
+
+  Future<void> _uploadLocalWorkouts() async {
     final localWorkouts = await isar.workouts
         .filter()
         .pocketbaseIdIsNull()
         .findAll();
+
     for (final workout in localWorkouts) {
       await _uploadWorkoutToCloud(workout);
     }
+  }
 
-    // 2. Download cloud-only workouts
+  Future<void> _downloadAndMergeCloudWorkouts() async {
     final pbRecords = await pb
         .collection(PBCollections.workouts.value)
         .getFullList();
@@ -503,7 +514,7 @@ class WorkoutRepository {
       await isar.workouts.putAll(workoutsToSave);
     });
 
-    // 3. Sync workout_exercises junction table
+    // Sync workout_exercises junction table
     try {
       final pbWorkoutExercises = await pb
           .collection(PBCollections.workoutExercises.value)

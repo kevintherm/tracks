@@ -1,9 +1,10 @@
 import 'package:provider/provider.dart';
+import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
-import 'package:tracks/ui/pages/explore_page.dart';
+import 'package:tracks/ui/pages/fragments/workout_fragment.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
@@ -37,11 +38,8 @@ class _HomeFragmentState extends State<HomeFragment> {
       'icon': Iconsax.search_favorite_outline,
       'subtitle': 'See other splits!',
       'title': 'Explore',
-      'action': (context) async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ExplorePage()),
-        );
+      'action': (BuildContext context) async {
+        context.read<NavigationProvider>().setSelectedIndex(2);
       },
     },
   ];
@@ -54,7 +52,17 @@ class _HomeFragmentState extends State<HomeFragment> {
     },
     {
       'icon': Iconsax.weight_1_outline,
-      'title': 'All Exercises',
+      'title': 'Manage Workouts',
+      'action': (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WorkoutFragment()),
+        );
+      },
+    },
+    {
+      'icon': Iconsax.weight_1_outline,
+      'title': 'Manage Exercises',
       'action': (context) {
         Navigator.push(
           context,
@@ -64,7 +72,7 @@ class _HomeFragmentState extends State<HomeFragment> {
     },
     {
       'icon': MingCute.fitness_line,
-      'title': 'All Muscles',
+      'title': 'Manage Muscles',
       'action': (context) {
         Navigator.push(
           context,

@@ -120,7 +120,7 @@ class MyApp extends StatelessWidget {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: AppColors.lightPrimary),
       textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-      scaffoldBackgroundColor: Colors.grey[100],
+      scaffoldBackgroundColor: Colors.grey[50],
       cardColor: Colors.white,
       cardTheme: const CardThemeData(color: Colors.white),
     );

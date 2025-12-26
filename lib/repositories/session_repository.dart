@@ -286,8 +286,12 @@ class SessionRepository {
   Future<void> performInitialSync() async {
     if (!authService.isSyncEnabled) return;
 
+    log('[Sync][Session] Starting...');
+
     await _uploadLocalSessions();
     await _downloadAndMergeCloudSessions();
+
+    log('[Sync][Session] Done.');
   }
 
   Future<void> _uploadLocalSessions() async {

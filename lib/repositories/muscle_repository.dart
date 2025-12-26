@@ -183,12 +183,12 @@ class MuscleRepository {
   Future<void> performInitialSync() async {
     if (!auth.isSyncEnabled) return;
 
-    log('[Sync] Performing sync muscle...');
+    log('[Sync][Muscle] Starting...');
 
     await _uploadLocalMuscles();
     await _downloadAndMergeCloudMuscles();
 
-    log('[Sync] DONE sync muscle...');
+    log('[Sync][Muscle] Done.');
   }
 
   Future<void> _uploadLocalMuscles() async {

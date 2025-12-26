@@ -25,24 +25,29 @@ class _ExplorePageState extends State<ExplorePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Header
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Explore",
-                      style: GoogleFonts.poppins(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Explore",
+                          style: GoogleFonts.poppins(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(Iconsax.search_favorite_1_outline),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -357,39 +362,7 @@ class _ExplorePageState extends State<ExplorePage> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Pressable(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        children: [
-                          Icon(
-                            Iconsax.arrow_left_2_outline,
-                            color: Colors.grey[700],
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Back to Home",
-                            style: GoogleFonts.inter(
-                              color: Colors.grey[700],
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
       ),

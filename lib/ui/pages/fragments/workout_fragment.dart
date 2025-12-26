@@ -8,6 +8,7 @@ import 'package:tracks/models/workout.dart';
 import 'package:tracks/repositories/workout_repository.dart';
 import 'package:tracks/services/import_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
+import 'package:tracks/ui/components/blur_away.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
@@ -17,7 +18,9 @@ import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
 class WorkoutFragment extends StatefulWidget {
-  const WorkoutFragment({super.key});
+  const WorkoutFragment({super.key, this.showImport = false});
+
+  final bool showImport;
 
   @override
   State<WorkoutFragment> createState() => _WorkoutFragmentState();
@@ -41,6 +44,12 @@ class _WorkoutFragmentState extends State<WorkoutFragment> {
         });
       });
     });
+
+    if (widget.showImport) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showImportDialog();
+      });
+    }
   }
 
   @override
@@ -100,80 +109,86 @@ class _WorkoutFragmentState extends State<WorkoutFragment> {
   Widget build(BuildContext context) {
     final workoutRepo = context.read<WorkoutRepository>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _AppBar(showImportDialog: _showImportDialog),
+    return BlurAway(
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _AppBar(showImportDialog: _showImportDialog),
 
-        _SearchBar(controller: searchController),
+              _SearchBar(controller: searchController),
 
-        Expanded(
-          child: StreamBuilder<List<Workout>>(
-            stream: workoutRepo.watchAllWorkouts(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                );
-              }
+              Expanded(
+                child: StreamBuilder<List<Workout>>(
+                  stream: workoutRepo.watchAllWorkouts(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Something went wrong: ${snapshot.error}',
-                    style: const TextStyle(
-                      color: Colors.redAccent,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Something went wrong: ${snapshot.error}',
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
 
-              final List<Workout> workouts = snapshot.data ?? [];
-              List<Workout> filtered = workouts;
+                    final List<Workout> workouts = snapshot.data ?? [];
+                    List<Workout> filtered = workouts;
 
-              if (search.isNotEmpty) {
-                filtered = FuzzySearch.search(
-                  items: workouts,
-                  query: search,
-                  getSearchableText: (e) => e.name,
-                  threshold: 0.1,
-                );
-              } else {
-                filtered = workouts.toList()
-                  ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-              }
+                    if (search.isNotEmpty) {
+                      filtered = FuzzySearch.search(
+                        items: workouts,
+                        query: search,
+                        getSearchableText: (e) => e.name,
+                        threshold: 0.1,
+                      );
+                    } else {
+                      filtered = workouts.toList()
+                        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+                    }
 
-              if (workouts.isEmpty) {
-                return Center(
-                  child: Text(
-                    "No workouts available.",
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                );
-              }
+                    if (workouts.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No workouts available.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      );
+                    }
 
-              if (filtered.isEmpty) {
-                return Center(
-                  child: Text(
-                    "No matching workouts found.",
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                );
-              }
+                    if (filtered.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No matching workouts found.",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      );
+                    }
 
-              return _WorkoutsList(workouts: filtered);
-            },
+                    return _WorkoutsList(workouts: filtered);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -190,14 +205,29 @@ class _AppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Row(
+            children: [
+              Tooltip(
+                message: "Back",
+                child: Pressable(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    Iconsax.arrow_left_2_outline,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 40),
+            ],
+          ),
           Text(
-            "Workout",
+            "Exercises",
             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           Row(
             children: [
               Tooltip(
-                message: "Explore Workouts",
+                message: "Import Exercises",
                 child: Pressable(
                   onTap: showImportDialog,
                   child: const Icon(Iconsax.import_1_outline, size: 28),
@@ -205,7 +235,7 @@ class _AppBar extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Tooltip(
-                message: 'Create New Workout',
+                message: 'Create New Exercise',
                 child: Pressable(
                   onTap: () {
                     Navigator.push(

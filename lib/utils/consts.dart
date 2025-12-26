@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/workout.dart';
-import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';

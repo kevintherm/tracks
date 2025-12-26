@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar/isar.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/exercise.dart';
@@ -17,11 +19,11 @@ class MuscleActivationParam {
 class ExerciseRepository {
   final Isar isar;
   final PocketBase pb;
-  final AuthService authService;
+  final AuthService auth;
   late final ImageStorageService imageStorageService;
 
-  ExerciseRepository(this.isar, this.pb, this.authService) {
-    imageStorageService = ImageStorageService(pb, authService);
+  ExerciseRepository(this.isar, this.pb, this.auth) {
+    imageStorageService = ImageStorageService(pb, auth);
   }
 
   IsarCollection<Exercise> get collection {
@@ -90,7 +92,7 @@ class ExerciseRepository {
       }
     });
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       await _uploadExerciseToCloud(exercise);
     }
   }
@@ -168,7 +170,7 @@ class ExerciseRepository {
       await isar.exercises.delete(exercise.id);
     });
 
-    if (authService.isSyncEnabled && exercise.pocketbaseId != null) {
+    if (auth.isSyncEnabled && exercise.pocketbaseId != null) {
       try {
         await pb
             .collection(PBCollections.exercises.value)
@@ -183,7 +185,7 @@ class ExerciseRepository {
 
   // Upload a single exercise to the cloud
   Future<void> _uploadExerciseToCloud(Exercise exercise) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       // Get muscles and activations from junction table
@@ -212,7 +214,7 @@ class ExerciseRepository {
           .collection(PBCollections.exercises.value)
           .create(
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
@@ -280,7 +282,7 @@ class ExerciseRepository {
 
   // Update an existing exercise on the cloud
   Future<void> _updateExerciseOnCloud(Exercise exercise) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       // Get muscles and activations from junction table
@@ -295,7 +297,7 @@ class ExerciseRepository {
           .update(
             exercise.pocketbaseId!,
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'name': exercise.name,
               'description': exercise.description,
               'calories_burned': exercise.caloriesBurned,
@@ -368,13 +370,17 @@ class ExerciseRepository {
 
   // This is the complex part: The initial sync when a user logs in
   Future<void> performInitialSync() async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
+
+    log('[Sync][Exercise] Starting...');
 
     // 1. Upload local-only exercises to cloud
     await _uploadLocalExercises();
 
     // 2. Download and merge cloud exercises
     await _downloadAndMergeCloudExercises();
+
+    log('[Sync][Exercise] Done.');
   }
 
   /// Upload all local exercises that don't have a pocketbaseId yet
@@ -395,7 +401,7 @@ class ExerciseRepository {
       // Fetch all cloud data
       final pbRecords = await pb
           .collection(PBCollections.exercises.value)
-          .getFullList();
+          .getFullList(filter: 'user = "${auth.user?.id}"');
       final pbExerciseMuscles = await pb
           .collection(PBCollections.exerciseMuscles.value)
           .getFullList(expand: 'muscle');
