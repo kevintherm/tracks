@@ -1,3 +1,4 @@
+- [repository] get the owned collection only when performing sync
 - implement browse feature
     - add custom api endpoint
         - trending workouts

@@ -26,7 +26,7 @@ func init() {
 	m.Register(func(app core.App) error {
 
 		// Create admin user first
-		adminUserId, err := CreateAdminUser(app)
+		adminUserId, err := CreateUser(app)
 		if err != nil {
 			return fmt.Errorf("failed to create admin user (major error): %w", err)
 		}
@@ -44,6 +44,12 @@ func init() {
 		err = SeedExercisesTable(app, muscleIds, adminUserId)
 		if err != nil {
 			return fmt.Errorf("failed to seed exercises (major error): %w", err)
+		}
+
+		// SeedWorkoutsTable
+		err = SeedWorkoutsTable(app, adminUserId)
+		if err != nil {
+			return fmt.Errorf("failed to seed workouts (major error): %w", err)
 		}
 
 		return nil
@@ -71,6 +77,16 @@ func init() {
 			return err
 		}
 
+		workoutsCollection, err := app.FindCollectionByNameOrId("workouts")
+		if err != nil {
+			return err
+		}
+
+		workoutExercisesCollection, err := app.FindCollectionByNameOrId("workout_exercises")
+		if err != nil {
+			return err
+		}
+
 		// Truncating is less risky, but we'll print errors if they happen.
 		if err := app.TruncateCollection(musclesCollection); err != nil {
 			fmt.Printf("Warning: Failed to truncate collection 'muscles': %v\n", err)
@@ -81,6 +97,12 @@ func init() {
 		if err := app.TruncateCollection(exercisesCollection); err != nil {
 			fmt.Printf("Warning: Failed to truncate collection 'exercises': %v\n", err)
 		}
+		if err := app.TruncateCollection(workoutExercisesCollection); err != nil {
+			fmt.Printf("Warning: Failed to truncate collection 'workout_exercises': %v\n", err)
+		}
+		if err := app.TruncateCollection(workoutsCollection); err != nil {
+			fmt.Printf("Warning: Failed to truncate collection 'workouts': %v\n", err)
+		}
 		if err := app.TruncateCollection(usersCollection); err != nil {
 			fmt.Printf("Warning: Failed to truncate collection 'users': %v\n", err)
 		}
@@ -89,7 +111,7 @@ func init() {
 	})
 }
 
-func CreateAdminUser(app core.App) (string, error) {
+func CreateUser(app core.App) (string, error) {
 	usersCollection, err := app.FindCollectionByNameOrId("users")
 	if err != nil {
 		return "", err
@@ -97,20 +119,20 @@ func CreateAdminUser(app core.App) (string, error) {
 
 	record := core.NewRecord(usersCollection)
 	record.Set("email", "tracks@tracks.com")
-	record.Set("password", "password123")
-	record.Set("passwordConfirm", "password123")
+	record.Set("password", "password")
+	record.Set("passwordConfirm", "password")
 	record.SetVerified(true)
 
 	err = app.Save(record)
 	if err != nil {
-		return "", fmt.Errorf("failed to create admin user: %w", err)
+		return "", fmt.Errorf("failed to create user: %w", err)
 	}
 
-	fmt.Printf("Created admin user: tracks@tracks.com\n")
+	fmt.Printf("Created user: tracks@tracks.com\n")
 	return record.Id, nil
 }
 
-func SeedExercisesTable(app core.App, muscleIds map[int]string, adminUserId string) error {
+func SeedExercisesTable(app core.App, muscleIds map[int]string, userId string) error {
 
 	// --- Major Errors ---
 	// If we can't find collections or read/parse the seed file, we must stop.
@@ -154,7 +176,7 @@ func SeedExercisesTable(app core.App, muscleIds map[int]string, adminUserId stri
 		record.Set("name", m.Name)
 		record.Set("description", m.Description)
 		record.Set("calories_burned", FloorTo(m.CaloriesBurned, 2))
-		record.Set("user", adminUserId)
+		record.Set("user", userId)
 		record.Set("is_public", true)
 
 		err = app.Save(record)
@@ -233,26 +255,32 @@ func SeedMusclesTable(app core.App, adminUserId string) (map[int]string, error) 
 	// Map muscle JSON ID to its local downloaded file path
 	localFilePaths := make(map[int]string)
 
-	fmt.Println("--- Starting Phase 1: Downloading muscle thumbnails ---")
-	for _, m := range muscles {
-		if m.Thumbnail == "" {
-			continue // Skip if no thumbnail URL
-		}
+	disableDownload := true
 
-		filename := path.Base(m.Thumbnail)
-		localPath := path.Join(tempDir, filename)
+	if !disableDownload {
+		fmt.Println("--- Starting Phase 1: Downloading muscle thumbnails ---")
+		for _, m := range muscles {
+			if m.Thumbnail == "" {
+				continue // Skip if no thumbnail URL
+			}
 
-		err := DownloadFileToDisk(ctx, m.Thumbnail, localPath)
-		if err != nil {
-			// This is now a minor error, we just log it and continue
-			fmt.Printf("MINOR ERROR: Failed to download thumbnail for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
-		} else {
-			// Only map if download was successful
-			localFilePaths[m.ID] = localPath
-			fmt.Printf("Successfully downloaded thumbnail for '%s'\n", m.Name)
+			filename := path.Base(m.Thumbnail)
+			localPath := path.Join(tempDir, filename)
+
+			err := DownloadFileToDisk(ctx, m.Thumbnail, localPath)
+			if err != nil {
+				// This is now a minor error, we just log it and continue
+				fmt.Printf("MINOR ERROR: Failed to download thumbnail for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
+			} else {
+				// Only map if download was successful
+				localFilePaths[m.ID] = localPath
+				fmt.Printf("Successfully downloaded thumbnail for '%s'\n", m.Name)
+			}
 		}
+		fmt.Println("--- Finished Phase 1: Downloads complete ---")
+	} else {
+		fmt.Println("--- Skipping Phase 1: Image downloading disabled ---")
 	}
-	fmt.Println("--- Finished Phase 1: Downloads complete ---")
 
 	// --- FIX: Phase 2: Save records to database (fast, inside DB transaction) ---
 	fmt.Println("--- Starting Phase 2: Seeding database ---")
@@ -264,21 +292,22 @@ func SeedMusclesTable(app core.App, adminUserId string) (map[int]string, error) 
 		record.Set("name", m.Name)
 		record.Set("description", m.Description)
 		record.Set("user", adminUserId)
-		record.Set("is_public", true)
 
 		// Check if we successfully downloaded a file for this muscle
-		if localPath, ok := localFilePaths[m.ID]; ok {
-			// Read the downloaded file from disk
-			imageBytes, err := os.ReadFile(localPath)
-			if err != nil {
-				fmt.Printf("MINOR ERROR: Failed to read local file for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
-			} else {
-				// Create the filesystem object from the bytes
-				f, err := filesystem.NewFileFromBytes(imageBytes, path.Base(localPath))
+		if !disableDownload {
+			if localPath, ok := localFilePaths[m.ID]; ok {
+				// Read the downloaded file from disk
+				imageBytes, err := os.ReadFile(localPath)
 				if err != nil {
-					fmt.Printf("MINOR ERROR: Failed to create file system object for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
+					fmt.Printf("MINOR ERROR: Failed to read local file for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
 				} else {
-					record.Set("thumbnail", f)
+					// Create the filesystem object from the bytes
+					f, err := filesystem.NewFileFromBytes(imageBytes, path.Base(localPath))
+					if err != nil {
+						fmt.Printf("MINOR ERROR: Failed to create file system object for muscle '%s' (Seed ID: %d): %v\n", m.Name, m.ID, err)
+					} else {
+						record.Set("thumbnail", f)
+					}
 				}
 			}
 		}
@@ -337,6 +366,87 @@ func DownloadFileToDisk(ctx context.Context, url string, destPath string) error 
 	// Copy the response body to the file
 	if _, err = io.Copy(out, resp.Body); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func SeedWorkoutsTable(app core.App, userId string) error {
+	workoutsCollection, err := app.FindCollectionByNameOrId("workouts")
+	if err != nil {
+		return err
+	}
+
+	workoutExercisesCollection, err := app.FindCollectionByNameOrId("workout_exercises")
+	if err != nil {
+		return err
+	}
+
+	exercisesCollection, err := app.FindCollectionByNameOrId("exercises")
+	if err != nil {
+		return err
+	}
+
+	type WorkoutExerciseSeed struct {
+		Name           string   `json:"name"`
+		Description    string   `json:"description"`
+		CaloriesBurned float64  `json:"caloriesBurned"`
+		Muscles        []string `json:"muscles"`
+		Sets           int      `json:"sets"`
+		Reps           int      `json:"reps"`
+	}
+
+	type WorkoutSeed struct {
+		Name        string                `json:"name"`
+		Description string                `json:"description"`
+		Thumbnail   *string               `json:"thumbnail"`
+		Exercises   []WorkoutExerciseSeed `json:"exercises"`
+	}
+
+	jsonFile, err := os.ReadFile("seeds/workouts.json")
+	if err != nil {
+		return err
+	}
+
+	var data = []WorkoutSeed{}
+	err = json.Unmarshal(jsonFile, &data)
+	if err != nil {
+		return err
+	}
+
+	for _, w := range data {
+		record := core.NewRecord(workoutsCollection)
+		record.Set("name", w.Name)
+		record.Set("description", w.Description)
+		record.Set("user", userId)
+		record.Set("is_public", true)
+
+		err = app.Save(record)
+		if err != nil {
+			fmt.Printf("MINOR ERROR: Failed saving record for collection 'workouts' (Name: %s): %v\n", w.Name, err)
+			continue
+		}
+
+		for _, we := range w.Exercises {
+			// Find exercise by name
+			exerciseRecord, err := app.FindFirstRecordByFilter(exercisesCollection.Id, "name = {:name}", map[string]interface{}{"name": we.Name})
+			if err != nil {
+				fmt.Printf("MINOR ERROR: Exercise '%s' not found for workout '%s': %v\n", we.Name, w.Name, err)
+				continue
+			}
+
+			pivot := core.NewRecord(workoutExercisesCollection)
+			pivot.Set("workout", record.Id)
+			pivot.Set("exercise", exerciseRecord.Id)
+			pivot.Set("sets", we.Sets)
+			pivot.Set("reps", we.Reps)
+
+			err = app.Save(pivot)
+			if err != nil {
+				fmt.Printf("MINOR ERROR: Failed saving relation for collection 'workout_exercises' (Workout: %s, Exercise: %s): %v\n", w.Name, we.Name, err)
+				continue
+			}
+		}
 	}
 
 	return nil

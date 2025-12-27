@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Full Body Beginner",
+    "description": "A great workout for beginners hitting all major muscle groups.",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Push Up",
+        "description": "Standard push up",
+        "caloriesBurned": 0.5,
+        "muscles": ["Chest", "Triceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Squat",
+        "description": "Bodyweight squat",
+        "caloriesBurned": 0.8,
+        "muscles": ["Quads", "Glutes"],
+        "sets": 3,
+        "reps": 15
+      },
+      {
+        "name": "Plank",
+        "description": "Hold for time",
+        "caloriesBurned": 0.3,
+        "muscles": ["Abs"],
+        "sets": 3,
+        "reps": 60
+      }
+    ]
+  },
+  {
+    "name": "Upper Body Power",
+    "description": "Focus on chest and back strength.",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Bench Press",
+        "caloriesBurned": 0.7,
+        "muscles": ["Chest"],
+        "sets": 4,
+        "reps": 8
+      },
+      {
+        "name": "Pull Up",
+        "caloriesBurned": 1.0,
+        "muscles": ["Back"],
+        "sets": 4,
+        "reps": 8
+      }
+    ]
+  }
+]

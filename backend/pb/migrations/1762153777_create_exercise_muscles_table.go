@@ -54,8 +54,8 @@ func init() {
 		})
 
 		// Rules: Users can only manage exercise_muscles for their own exercises
-		collection.ListRule = types.Pointer("exercise.user = null || (@request.auth.id != '' && exercise.user = @request.auth.id)")
-		collection.ViewRule = types.Pointer("exercise.user = null || (@request.auth.id != '' && exercise.user = @request.auth.id)")
+		collection.ListRule = types.Pointer("@request.auth.id != '' && (exercise.user = @request.auth.id || exercise.is_public = true)")
+		collection.ViewRule = types.Pointer("@request.auth.id != '' && (exercise.user = @request.auth.id || exercise.is_public = true)")
 		collection.CreateRule = types.Pointer("@request.auth.id != '' && exercise.user = @request.auth.id")
 		collection.UpdateRule = types.Pointer("@request.auth.id != '' && exercise.user = @request.auth.id")
 		collection.DeleteRule = types.Pointer("@request.auth.id != '' && exercise.user = @request.auth.id")

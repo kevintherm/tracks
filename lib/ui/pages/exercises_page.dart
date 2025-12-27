@@ -13,6 +13,7 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
+import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
@@ -428,14 +429,6 @@ class _ExerciseListItem extends StatelessWidget {
       key: ValueKey(exercise.id),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
-        if (exercise.public) {
-          Toast(context).neutral(
-            content: Text("Cannot modify or delete public exercises."),
-            duration: Duration(milliseconds: 500),
-          );
-          return false;
-        }
-
         if (direction == DismissDirection.endToStart) {
           await _showDeleteConfirmation(context);
           return false;
@@ -699,7 +692,7 @@ class _PublicBadge extends StatelessWidget {
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.blue[700],
+          color: AppColors.primary,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(8),
             bottomRight: Radius.circular(8),

@@ -1,5 +1,4 @@
 import 'package:provider/provider.dart';
-import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';

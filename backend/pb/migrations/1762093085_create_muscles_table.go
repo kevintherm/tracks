@@ -38,15 +38,11 @@ func init() {
 		})
 
 		musclesCollection.Fields.Add(&core.FileField{
-			Name:      "thumbnail",
+			Name:      "thumbnails",
 			Required:  false,
-			MaxSelect: 1,
-			MaxSize:   20 * 1024 * 1024,
+			MaxSelect: 12,
+			MaxSize:   5 * 1024 * 1024,
 			MimeTypes: []string{"image/jpg", "image/jpeg", "image/png", "image/gif", "image/heic"},
-		})
-
-		musclesCollection.Fields.Add(&core.BoolField{
-			Name: "is_public",
 		})
 
 		musclesCollection.Fields.Add(&core.AutodateField{
@@ -55,14 +51,10 @@ func init() {
 			OnUpdate: true,
 		})
 
-		musclesCollection.ListRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
-		musclesCollection.ViewRule = types.Pointer("user = null || (@request.auth.id != '' && user = @request.auth.id)")
+		musclesCollection.ListRule = types.Pointer("@request.auth.id != '' && @request.query.user = user")
+		musclesCollection.ViewRule = types.Pointer("@request.auth.id != '' && (@request.auth.id = user || @request.query.user = user)")
 		musclesCollection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
-		musclesCollection.UpdateRule = types.Pointer(`
-			@request.auth.id != '' &&
-			user = @request.auth.id &&
-			(@request.body.user:isset = false || @request.body.user = @request.auth.id)
-		`)
+		musclesCollection.UpdateRule = types.Pointer(`@request.auth.id != '' && user = @request.auth.id && (@request.body.user:isset = false || @request.body.user = @request.auth.id)`)
 		musclesCollection.DeleteRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
 
 		_ = app.Save(musclesCollection)

@@ -20,9 +20,9 @@ class SessionExerciseData {
 class SessionRepository {
   final Isar isar;
   final PocketBase pb;
-  final AuthService authService;
+  final AuthService auth;
 
-  SessionRepository(this.isar, this.pb, this.authService);
+  SessionRepository(this.isar, this.pb, this.auth);
 
   IsarCollection<Session> get collection {
     return isar.sessions;
@@ -110,7 +110,7 @@ class SessionRepository {
       log('Failed to create session, $e');
     }
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       await _uploadSessionToCloud(session);
     }
   }
@@ -126,7 +126,7 @@ class SessionRepository {
       await session.workout.save();
     });
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       if (session.pocketbaseId != null) {
         await _updateSessionOnCloud(session);
       } else {
@@ -164,7 +164,7 @@ class SessionRepository {
       }
     });
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       if (session.pocketbaseId != null) {
         for (final data in exercises) {
           await _uploadSessionExerciseToCloud(
@@ -204,7 +204,7 @@ class SessionRepository {
       await isar.sessions.delete(session.id);
     });
 
-    if (authService.isSyncEnabled && session.pocketbaseId != null) {
+    if (auth.isSyncEnabled && session.pocketbaseId != null) {
       try {
         await pb
             .collection(PBCollections.sessions.value)
@@ -284,7 +284,7 @@ class SessionRepository {
   // --- SYNC LOGIC ---
 
   Future<void> performInitialSync() async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     log('[Sync][Session] Starting...');
 
@@ -306,7 +306,7 @@ class SessionRepository {
   }
 
   Future<void> _uploadSessionToCloud(Session session) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       await session.workout.load();
@@ -322,7 +322,7 @@ class SessionRepository {
           .collection(PBCollections.sessions.value)
           .create(
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'workout': workout!.pocketbaseId,
               'start': session.start.toIso8601String(),
               'end': session.end?.toIso8601String(),
@@ -351,7 +351,7 @@ class SessionRepository {
   }
 
   Future<void> _updateSessionOnCloud(Session session) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       await session.workout.load();
@@ -367,7 +367,7 @@ class SessionRepository {
           .update(
             session.pocketbaseId!,
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'workout': workout!.pocketbaseId,
               'start': session.start.toIso8601String(),
               'end': session.end?.toIso8601String(),
@@ -461,11 +461,10 @@ class SessionRepository {
 
   Future<void> _downloadAndMergeCloudSessions() async {
     try {
-      // Fetch all cloud sessions with nested relations
-      // Note: PocketBase expand syntax might vary, assuming standard relation expansion
       final pbRecords = await pb
           .collection(PBCollections.sessions.value)
           .getFullList(
+            filter: 'user = "${auth.user?.id}"',
             expand:
                 'workout,session_exercises(session).exercise,session_exercises(session).session_sets(session_exercise)',
           );

@@ -34,11 +34,11 @@ class WorkoutConfig {
 class WorkoutRepository {
   final Isar isar;
   final PocketBase pb;
-  final AuthService authService;
+  final AuthService auth;
   late final ImageStorageService imageStorageService;
 
-  WorkoutRepository(this.isar, this.pb, this.authService) {
-    imageStorageService = ImageStorageService(pb, authService);
+  WorkoutRepository(this.isar, this.pb, this.auth) {
+    imageStorageService = ImageStorageService(pb, auth);
   }
 
   Stream<List<Workout>> watchAllWorkouts() {
@@ -131,7 +131,7 @@ class WorkoutRepository {
       }
     });
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       _uploadWorkoutToCloud(workout);
     }
   }
@@ -194,7 +194,7 @@ class WorkoutRepository {
     });
 
     // Sync to cloud if enabled
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       if (workout.pocketbaseId != null) {
         await _updateWorkoutOnCloud(workout);
       } else {
@@ -234,7 +234,7 @@ class WorkoutRepository {
       await isar.workouts.delete(workout.id);
     });
 
-    if (authService.isSyncEnabled && workout.pocketbaseId != null) {
+    if (auth.isSyncEnabled && workout.pocketbaseId != null) {
       try {
         await pb
             .collection(PBCollections.workouts.value)
@@ -249,7 +249,7 @@ class WorkoutRepository {
 
   // Upload a single workout to the cloud
   Future<void> _uploadWorkoutToCloud(Workout workout) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       final junctions = await isar.workoutExercises
@@ -261,7 +261,7 @@ class WorkoutRepository {
           .collection(PBCollections.workouts.value)
           .create(
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'name': workout.name,
               'description': workout.description,
               'is_public': workout.public,
@@ -329,7 +329,7 @@ class WorkoutRepository {
 
   // Update an existing workout on the cloud
   Future<void> _updateWorkoutOnCloud(Workout workout) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       // Get exercises from junction table
@@ -344,7 +344,7 @@ class WorkoutRepository {
           .update(
             workout.pocketbaseId!,
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'name': workout.name,
               'description': workout.description,
               'is_public': workout.public,
@@ -428,7 +428,7 @@ class WorkoutRepository {
 
   // This is the complex part: The initial sync when a user logs in
   Future<void> performInitialSync() async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     log('[Sync][Workout] Starting...');
 
@@ -452,7 +452,7 @@ class WorkoutRepository {
   Future<void> _downloadAndMergeCloudWorkouts() async {
     final pbRecords = await pb
         .collection(PBCollections.workouts.value)
-        .getFullList();
+        .getFullList(filter: 'user = "${auth.user?.id}"');
     final List<Workout> workoutsToSave = [];
 
     for (final record in pbRecords) {

@@ -21,6 +21,7 @@ import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/ui/components/select_config/select_config_option.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
 
 class CreateExercisePage extends StatefulWidget {
@@ -40,6 +41,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
 
   XFile? _thumbnailImage;
   bool _thumbnailRemoved = false;
+  bool _isPublic = false;
 
   final List<SelectConfigOption> _selectedOptions = [];
   final Map<String, int> _muscleActivations = {};
@@ -51,6 +53,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       _nameController.text = widget.exercise!.name;
       _descriptionController.text = widget.exercise!.description ?? '';
       _caloriesController.text = widget.exercise!.caloriesBurned.toString();
+      _isPublic = widget.exercise!.public;
       _loadExistingMuscles(widget.exercise!);
     }
   }
@@ -75,7 +78,9 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           id: muscle.id.toString(),
           label: muscle.name,
           subtitle: muscle.description,
-          imagePath: muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
+          imagePath: muscle.thumbnails.isNotEmpty
+              ? muscle.thumbnails.first
+              : null,
         );
 
         // Apply to selected options
@@ -214,7 +219,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 thumbnail: thumbnailPath,
                 pocketbaseId: widget.exercise!.pocketbaseId,
                 needSync: widget.exercise!.needSync,
-                public: widget.exercise!.public,
+                public: _isPublic,
               )
               ..id = widget.exercise!.id
               ..pendingThumbnailPath = pendingThumbnailPath;
@@ -242,6 +247,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           description: description,
           caloriesBurned: calories,
           thumbnail: null,
+          public: _isPublic,
         )..pendingThumbnailPath = _thumbnailImage?.path;
 
         final muscleActivations = <MuscleActivationParam>[];
@@ -288,7 +294,9 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     id: muscle.id.toString(),
                     label: muscle.name,
                     subtitle: muscle.description,
-                    imagePath: muscle.thumbnails.isNotEmpty ? muscle.thumbnails.first : null,
+                    imagePath: muscle.thumbnails.isNotEmpty
+                        ? muscle.thumbnails.first
+                        : null,
                   ),
                 )
                 .toList();
@@ -384,6 +392,31 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          title: Text(
+                            "Public",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Make this exercise visible to everyone",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          value: _isPublic,
+                          onChanged: (value) {
+                            setState(() {
+                              _isPublic = value;
+                            });
+                          },
+                          activeThumbColor: AppColors.primary,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ],
                     ),
                   ),
@@ -460,7 +493,8 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ExercisesPage(showImport: true),
+                                    builder: (_) =>
+                                        const ExercisesPage(showImport: true),
                                   ),
                                 );
                               },
@@ -519,98 +553,60 @@ class _ThumbnailSection extends StatelessWidget {
   Widget _buildExistingImagePreview(String imagePath) {
     return AspectRatio(
       aspectRatio: 1,
-      child: FutureBuilder<Uint8List>(
-        future: File(imagePath).readAsBytes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: Colors.grey[300],
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Iconsax.gallery_slash_outline,
-                      size: 48,
-                      color: Colors.grey[600],
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: getSafeImage(
+              imagePath,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    onRemoveImage();
+                  },
+                  icon: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Failed to load image',
-                      style: GoogleFonts.inter(color: Colors.grey[600]),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(
+                      Iconsax.trash_outline,
+                      color: Colors.white,
+                      size: 20,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          }
-
-          if (!snapshot.hasData) {
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          return Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.memory(
-                  snapshot.data!,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  cacheWidth: 500,
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        onRemoveImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.trash_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                IconButton(
+                  onPressed: () {
+                    onPickImage();
+                  },
+                  icon: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.lightPrimary,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        onPickImage();
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade400,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Iconsax.camera_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(
+                      Iconsax.camera_outline,
+                      color: Colors.white,
+                      size: 20,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

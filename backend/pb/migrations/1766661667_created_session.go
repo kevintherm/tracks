@@ -18,14 +18,26 @@ func init() {
 			return err
 		}
 
+		userCollection, err := app.FindCollectionByNameOrId("users")
+		if err != nil {
+			return err
+		}
+
 		// Create sessions collection
 		sessionsCollection := core.NewBaseCollection("sessions")
 
 		sessionsCollection.Fields.Add(&core.RelationField{
 			Name:         "workout",
 			MaxSelect:    1,
-			Required:     true,
+			Required:     false,
 			CollectionId: workoutCollection.Id,
+		})
+
+		sessionsCollection.Fields.Add(&core.RelationField{
+			Name:         "user",
+			MaxSelect:    1,
+			Required:     true,
+			CollectionId: userCollection.Id,
 		})
 
 		sessionsCollection.Fields.Add(&core.DateField{
@@ -47,11 +59,11 @@ func init() {
 			OnUpdate: true,
 		})
 
-		sessionsCollection.ListRule = types.Pointer("workout.user.id = @request.auth.id")
-		sessionsCollection.ViewRule = types.Pointer("workout.user.id = @request.auth.id")
-		sessionsCollection.CreateRule = types.Pointer("workout.user.id = @request.auth.id")
-		sessionsCollection.UpdateRule = types.Pointer("workout.user.id = @request.auth.id")
-		sessionsCollection.DeleteRule = types.Pointer("workout.user.id = @request.auth.id")
+		sessionsCollection.ListRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+		sessionsCollection.ViewRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+		sessionsCollection.CreateRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+		sessionsCollection.UpdateRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
+		sessionsCollection.DeleteRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
 
 		err = app.Save(sessionsCollection)
 		if err != nil {
@@ -98,11 +110,11 @@ func init() {
 			OnUpdate: true,
 		})
 
-		sessionExercisesCollection.ListRule = types.Pointer("session.workout.user.id = @request.auth.id")
-		sessionExercisesCollection.ViewRule = types.Pointer("session.workout.user.id = @request.auth.id")
-		sessionExercisesCollection.CreateRule = types.Pointer("session.workout.user.id = @request.auth.id")
-		sessionExercisesCollection.UpdateRule = types.Pointer("session.workout.user.id = @request.auth.id")
-		sessionExercisesCollection.DeleteRule = types.Pointer("session.workout.user.id = @request.auth.id")
+		sessionExercisesCollection.ListRule = types.Pointer("session.user.id = @request.auth.id")
+		sessionExercisesCollection.ViewRule = types.Pointer("session.user.id = @request.auth.id")
+		sessionExercisesCollection.CreateRule = types.Pointer("session.user.id = @request.auth.id")
+		sessionExercisesCollection.UpdateRule = types.Pointer("session.user.id = @request.auth.id")
+		sessionExercisesCollection.DeleteRule = types.Pointer("session.user.id = @request.auth.id")
 
 		err = app.Save(sessionExercisesCollection)
 		if err != nil {
@@ -173,11 +185,11 @@ func init() {
 			OnUpdate: true,
 		})
 
-		sessionSetsCollection.ListRule = types.Pointer("session_exercise.session.workout.user.id = @request.auth.id")
-		sessionSetsCollection.ViewRule = types.Pointer("session_exercise.session.workout.user.id = @request.auth.id")
-		sessionSetsCollection.CreateRule = types.Pointer("session_exercise.session.workout.user.id = @request.auth.id")
-		sessionSetsCollection.UpdateRule = types.Pointer("session_exercise.session.workout.user.id = @request.auth.id")
-		sessionSetsCollection.DeleteRule = types.Pointer("session_exercise.session.workout.user.id = @request.auth.id")
+		sessionSetsCollection.ListRule = types.Pointer("session_exercise.session.user.id = @request.auth.id")
+		sessionSetsCollection.ViewRule = types.Pointer("session_exercise.session.user.id = @request.auth.id")
+		sessionSetsCollection.CreateRule = types.Pointer("session_exercise.session.user.id = @request.auth.id")
+		sessionSetsCollection.UpdateRule = types.Pointer("session_exercise.session.user.id = @request.auth.id")
+		sessionSetsCollection.DeleteRule = types.Pointer("session_exercise.session.user.id = @request.auth.id")
 
 		err = app.Save(sessionSetsCollection)
 		if err != nil {

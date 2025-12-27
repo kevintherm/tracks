@@ -36,6 +36,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   XFile? _thumbnailImage;
   bool _thumbnailRemoved = false;
+  bool _isPublic = false;
 
   List<WorkoutConfigParam> _selectedExercises = [];
 
@@ -45,6 +46,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     if (widget.workout != null) {
       _nameController.text = widget.workout!.name;
       _descriptionController.text = widget.workout!.description ?? '';
+      _isPublic = widget.workout!.public;
       _loadExistingExercises(widget.workout!);
     }
   }
@@ -254,7 +256,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 thumbnail: thumbnailPath,
                 pocketbaseId: widget.workout!.pocketbaseId,
                 needSync: widget.workout!.needSync,
-                public: widget.workout!.public,
+                public: _isPublic,
               )
               ..id = widget.workout!.id
               ..pendingThumbnailPath = pendingThumbnailPath;
@@ -270,6 +272,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           name: name,
           description: description,
           thumbnail: null,
+          public: _isPublic,
         )..pendingThumbnailPath = _thumbnailImage?.path;
 
         await workoutRepo.createWorkout(
@@ -358,6 +361,31 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                             borderRadius: BorderRadius.circular(16.00),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      SwitchListTile(
+                        title: Text(
+                          "Public",
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Make this workout visible to everyone",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        value: _isPublic,
+                        onChanged: (value) {
+                          setState(() {
+                            _isPublic = value;
+                          });
+                        },
+                        activeThumbColor: AppColors.primary,
+                        contentPadding: EdgeInsets.zero,
                       ),
                     ],
                   ),
@@ -885,7 +913,7 @@ class _ThumbnailSection extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: getImage(
+            child: getSafeImage(
               imagePath,
               width: double.infinity,
               height: double.infinity,

@@ -4,6 +4,7 @@ import 'package:tracks/models/muscle.dart';
 import 'package:tracks/models/exercise_muscles.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 
 part 'exercise.g.dart';
 
@@ -98,26 +99,25 @@ class Exercise {
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
-  factory Exercise.fromRecord(
-    RecordModel record,
-    String Function(String field) getUrl,
-  ) {
-    final exercise = Exercise(
-      name: record.data['name'] ?? '',
-      description: record.data['description'],
-      caloriesBurned: (record.data['calories_burned'] ?? 0).toDouble(),
-      pocketbaseId: record.id,
-      needSync: false,
-      public: record.data['is_public'] ?? false,
-    )
-      ..createdAt =
-          DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now()
-      ..updatedAt =
-          DateTime.tryParse(record.data['updated'] ?? '') ?? DateTime.now();
+  factory Exercise.fromRecord(RecordModel record) {
+    final getUrl = PocketBaseService.instance.client.files.getURL;
+    final exercise =
+        Exercise(
+            name: record.data['name'] ?? '',
+            description: record.data['description'],
+            caloriesBurned: (record.data['calories_burned'] ?? 0).toDouble(),
+            pocketbaseId: record.id,
+            needSync: false,
+            public: record.data['is_public'] ?? false,
+          )
+          ..createdAt =
+              DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now()
+          ..updatedAt =
+              DateTime.tryParse(record.data['updated'] ?? '') ?? DateTime.now();
 
     final thumbnailField = record.data['thumbnail'];
     if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {
-      exercise.thumbnail = getUrl(thumbnailField);
+      exercise.thumbnail = getUrl(record, thumbnailField).toString();
     }
 
     return exercise;
@@ -127,18 +127,19 @@ class Exercise {
     Map<String, dynamic> data,
     String Function(String field) getUrl,
   ) {
-    final exercise = Exercise(
-      name: data['name'] ?? '',
-      description: data['description'],
-      caloriesBurned: (data['calories_burned'] ?? 0).toDouble(),
-      pocketbaseId: data['id'],
-      needSync: false,
-      public: data['is_public'] ?? false,
-    )
-      ..createdAt =
-          DateTime.tryParse(data['created'] ?? '') ?? DateTime.now()
-      ..updatedAt =
-          DateTime.tryParse(data['updated'] ?? '') ?? DateTime.now();
+    final exercise =
+        Exercise(
+            name: data['name'] ?? '',
+            description: data['description'],
+            caloriesBurned: (data['calories_burned'] ?? 0).toDouble(),
+            pocketbaseId: data['id'],
+            needSync: false,
+            public: data['is_public'] ?? false,
+          )
+          ..createdAt =
+              DateTime.tryParse(data['created'] ?? '') ?? DateTime.now()
+          ..updatedAt =
+              DateTime.tryParse(data['updated'] ?? '') ?? DateTime.now();
 
     final thumbnailField = data['thumbnail'];
     if (thumbnailField != null && thumbnailField.toString().isNotEmpty) {

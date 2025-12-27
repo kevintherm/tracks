@@ -19,8 +19,8 @@ func init() {
 		collection.Fields.Add(&core.RelationField{
 			Name:         "user",
 			MaxSelect:    1,
+			Required:     true,
 			CollectionId: usersCollection.Id,
-			Required:     false,
 		})
 
 		collection.Fields.Add(&core.TextField{
@@ -46,6 +46,11 @@ func init() {
 			Name: "is_public",
 		})
 
+		collection.Fields.Add(&core.NumberField{
+			Name: "views",
+			Min:  types.Pointer(0.0),
+		})
+
 		collection.Fields.Add(&core.AutodateField{
 			Name:     "created",
 			OnCreate: true,
@@ -56,14 +61,10 @@ func init() {
 			OnUpdate: true,
 		})
 
-		collection.ListRule = types.Pointer("user = null || (@request.auth.id != '' && (user = @request.auth.id || is_public = true))")
-		collection.ViewRule = types.Pointer("user = null || (@request.auth.id != '' && (user = @request.auth.id || is_public = true))")
+		collection.ListRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
+		collection.ViewRule = types.Pointer("@request.auth.id != '' && (user = @request.auth.id || is_public = true)")
 		collection.CreateRule = types.Pointer("@request.auth.id != '' && @request.body.user = @request.auth.id")
-		collection.UpdateRule = types.Pointer(`
-			@request.auth.id != '' &&
-			user = @request.auth.id &&
-			(@request.body.user:isset = false || @request.body.user = @request.auth.id)
-		`)
+		collection.UpdateRule = types.Pointer(`@request.auth.id != '' && user = @request.auth.id && (@request.body.user:isset = false || @request.body.user = @request.auth.id)`)
 		collection.DeleteRule = types.Pointer("@request.auth.id != '' && user = @request.auth.id")
 
 		err = app.Save(collection)

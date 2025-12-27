@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:pocketbase/pocketbase.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tracks/models/user.dart';
 import 'package:tracks/models/workout.dart';

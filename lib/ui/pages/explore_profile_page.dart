@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,17 +25,35 @@ class ExploreProfilePage extends StatefulWidget {
 }
 
 class _ExploreProfilePageState extends State<ExploreProfilePage> {
+  final pb = PocketBaseService.instance.client;
+
   int _selectedTab = 0; // 0: Workouts, 1: Exercises, 2: Schedule
   late PageController _pageController;
   late Future<User?> _userFuture;
+  final List<Future<List>> futures = [
+    Future.value([]),
+    Future.value([]),
+    Future.value([]),
+  ];
 
   User? _user;
+  int _workoutCount = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _selectedTab);
     _userFuture = _fetchUser();
+    futures[0] = _fetchWorkouts().then((value) {
+      if (mounted) {
+        setState(() {
+          _workoutCount = value.length;
+        });
+      }
+      return value;
+    });
+    futures[1] = _fetchExercises();
+    futures[2] = _fetchSchedules();
   }
 
   @override
@@ -45,6 +65,34 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
   Future<User?> _fetchUser() async {
     await Future.delayed(Duration(milliseconds: 150));
     return await User.fetchUserById(widget.userId);
+  }
+
+  Future<List<Workout>> _fetchWorkouts() async {
+    if (widget.userId == null) return [];
+
+    final results = await pb
+        .collection(PBCollections.workouts.value)
+        .getList(filter: 'user = "${widget.userId}"');
+    return results.items.map((e) => Workout.fromRecord(e)).toList();
+  }
+
+  Future<List<Exercise>> _fetchExercises() async {
+    if (widget.userId == null) return [];
+
+    final results = await pb
+        .collection(PBCollections.exercises.value)
+        .getList(filter: 'user = "${widget.userId}"');
+    return results.items.map((e) => Exercise.fromRecord(e)).toList();
+  }
+
+  Future<List<Schedule>> _fetchSchedules() async {
+    if (widget.userId == null) return [];
+
+    final results = await pb.collection(PBCollections.schedules.value).getList(
+      filter: 'workout.user = "${widget.userId}"',
+      expand: 'workout',
+    );
+    return results.items.map((e) => Schedule.fromRecord(e)).toList();
   }
 
   @override
@@ -64,89 +112,10 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             }
 
             if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Iconsax.danger_outline,
-                      size: 64,
-                      color: Colors.red[400],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Something went wrong',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        snapshot.error.toString(),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Pressable(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Go Back',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return _buildError(snapshot);
             }
 
             _user = snapshot.data;
-            final pb = PocketBaseService.instance.client;
-            final workouts = <Workout>[];
-            final exercises = <Exercise>[];
-            final schedules = <Schedule>[];
-
-            // Parse expanded workouts
-            final expandedWorkouts = _user!.expand['workouts_via_user'];
-            if (expandedWorkouts != null) {
-              for (final wo in expandedWorkouts) {
-                workouts.add(Workout.fromRecord(wo));
-              }
-            }
-
-            // Parse expanded exercises
-            final expandedExercises = _user!.expand['exercises_via_user'];
-            if (expandedExercises != null) {
-              for (final e in expandedExercises) {
-                exercises.add(
-                  Exercise.fromRecord(
-                    e,
-                    (field) => pb.files.getUrl(e, field).toString(),
-                  ),
-                );
-              }
-            }
 
             return NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -254,10 +223,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildStatItem(
-                                "Workouts",
-                                workouts.length.toCompact(),
-                              ),
+                              _buildStatItem("Workouts", _workoutCount.toCompact()),
                               _buildStatItem(
                                 "Followers",
                                 _user!.followers.toCompact(),
@@ -358,15 +324,45 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 controller: _pageController,
                 onPageChanged: (index) => setState(() => _selectedTab = index),
                 children: [
-                  _buildTabContent(0, workouts),
-                  _buildTabContent(1, exercises),
-                  _buildTabContent(2, schedules),
+                  _buildTab(0),
+                  _buildTab(1),
+                  _buildTab(2),
                 ],
               ),
             );
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildTab(int index) {
+    return FutureBuilder<List<dynamic>>(
+      future: futures[index],
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildError(snapshot);
+        }
+
+        if (snapshot.connectionState != ConnectionState.done) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: _buildContentCardShimmer(),
+          );
+        }
+
+        final data = snapshot.data!;
+        if (data.isEmpty) {
+          return Center(
+            child: Text(
+              "No items found",
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
+          );
+        }
+
+        return _buildTabContent(index, data);
+      },
     );
   }
 
@@ -631,28 +627,32 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 const SizedBox(height: 16),
 
                 // Content Cards Shimmer
-                ...List.generate(3, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        height: 240,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+                ..._buildContentCardShimmer(),
               ],
             ),
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildContentCardShimmer({int count = 3}) {
+    return List.generate(count, (index) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Container(
+            height: 240,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildTabContent(int tabIndex, List<dynamic> items) {
@@ -719,7 +719,8 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
         final ex = items[itemIndex] as Exercise;
         return _buildExerciseCard(ex);
       case 2:
-        return _buildScheduleCard(itemIndex);
+        final schedule = items[itemIndex] as Schedule;
+        return _buildScheduleCard(schedule);
       default:
         return const SizedBox();
     }
@@ -810,8 +811,8 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       ),
     );
   }
-
-  Widget _buildScheduleCard(int index) {
+  Widget _buildScheduleCard(Schedule schedule) {
+    final workout = schedule.workout.value;
     return Pressable(
       onTap: () => Navigator.push(
         context,
@@ -845,7 +846,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    "Week ${index + 1}",
+                    schedule.recurrenceType.name.toUpperCase(),
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -855,7 +856,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 ),
                 const Spacer(),
                 Text(
-                  "5 Days",
+                  "${schedule.plannedDuration} min",
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: Colors.grey[600],
@@ -865,7 +866,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             ),
             const SizedBox(height: 12),
             Text(
-              "Hypertrophy Focus Block ${index + 1}",
+              workout?.name ?? "Unknown Workout",
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -873,14 +874,17 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              "A 4-week block focused on building muscle mass with high volume training.",
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: Colors.grey[600],
-                height: 1.4,
+            if (workout?.description != null)
+              Text(
+                workout!.description!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  height: 1.4,
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -1087,6 +1091,54 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
           color: Colors.grey[700],
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+
+  Widget _buildError(snapshot) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Iconsax.danger_outline, size: 64, color: Colors.red[400]),
+          const SizedBox(height: 16),
+          Text(
+            'Something went wrong',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              snapshot.error.toString(),
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Pressable(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Go Back',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
