@@ -14,6 +14,7 @@ import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/providers/navigation_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
+import 'package:tracks/repositories/post_repository.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/repositories/session_repository.dart';
 import 'package:tracks/repositories/workout_repository.dart';
@@ -94,6 +95,9 @@ void main() async {
             pb,
             context.read<AuthService>(),
           ),
+        ),
+        Provider(
+          create: (context) => PostRepository(pb),
         ),
       ],
       child: const MyApp(),

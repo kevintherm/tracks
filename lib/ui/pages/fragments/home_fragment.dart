@@ -1,9 +1,17 @@
 import 'package:provider/provider.dart';
+import 'package:tracks/models/post.dart';
+import 'package:tracks/models/schedule.dart';
+import 'package:tracks/models/workout.dart';
+import 'package:tracks/repositories/post_repository.dart';
+import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/ui/components/app_container.dart';
+import 'package:tracks/ui/pages/view_post_page.dart';
+import 'package:intl/intl.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/ui/pages/explore_page.dart';
+import 'package:tracks/ui/pages/view_workout_page.dart';
 import 'package:tracks/ui/pages/workouts_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
@@ -13,6 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/pages/start_session_page.dart';
 import 'package:tracks/utils/app_colors.dart';
+import 'package:tracks/utils/consts.dart';
 
 class HomeFragment extends StatefulWidget {
   const HomeFragment({super.key});
@@ -333,119 +342,105 @@ class _HomeFragmentState extends State<HomeFragment> {
                 const SizedBox(height: 24),
 
                 // Today Split
-                Text(
-                  'Today Split',
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                  ),
-                ),
+                StreamBuilder<List<Schedule>>(
+                  stream: context
+                      .read<ScheduleRepository>()
+                      .watchSchedulesForDate(DateTime.now()),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      final schedule = snapshot.data!.first;
+                      final workout = schedule.workout.value;
 
-                const SizedBox(height: 16),
+                      if (workout == null) return const SizedBox.shrink();
 
-                Pressable(
-                  onTap: () {},
-                  child: Column(
-                    children: [
-                      AppContainer(
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Image.asset(
-                                      'assets/drawings/pushup.jpg',
-                                      width: 100,
-                                      height: 100,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Push Up",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Average of 8 sets per week",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        SliderTheme(
-                                          data: SliderThemeData(
-                                            padding: EdgeInsets.only(top: 8),
-                                            trackHeight: 14,
-                                            disabledActiveTrackColor:
-                                                AppColors.accent,
-                                            thumbShape:
-                                                SliderComponentShape.noThumb,
-                                          ),
-                                          child: Slider(
-                                            value: 10,
-                                            min: 0,
-                                            max: 100,
-                                            onChanged: null,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Today Split',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildWorkoutCard(context, workout, "Today"),
+                        ],
+                      );
+                    } else {
+                      // Check for upcoming
+                      return FutureBuilder<Map<String, dynamic>?>(
+                        future: context
+                            .read<ScheduleRepository>()
+                            .getNextSchedule(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && snapshot.data != null) {
+                            final schedule =
+                                snapshot.data!['schedule'] as Schedule;
+                            final date = snapshot.data!['date'] as DateTime;
+                            final workout = schedule.workout.value;
 
-                            Positioned(
-                              right: 32 + 10,
-                              top: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(8),
-                                    bottomRight: Radius.circular(8),
-                                  ),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  "Mediocre",
+                            if (workout == null) return const SizedBox.shrink();
+
+                            final dateFormat = DateFormat('EEEE, MMM d');
+                            final dateString = dateFormat.format(date);
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Upcoming Split',
                                   style: GoogleFonts.inter(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildWorkoutCard(context, workout, dateString),
+                              ],
+                            );
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Today Split',
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              AppContainer(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: Text(
+                                      "No workouts scheduled.",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 24),
 
                 // News
                 Text(
-                  'Science Based News',
+                  'Posts',
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -455,107 +450,175 @@ class _HomeFragmentState extends State<HomeFragment> {
 
                 const SizedBox(height: 16),
 
-                Pressable(
-                  onTap: () {},
-                  child: Column(
-                    children: [
-                      AppContainer(
-                        child: Stack(
-                          children: [
-                            Padding(
+                FutureBuilder<List<Post>>(
+                  future: context.read<PostRepository>().getPosts(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+                    final posts = snapshot.data ?? [];
+                    if (posts.isEmpty) {
+                      return const Text('No posts yet.');
+                    }
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: posts.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return Pressable(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ViewPostPage(post: post),
+                              ),
+                            );
+                          },
+                          child: AppContainer(
+                            child: Padding(
                               padding: const EdgeInsets.all(16.0),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Image.asset(
-                                      'assets/drawings/pushup.jpg',
-                                      width: 100,
-                                      height: 100,
+                                  Text(
+                                    post.title,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-
-                                  const SizedBox(width: 16),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Push Up",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        post.userName ?? 'Unknown',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        Text(
-                                          "Average of 8 sets per week",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.grey[600],
-                                          ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        post.created.toString().split(' ')[0],
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          color: Colors.grey,
                                         ),
-                                        SliderTheme(
-                                          data: SliderThemeData(
-                                            padding: EdgeInsets.only(top: 8),
-                                            trackHeight: 14,
-                                            disabledActiveTrackColor:
-                                                AppColors.accent,
-                                            thumbShape:
-                                                SliderComponentShape.noThumb,
-                                          ),
-                                          child: Slider(
-                                            value: 10,
-                                            min: 0,
-                                            max: 100,
-                                            onChanged: null,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
-
-                            Positioned(
-                              right: 32 + 10,
-                              top: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(8),
-                                    bottomRight: Radius.circular(8),
-                                  ),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  "Mediocre",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWorkoutCard(
+    BuildContext context,
+    Workout workout,
+    String badgeText,
+  ) {
+    return Pressable(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewWorkoutPage(workout: workout),
+          ),
+        );
+      },
+      child: AppContainer(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: _buildWorkoutImage(context, workout),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          workout.name,
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (workout.description != null &&
+                            workout.description!.isNotEmpty)
+                          Text(
+                            workout.description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 32 + 10,
+              top: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 12,
+                ),
+                child: Text(
+                  badgeText,
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkoutImage(BuildContext context, Workout workout) {
+    return getSafeImage(
+      workout.pendingThumbnailPath ?? workout.thumbnail ?? '',
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:tracks/models/workout.dart';
+import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -120,7 +121,6 @@ Widget getImage(
 
 Widget getSafeImage(
   String imagePath, {
-  bool pbUrl = false,
   double width = 100,
   double height = 100,
 }) {
@@ -157,6 +157,8 @@ Widget getSafeImage(
       errorBuilder: (context, error, stackTrace) => errorPlaceholder,
     );
   }
+
+  log('$imagePath');
 
   // Priority 2: Check for network image from thumbnail (backend URL only)
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
@@ -277,7 +279,6 @@ extension CompactNumber on int {
   }
 }
 
-
 bool isToday(DateTime date) {
   final now = DateTime.now();
   return date.year == now.year &&
@@ -286,6 +287,7 @@ bool isToday(DateTime date) {
 }
 
 enum PBCollections {
+  posts("posts"),
   trendingWorkouts("trending_workouts"),
   trendingCreators("trending_creators"),
   users("users"),
@@ -378,4 +380,10 @@ String getFileName(String input) {
   // Fallback: treat as file path or filename
   final parts = input.split(RegExp(r'[\\/]+'));
   return parts.isNotEmpty ? parts.last : '';
+}
+
+String getPBURL(String? id, String? filename, String collection) {
+  return PocketBaseService.instance.client.files
+      .getURL(RecordModel({'id': id, 'collectionName': collection}), filename ?? '')
+      .toString();
 }

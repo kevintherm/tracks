@@ -1,8 +1,9 @@
 - add performed_count for cached occurances count (exercises, workouts)
-- 
 - deploy V1 !!!!
 - follow feature for explore page
 
+- search function on home fragment
+- search function on explore page
 - add estimated time column for exercises
 - add difficulty column for workouts
 - tracks copies by storing the forked pocketbaseId
@@ -59,6 +60,7 @@ session page
     - create schedule page
 
 #done
+- populated home fragment
 - implement browse feature
     - add custom view resources
         - trending workouts

@@ -43,6 +43,66 @@ class ScheduleRepository {
     });
   }
 
+  Future<Map<String, dynamic>?> getNextSchedule() async {
+    final allSchedules = await isar.schedules.where().findAll();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    DateTime? closestDate;
+    Schedule? closestSchedule;
+
+    for (final schedule in allSchedules) {
+      DateTime? nextDateForSchedule;
+
+      switch (schedule.recurrenceType) {
+        case RecurrenceType.once:
+          if (schedule.selectedDates.isNotEmpty) {
+            final date = schedule.selectedDates.first;
+            final dateOnly = DateTime(date.year, date.month, date.day);
+            if (dateOnly.isAfter(today)) {
+              nextDateForSchedule = dateOnly;
+            }
+          }
+          break;
+        case RecurrenceType.monthly:
+          for (final date in schedule.selectedDates) {
+            final dateOnly = DateTime(date.year, date.month, date.day);
+            if (dateOnly.isAfter(today)) {
+              if (nextDateForSchedule == null ||
+                  dateOnly.isBefore(nextDateForSchedule)) {
+                nextDateForSchedule = dateOnly;
+              }
+            }
+          }
+          break;
+        case RecurrenceType.daily:
+          if (schedule.dailyWeekday.isNotEmpty) {
+            for (int i = 1; i <= 7; i++) {
+              final nextDay = today.add(Duration(days: i));
+              final weekday = dateTimeWeekdayToWeekday(nextDay.weekday);
+              if (schedule.dailyWeekday.contains(weekday)) {
+                nextDateForSchedule = nextDay;
+                break;
+              }
+            }
+          }
+          break;
+      }
+
+      if (nextDateForSchedule != null) {
+        if (closestDate == null || nextDateForSchedule.isBefore(closestDate)) {
+          closestDate = nextDateForSchedule;
+          closestSchedule = schedule;
+        }
+      }
+    }
+
+    if (closestSchedule != null && closestDate != null) {
+      return {'schedule': closestSchedule, 'date': closestDate};
+    }
+    return null;
+  }
+
   Future<void> createSchedule({required Schedule schedule, Workout? workout}) async {
     schedule.needSync = true;
 
