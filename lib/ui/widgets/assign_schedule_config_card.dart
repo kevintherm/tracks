@@ -155,6 +155,10 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
     setState(() => schedule.durationAlert = !schedule.durationAlert);
   }
 
+  void _togglePublic(bool value) {
+    setState(() => schedule.public = !schedule.public);
+  }
+
   void _toggleSelectedDay(Weekday day) {
     setState(() {
       if (schedule.dailyWeekday.contains(day)) {
@@ -347,6 +351,16 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
               title: const Text('Duration Alert'),
               value: schedule.durationAlert,
               onChanged: (value) => _toggleDurationAlert(value),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              visualDensity: const VisualDensity(vertical: -2),
+              subtitle: const Text(
+                "Make this schedule visible to everyone",
+              ),
+              title: const Text('Public'),
+              value: schedule.public,
+              onChanged: (value) => _togglePublic(value),
             ),
           ],
         ),

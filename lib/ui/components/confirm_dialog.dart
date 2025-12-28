@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 
-enum ConfirmType { action, delete }
+enum ConfirmType { action, delete, copy }
 
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
@@ -19,6 +19,7 @@ class ConfirmDialog extends StatelessWidget {
 
   IconData get _icon {
     switch (confirmType) {
+      case ConfirmType.copy:
       case ConfirmType.action:
         return Iconsax.info_circle_outline;
       case ConfirmType.delete:
@@ -28,6 +29,7 @@ class ConfirmDialog extends StatelessWidget {
 
   Color get _iconColor {
     switch (confirmType) {
+      case ConfirmType.copy:
       case ConfirmType.action:
         return Colors.blue[400]!;
       case ConfirmType.delete:
@@ -37,6 +39,7 @@ class ConfirmDialog extends StatelessWidget {
 
   String get _title {
     switch (confirmType) {
+      case ConfirmType.copy:
       case ConfirmType.action:
         return 'Confirm Action';
       case ConfirmType.delete:
@@ -46,6 +49,8 @@ class ConfirmDialog extends StatelessWidget {
 
   String get _message {
     switch (confirmType) {
+      case ConfirmType.copy:
+        return 'Are you sure you want to copy this workout into your library?';
       case ConfirmType.action:
         return 'Are you sure you want to proceed with this action?';
       case ConfirmType.delete:
@@ -55,6 +60,7 @@ class ConfirmDialog extends StatelessWidget {
 
   String get _confirmButtonText {
     switch (confirmType) {
+      case ConfirmType.copy:
       case ConfirmType.action:
         return 'Confirm';
       case ConfirmType.delete:
@@ -64,6 +70,7 @@ class ConfirmDialog extends StatelessWidget {
 
   Color get _confirmButtonColor {
     switch (confirmType) {
+      case ConfirmType.copy:
       case ConfirmType.action:
         return Colors.blue[400]!;
       case ConfirmType.delete:

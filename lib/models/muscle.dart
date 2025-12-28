@@ -8,6 +8,7 @@ class Muscle {
   Id id = Isar.autoIncrement;
 
   String? pocketbaseId;
+  String? fromPocketBaseId;
 
   late String name;
   late String? description;

@@ -27,33 +27,38 @@ const MuscleSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(
+    r'fromPocketBaseId': PropertySchema(
       id: 2,
+      name: r'fromPocketBaseId',
+      type: IsarType.string,
+    ),
+    r'name': PropertySchema(
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'needSync': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'removedThumbnails': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'removedThumbnails',
       type: IsarType.stringList,
     ),
     r'thumbnails': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'thumbnails',
       type: IsarType.stringList,
     ),
     r'updatedAt': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -80,6 +85,12 @@ int _muscleEstimateSize(
   var bytesCount = offsets.last;
   {
     final value = object.description;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.fromPocketBaseId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -116,12 +127,13 @@ void _muscleSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeString(offsets[1], object.description);
-  writer.writeString(offsets[2], object.name);
-  writer.writeBool(offsets[3], object.needSync);
-  writer.writeString(offsets[4], object.pocketbaseId);
-  writer.writeStringList(offsets[5], object.removedThumbnails);
-  writer.writeStringList(offsets[6], object.thumbnails);
-  writer.writeDateTime(offsets[7], object.updatedAt);
+  writer.writeString(offsets[2], object.fromPocketBaseId);
+  writer.writeString(offsets[3], object.name);
+  writer.writeBool(offsets[4], object.needSync);
+  writer.writeString(offsets[5], object.pocketbaseId);
+  writer.writeStringList(offsets[6], object.removedThumbnails);
+  writer.writeStringList(offsets[7], object.thumbnails);
+  writer.writeDateTime(offsets[8], object.updatedAt);
 }
 
 Muscle _muscleDeserialize(
@@ -133,14 +145,15 @@ Muscle _muscleDeserialize(
   final object = Muscle(
     description: reader.readStringOrNull(offsets[1]),
     id: id,
-    name: reader.readString(offsets[2]),
-    needSync: reader.readBoolOrNull(offsets[3]) ?? true,
-    pocketbaseId: reader.readStringOrNull(offsets[4]),
+    name: reader.readString(offsets[3]),
+    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
+    pocketbaseId: reader.readStringOrNull(offsets[5]),
   );
   object.createdAt = reader.readDateTime(offsets[0]);
-  object.removedThumbnails = reader.readStringList(offsets[5]) ?? [];
-  object.thumbnails = reader.readStringList(offsets[6]) ?? [];
-  object.updatedAt = reader.readDateTime(offsets[7]);
+  object.fromPocketBaseId = reader.readStringOrNull(offsets[2]);
+  object.removedThumbnails = reader.readStringList(offsets[6]) ?? [];
+  object.thumbnails = reader.readStringList(offsets[7]) ?? [];
+  object.updatedAt = reader.readDateTime(offsets[8]);
   return object;
 }
 
@@ -156,16 +169,18 @@ P _muscleDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 5:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
       return (reader.readStringList(offset) ?? []) as P;
     case 7:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 8:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -454,6 +469,157 @@ extension MuscleQueryFilter on QueryBuilder<Muscle, Muscle, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      fromPocketBaseIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      fromPocketBaseIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fromPocketBaseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      fromPocketBaseIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition> fromPocketBaseIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'fromPocketBaseId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      fromPocketBaseIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterFilterCondition>
+      fromPocketBaseIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'fromPocketBaseId',
         value: '',
       ));
     });
@@ -1325,6 +1491,18 @@ extension MuscleQuerySortBy on QueryBuilder<Muscle, Muscle, QSortBy> {
     });
   }
 
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Muscle, Muscle, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1396,6 +1574,18 @@ extension MuscleQuerySortThenBy on QueryBuilder<Muscle, Muscle, QSortThenBy> {
   QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Muscle, Muscle, QAfterSortBy> thenByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
     });
   }
 
@@ -1474,6 +1664,14 @@ extension MuscleQueryWhereDistinct on QueryBuilder<Muscle, Muscle, QDistinct> {
     });
   }
 
+  QueryBuilder<Muscle, Muscle, QDistinct> distinctByFromPocketBaseId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fromPocketBaseId',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Muscle, Muscle, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1529,6 +1727,12 @@ extension MuscleQueryProperty on QueryBuilder<Muscle, Muscle, QQueryProperty> {
   QueryBuilder<Muscle, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<Muscle, String?, QQueryOperations> fromPocketBaseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fromPocketBaseId');
     });
   }
 

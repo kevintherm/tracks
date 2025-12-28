@@ -26,7 +26,7 @@ class User {
 
   int followings = 0;
 
-  int totalCopies = 0;
+  int totalViews = 0;
 
   DateTime createdAt = DateTime.now();
 
@@ -45,7 +45,7 @@ class User {
     this.verified = false,
     this.followers = 0,
     this.followings = 0,
-    this.totalCopies = 0,
+    this.totalViews = 0,
     this.expand = const {}
   });
 
@@ -81,7 +81,8 @@ class User {
       verified: record.data['verified'] ?? false,
       followers: record.data['followers'] ?? 0,
       followings: record.data['followings'] ?? 0,
-      totalCopies: record.data['total_copies'] ?? 0,
+      totalViews: record.data['total_copies'] ?? 0,
+      avatar: record.data['avatar'],
       // ignore: deprecated_member_use
       expand: record.expand,
     );
@@ -108,7 +109,7 @@ class User {
       'emailVisibility': emailVisibility,
       'followers': followers,
       'followings': followings,
-      'total_copies': totalCopies,
+      'total_views': totalViews,
     };
   }
 
@@ -122,7 +123,7 @@ class User {
     verified = other.verified;
     followers = other.followers;
     followings = other.followings;
-    totalCopies = other.totalCopies;
+    totalViews = other.totalViews;
     updatedAt = other.updatedAt;
   }
 }

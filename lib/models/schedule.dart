@@ -9,6 +9,7 @@ class Schedule {
   Id id = Isar.autoIncrement;
 
   String? pocketbaseId;
+  String? fromPocketBaseId;
   bool needSync;
 
   late DateTime createdAt;
@@ -17,6 +18,9 @@ class Schedule {
   DateTime startTime;
   int plannedDuration; // In Minutes
   bool durationAlert;
+  bool public;
+  int views;
+  int copies;
 
   @enumerated
   RecurrenceType recurrenceType;
@@ -44,6 +48,9 @@ class Schedule {
     this.durationAlert = false,
     required this.recurrenceType,
     this.needSync = true,
+    this.public = false,
+    this.views = 0,
+    this.copies = 0,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
@@ -55,7 +62,8 @@ class Schedule {
     RecurrenceType? recurrenceType,
     List<Weekday>? weeklyDays,
     List<DateTime>? selectedDates,
-    String? pocketbaseId,
+    int? views,
+    int? copies,
     bool? needSync,
   }) {
     final copy =
@@ -65,6 +73,9 @@ class Schedule {
             durationAlert: durationAlert ?? this.durationAlert,
             recurrenceType: recurrenceType ?? this.recurrenceType,
             needSync: needSync ?? this.needSync,
+            public: public,
+            views: views ?? this.views,
+            copies: copies ?? this.copies,
           )
           ..id = id
           ..pocketbaseId = pocketbaseId ?? this.pocketbaseId
@@ -82,9 +93,12 @@ class Schedule {
   factory Schedule.fromRecord(RecordModel record) {
     final schedule = Schedule(
       startTime: DateTime.tryParse(record.data['start_time'] ?? '') ?? DateTime.now(),
+      views: record.getIntValue('views'),
+      copies: record.getIntValue('copies'),
       plannedDuration: record.data['planned_duration'] ?? 30,
       durationAlert: record.data['duration_alert'] ?? false,
       recurrenceType: _parseRecurrenceType(record.data['recurrence_type']),
+      public: record.getBoolValue('is_public'),
       needSync: false,
     )
       ..pocketbaseId = record.id
@@ -126,6 +140,8 @@ class Schedule {
       'planned_duration': plannedDuration,
       'duration_alert': durationAlert,
       'recurrence_type': _recurrenceTypeToString(recurrenceType),
+      'views': views,
+      'copies': copies,
       'daily_weekday': dailyWeekday.map((e) => _weekdayToString(e)).toList(),
       'selected_dates': selectedDates.map((e) => e.toIso8601String()).toList(),
     };

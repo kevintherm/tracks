@@ -1,15 +1,16 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tracks/models/user.dart';
-import 'package:tracks/models/workout.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/explore_profile_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
+import 'package:tracks/ui/pages/view_remote_workout_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 
@@ -24,8 +25,8 @@ class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController _searchController = TextEditingController();
   final pb = PocketBaseService.instance.client;
 
-  late final Future<List<User>> _popularCreators = _fetchPopularCreators();
-  late final Future<List<Workout>> _trendingWorkouts = _fetchTrendingWorkouts();
+  late Future<List<RecordModel>> _popularCreators = _fetchPopularCreators();
+  late Future<List<RecordModel>> _trendingWorkouts = _fetchTrendingWorkouts();
 
   @override
   void dispose() {
@@ -33,122 +34,233 @@ class _ExplorePageState extends State<ExplorePage> {
     super.dispose();
   }
 
-  Future<List<User>> _fetchPopularCreators() async {
+  Future<List<RecordModel>> _fetchPopularCreators() async {
     try {
       final records = await pb
-          .collection(PBCollections.users.value)
-          .getFullList(
-            batch: 10,
-            filter: 'id != "$tracksAccountID"',
-            sort: '-total_copies,-followers',
-          );
-      return records.map((e) => User.fromRecord(e)).toList();
+          .collection(PBCollections.trendingCreators.value)
+          .getFullList(batch: 10, sort: '-total_views,-followers');
+
+      return records.map((e) {
+        final avatar = e.getStringValue('avatar');
+        e.set(
+          'avatar',
+          avatar.isEmpty ? '' : pb.files.getURL(RecordModel(e.data), avatar),
+        );
+        return e;
+      }).toList();
     } catch (e) {
       log('[ERROR] $e');
       return [];
     }
   }
 
-  Future<List<Workout>> _fetchTrendingWorkouts() async {
+  Future<List<RecordModel>> _fetchTrendingWorkouts() async {
     try {
       final records = await pb
-          .collection(PBCollections.workouts.value)
-          .getList(
-            page: 1,
-            perPage: 10,
-            sort: '-created',
-            filter: 'is_public = true',
-            expand: 'exercises',
-          );
-      return records.items.map((e) => Workout.fromRecord(e)).toList();
+          .collection(PBCollections.trendingWorkouts.value)
+          .getFullList(batch: 10, sort: '-views,-created');
+
+      return records.map((e) {
+        final thumb = e.getStringValue('thumbnail');
+        e.set(
+          'thumbnail',
+          thumb.isEmpty ? '' : pb.files.getURL(RecordModel(e.data), thumb),
+        );
+        return e;
+      }).toList();
     } catch (e) {
       log('[ERROR] $e');
       return [];
     }
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _popularCreators = _fetchPopularCreators();
+      _trendingWorkouts = _fetchTrendingWorkouts();
+    });
+    await _popularCreators;
+    await _trendingWorkouts;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Explore",
-                          style: GoogleFonts.poppins(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Explore",
+                            style: GoogleFonts.poppins(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 2),
-                        Icon(Iconsax.search_favorite_1_outline),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Discover workouts from the community",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                          const SizedBox(width: 2),
+                          Icon(Iconsax.search_favorite_1_outline),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        "Discover workouts from the community",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // Search Bar
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Pressable(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            SearchPage(scope: SearchPageScope.explore),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+              // Search Bar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Pressable(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SearchPage(scope: SearchPageScope.explore),
                         ),
-                      ],
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Iconsax.search_normal_1_outline, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Search",
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
+                  ),
+                ),
+              ),
+
+              // System Account - Featured Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Pressable(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return ExploreProfilePage(userId: tracksAccountID);
+                          },
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.primary, AppColors.lightPrimary],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Iconsax.search_normal_1_outline, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Search",
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w300,
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(16),
                             ),
+                            child: const Icon(
+                              Iconsax.medal_star_bold,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Tracks Official",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Iconsax.verify_bold,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Get started with curated workouts",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            size: 16,
                           ),
                         ],
                       ),
@@ -156,294 +268,207 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                 ),
               ),
-            ),
 
-            // System Account - Featured Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Pressable(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return ExploreProfilePage(userId: tracksAccountID);
-                        },
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+              // Trending Workouts Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Trending Workouts",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
                       ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.lightPrimary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Iconsax.medal_star_bold,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    "Tracks Official",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    Iconsax.verify_bold,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Get started with curated workouts",
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white.withValues(alpha: 0.8),
-                          size: 16,
-                        ),
-                      ],
-                    ),
+                      // Pressable(
+                      //   onTap: () {},
+                      //   child: Text(
+                      //     "See all",
+                      //     style: GoogleFonts.inter(
+                      //       fontSize: 14,
+                      //       color: AppColors.primary,
+                      //       fontWeight: FontWeight.w500,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ),
                 ),
               ),
-            ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // Trending Workouts Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Trending Workouts",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Pressable(
-                      onTap: () {},
-                      child: Text(
-                        "See all",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
+              // Trending Workouts List
+              SliverToBoxAdapter(
+                child: FutureBuilder<List<RecordModel>>(
+                  future: _trendingWorkouts,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SizedBox(
+                        height: 200,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: 3,
+                          itemBuilder: (context, index) =>
+                              const _TrendingWorkoutSkeleton(),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                      );
+                    }
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    if (snapshot.hasError) {
+                      return SizedBox(
+                        height: 200,
+                        child: Center(child: Text('Error loading workouts')),
+                      );
+                    }
 
-            // Trending Workouts List
-            SliverToBoxAdapter(
-              child: FutureBuilder<List<Workout>>(
-                future: _trendingWorkouts,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    final workouts = snapshot.data ?? [];
+                    if (workouts.isEmpty) {
+                      return SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: Text('No trending workouts found'),
+                        ),
+                      );
+                    }
+
                     return SizedBox(
                       height: 200,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 3,
-                        itemBuilder: (context, index) =>
-                            const _TrendingWorkoutSkeleton(),
+                        itemCount: workouts.length,
+                        itemBuilder: (context, index) {
+                          final workout = workouts[index];
+                          return _TrendingWorkoutCard(
+                            workoutId: workout.getStringValue('id'),
+                            title: workout.getStringValue('name'),
+                            author: workout.getStringValue('author_name'),
+                            exercises: workout.getIntValue('exercises_count'),
+                            duration: workout.getStringValue('duration'),
+                            gradient: [
+                              AppColors.secondary,
+                              AppColors.darkSecondary,
+                            ],
+                            copies: workout.getIntValue('views'),
+                            imagePath: workout.getStringValue('thumbnail'),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+              // Community Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Popular Creators",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      // Pressable(
+                      //   onTap: () {},
+                      //   child: Text(
+                      //     "See all",
+                      //     style: GoogleFonts.inter(
+                      //       fontSize: 14,
+                      //       color: AppColors.primary,
+                      //       fontWeight: FontWeight.w500,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+              // Popular Creators List
+              FutureBuilder<List<RecordModel>>(
+                future: _popularCreators,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const _CreatorSkeleton(),
+                          childCount: 5,
+                        ),
                       ),
                     );
                   }
 
                   if (snapshot.hasError) {
-                    return SizedBox(
-                      height: 200,
-                      child: Center(child: Text('Error loading workouts')),
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(child: Text('Error loading creators')),
+                      ),
                     );
                   }
 
-                  final workouts = snapshot.data ?? [];
-                  if (workouts.isEmpty) {
-                    return SizedBox(
-                      height: 200,
-                      child: Center(child: Text('No trending workouts found')),
+                  final users = snapshot.data ?? [];
+                  if (users.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(child: Text('No creators found')),
+                      ),
                     );
                   }
 
-                  return SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: workouts.length,
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList.separated(
+                      itemCount: users.length,
                       itemBuilder: (context, index) {
-                        final workout = workouts[index];
-                        return _TrendingWorkoutCard(
-                          title: workout.name,
-                          author: "Tracks User", // Placeholder
-                          exercises:
-                              0, // Placeholder as we can't easily get count
-                          duration: "N/A", // Placeholder
-                          gradient: [
-                            AppColors.secondary,
-                            AppColors.darkSecondary,
-                          ], // Placeholder
-                          copies: 0, // Placeholder
-                          imagePath: workout.thumbnail,
+                        final user = users[index];
+                        return _CreatorCard(
+                          name: user.getStringValue('name'),
+                          username: "@${user.getStringValue('username')}",
+                          workouts: 0,
+                          followers: user.getIntValue('followers').toCompact(),
+                          avatarColor: AppColors.primary,
+                          avatarUrl: user.getStringValue('avatar'),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ExploreProfilePage(userId: user.id),
+                            ),
+                          ),
                         );
                       },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
                     ),
                   );
                 },
               ),
-            ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-            // Community Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Popular Creators",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Pressable(
-                      onTap: () {},
-                      child: Text(
-                        "See all",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-            // Popular Creators List
-            FutureBuilder<List<User>>(
-              future: _popularCreators,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => const _CreatorSkeleton(),
-                        childCount: 5,
-                      ),
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Center(child: Text('Error loading creators')),
-                    ),
-                  );
-                }
-
-                final users = snapshot.data ?? [];
-                if (users.isEmpty) {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Center(child: Text('No creators found')),
-                    ),
-                  );
-                }
-
-                return SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final user = users[index];
-                      return _CreatorCard(
-                        name: user.name.isNotEmpty ? user.name : user.username,
-                        username: "@${user.username}",
-                        workouts: 0, // Placeholder
-                        followers: user.followers.toCompact(),
-                        avatarColor: AppColors.primary, // Placeholder
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ExploreProfilePage(userId: user.id),
-                          ),
-                        ),
-                      );
-                    }, childCount: users.length),
-                  ),
-                );
-              },
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
+          ),
         ),
       ),
     );
@@ -457,7 +482,8 @@ class _TrendingWorkoutCard extends StatelessWidget {
   final String duration;
   final List<Color> gradient;
   final int copies;
-  final String? imagePath;
+  final String imagePath;
+  final String workoutId;
 
   const _TrendingWorkoutCard({
     required this.title,
@@ -466,14 +492,20 @@ class _TrendingWorkoutCard extends StatelessWidget {
     required this.duration,
     required this.gradient,
     required this.copies,
-    this.imagePath,
+    required this.imagePath,
+    required this.workoutId,
   });
 
   @override
   Widget build(BuildContext context) {
     return Pressable(
       onTap: () {
-        // TODO: Navigate to workout details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewRemoteWorkoutPage(workoutId: workoutId),
+          ),
+        );
       },
       child: Container(
         width: 170,
@@ -484,7 +516,7 @@ class _TrendingWorkoutCard extends StatelessWidget {
           child: Stack(
             children: [
               // Background: Image or Gradient
-              if (imagePath != null)
+              if (imagePath.isNotEmpty)
                 Positioned.fill(
                   child: getImage(
                     imagePath,
@@ -492,7 +524,7 @@ class _TrendingWorkoutCard extends StatelessWidget {
                     height: double.infinity,
                   ),
                 ),
-              if (imagePath == null)
+              if (imagePath.isEmpty)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -505,7 +537,7 @@ class _TrendingWorkoutCard extends StatelessWidget {
                   ),
                 ),
               // Gradient Overlay
-              if (imagePath != null)
+              if (imagePath.isNotEmpty)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -637,6 +669,7 @@ class _CreatorCard extends StatelessWidget {
   final int workouts;
   final String followers;
   final Color avatarColor;
+  final String avatarUrl;
   final void Function() onTap;
 
   const _CreatorCard({
@@ -645,6 +678,7 @@ class _CreatorCard extends StatelessWidget {
     required this.workouts,
     required this.followers,
     required this.avatarColor,
+    required this.avatarUrl,
     required this.onTap,
   });
 
@@ -667,28 +701,34 @@ class _CreatorCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [avatarColor, avatarColor.withValues(alpha: 0.7)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            if (avatarUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(14),
+                child: getSafeImage(avatarUrl, width: 50, height: 50),
+              )
+            else
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [avatarColor, avatarColor.withValues(alpha: 0.7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Center(
-                child: Text(
-                  name[0].toUpperCase(),
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                child: Center(
+                  child: Text(
+                    name[0].toUpperCase(),
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(

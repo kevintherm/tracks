@@ -1,13 +1,15 @@
-- [repository] get the owned collection only when performing sync
-- implement browse feature
-    - add custom api endpoint
-        - trending workouts
-        -popular creators
-    - view user profile
-    - copy user workout, exercise
 - add performed_count for cached occurances count (exercises, workouts)
+- 
 - deploy V1 !!!!
+- follow feature for explore page
 
+- add estimated time column for exercises
+- add difficulty column for workouts
+- tracks copies by storing the forked pocketbaseId
+- fix refresh indicator on explore_profile_page
+- when user log in to another account the old data did not get erased
+    - pocketbaseid doesnt change, so the older stuff doesnt get reuploaded to backend
+    - prompt if user want to keep or erase and reupload old account data
 - implement filter on exercises page, workouts page, session page, schedule page, muscles page
 - optimize
     -https://docs.flutter.dev/tools/devtools/inspector#highlight-oversized-images
@@ -57,6 +59,14 @@ session page
     - create schedule page
 
 #done
+- implement browse feature
+    - add custom view resources
+        - trending workouts
+        -popular creators
+    - view user profile
+    - copy user workout, exercise
+- add public to schedule local
+- [repository] get the owned collection only when performing sync
 - fix bug muscle thumbnails: track removed images
 - add import json exercise
 - add import json workout

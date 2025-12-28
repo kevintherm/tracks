@@ -13,6 +13,7 @@ class Exercise {
   Id id = Isar.autoIncrement;
 
   String? pocketbaseId;
+  String? fromPocketBaseId;
 
   @Index()
   late String name;
@@ -23,6 +24,8 @@ class Exercise {
 
   bool needSync;
   bool public;
+  int views;
+  int copies;
 
   late DateTime createdAt;
   late DateTime updatedAt;
@@ -96,6 +99,8 @@ class Exercise {
     this.pocketbaseId,
     this.needSync = true,
     this.public = false,
+    this.views = 0,
+    this.copies = 0,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
@@ -107,6 +112,8 @@ class Exercise {
             description: record.data['description'],
             caloriesBurned: (record.data['calories_burned'] ?? 0).toDouble(),
             pocketbaseId: record.id,
+            views: record.data['views'] ?? 0,
+            copies: record.data['copies'] ?? 0,
             needSync: false,
             public: record.data['is_public'] ?? false,
           )
@@ -133,6 +140,8 @@ class Exercise {
             description: data['description'],
             caloriesBurned: (data['calories_burned'] ?? 0).toDouble(),
             pocketbaseId: data['id'],
+            views: data['views'] ?? 0,
+            copies: data['copies'] ?? 0,
             needSync: false,
             public: data['is_public'] ?? false,
           )
@@ -153,8 +162,8 @@ class Exercise {
     return {
       'name': name,
       'description': description,
-      'calories_burned': caloriesBurned,
-      'is_public': public,
+      'views': views,
+      'copies': copies,
     };
   }
 
@@ -162,6 +171,10 @@ class Exercise {
     name = other.name;
     description = other.description;
     thumbnail = other.thumbnail;
+    caloriesBurned = other.caloriesBurned;
+    public = other.public;
+    views = other.views;
+    copies = other.copies;
     caloriesBurned = other.caloriesBurned;
     public = other.public;
     pocketbaseId = other.pocketbaseId;

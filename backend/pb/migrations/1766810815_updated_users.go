@@ -53,7 +53,7 @@ func init() {
 
 		// total_copies
 		collection.Fields.Add(&core.NumberField{
-			Name:    "total_copies",
+			Name:    "total_views",
 			Min:     types.Pointer(0.0),
 			OnlyInt: true,
 		})

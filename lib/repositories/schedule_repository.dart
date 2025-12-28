@@ -10,9 +10,9 @@ import 'package:tracks/utils/consts.dart';
 class ScheduleRepository {
   final Isar isar;
   final PocketBase pb;
-  final AuthService authService;
+  final AuthService auth;
 
-  ScheduleRepository(this.isar, this.pb, this.authService);
+  ScheduleRepository(this.isar, this.pb, this.auth);
 
   IsarCollection<Schedule> get collection {
     return isar.schedules;
@@ -43,15 +43,19 @@ class ScheduleRepository {
     });
   }
 
-  Future<void> createSchedule({required Schedule schedule}) async {
+  Future<void> createSchedule({required Schedule schedule, Workout? workout}) async {
     schedule.needSync = true;
+
+    if (workout != null) {
+      schedule.workout.value = workout;
+    }
 
     await isar.writeTxn(() async {
       await isar.schedules.put(schedule);
       await schedule.workout.save();
     });
 
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       await _uploadScheduleToCloud(schedule);
     }
   }
@@ -70,7 +74,7 @@ class ScheduleRepository {
     });
 
     // Sync to cloud if enabled
-    if (authService.isSyncEnabled) {
+    if (auth.isSyncEnabled) {
       if (schedule.pocketbaseId != null) {
         await _updateScheduleOnCloud(schedule);
       } else {
@@ -84,13 +88,13 @@ class ScheduleRepository {
       await isar.schedules.delete(schedule.id);
     });
 
-    if (authService.isSyncEnabled && schedule.pocketbaseId != null) {
+    if (auth.isSyncEnabled && schedule.pocketbaseId != null) {
       try {
         await pb
             .collection(PBCollections.schedules.value)
             .delete(schedule.pocketbaseId!);
       } catch (e) {
-        print('Failed to delete schedule from cloud: $e');
+        log('Failed to delete schedule from cloud: $e');
         // Already deleted locally, cloud deletion failure is acceptable
       }
     }
@@ -154,14 +158,14 @@ class ScheduleRepository {
   }
 
   Future<void> _uploadScheduleToCloud(Schedule schedule) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       await schedule.workout.load();
       final workout = schedule.workout.value;
 
       if (workout?.pocketbaseId == null) {
-        print('Cannot upload schedule: workout not synced to cloud');
+        log('Cannot upload schedule: workout not synced to cloud');
         return;
       }
 
@@ -169,12 +173,13 @@ class ScheduleRepository {
           .collection(PBCollections.schedules.value)
           .create(
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'workout': workout!.pocketbaseId,
               'start_time': schedule.startTime.toIso8601String(),
               'planned_duration': schedule.plannedDuration,
               'duration_alert': schedule.durationAlert,
               'recurrence_type': schedule.recurrenceType.name,
+              'public': schedule.public,
               'daily_weekday': schedule.dailyWeekday
                   .map((w) => w.name)
                   .toList(),
@@ -191,20 +196,20 @@ class ScheduleRepository {
         await isar.schedules.put(schedule);
       });
     } catch (e) {
-      print('Failed to upload schedule to cloud: $e');
+      log('Failed to upload schedule to cloud: $e');
       // Remains marked as needSync = true
     }
   }
 
   Future<void> _updateScheduleOnCloud(Schedule schedule) async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     try {
       await schedule.workout.load();
       final workout = schedule.workout.value;
 
       if (workout?.pocketbaseId == null) {
-        print('Cannot update schedule: workout not synced to cloud');
+        log('Cannot update schedule: workout not synced to cloud');
         return;
       }
 
@@ -213,12 +218,13 @@ class ScheduleRepository {
           .update(
             schedule.pocketbaseId!,
             body: {
-              'user': authService.currentUser?['id'],
+              'user': auth.currentUser?['id'],
               'workout': workout!.pocketbaseId,
               'start_time': schedule.startTime.toIso8601String(),
               'planned_duration': schedule.plannedDuration,
               'duration_alert': schedule.durationAlert,
               'recurrence_type': schedule.recurrenceType.name,
+              'public': schedule.public,
               'daily_weekday': schedule.dailyWeekday
                   .map((w) => w.name)
                   .toList(),
@@ -234,13 +240,13 @@ class ScheduleRepository {
         await isar.schedules.put(schedule);
       });
     } catch (e) {
-      print('Failed to update schedule on cloud: $e');
+      log('Failed to update schedule on cloud: $e');
       // Remains marked as needSync = true
     }
   }
 
   Future<void> performInitialSync() async {
-    if (!authService.isSyncEnabled) return;
+    if (!auth.isSyncEnabled) return;
 
     log('[Sync][Schedule] Starting...');
 
@@ -270,7 +276,7 @@ class ScheduleRepository {
       // Fetch all cloud schedules
       final pbRecords = await pb
           .collection(PBCollections.schedules.value)
-          .getFullList(expand: 'workout');
+          .getFullList(filter: 'workout.user = "${auth.user?.id}"', expand: 'workout');
 
       final List<Schedule> schedulesToSave = [];
 
@@ -304,14 +310,14 @@ class ScheduleRepository {
         });
       }
     } catch (e) {
-      print('Failed to download and merge cloud schedules: $e');
+      log('Failed to download and merge cloud schedules: $e');
       rethrow;
     }
   }
 
   /// Insert a new schedule from cloud that doesn't exist locally
   Future<void> _insertNewScheduleFromCloud(
-    dynamic record,
+    RecordModel record,
     List<Schedule> schedulesToSave,
   ) async {
     // Find the workout by pocketbaseId
@@ -324,7 +330,7 @@ class ScheduleRepository {
         .findFirst();
 
     if (workout == null) {
-      print('Cannot create schedule: workout not found locally');
+      log('Cannot create schedule: workout not found locally');
       return;
     }
 
@@ -339,6 +345,7 @@ class ScheduleRepository {
             recurrenceType: _parseRecurrenceType(
               record.data['recurrence_type'],
             ),
+            public: record.getBoolValue('is_public'),
             needSync: false,
           )
           ..pocketbaseId = record.id
@@ -355,7 +362,7 @@ class ScheduleRepository {
 
   /// Update an existing schedule from cloud if cloud version is newer
   Future<void> _updateExistingScheduleFromCloud(
-    dynamic record,
+    RecordModel record,
     Schedule exists,
     List<Schedule> schedulesToSave,
   ) async {
@@ -376,7 +383,7 @@ class ScheduleRepository {
         .findFirst();
 
     if (workout == null) {
-      print('Cannot update schedule: workout not found locally');
+      log('Cannot update schedule: workout not found locally');
       return;
     }
 
@@ -392,6 +399,7 @@ class ScheduleRepository {
       ..recurrenceType = _parseRecurrenceType(record.data['recurrence_type'])
       ..dailyWeekday = _parseWeekdays(record.data['daily_weekday'])
       ..selectedDates = _parseDates(record.data['selected_dates'])
+      ..public = record.getBoolValue('is_public')
       ..updatedAt = cloudLastUpdated
       ..workout.value = workout;
 

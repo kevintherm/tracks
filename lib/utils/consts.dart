@@ -286,6 +286,8 @@ bool isToday(DateTime date) {
 }
 
 enum PBCollections {
+  trendingWorkouts("trending_workouts"),
+  trendingCreators("trending_creators"),
   users("users"),
   schedules("schedules"),
   workoutExercises("workout_exercises"),

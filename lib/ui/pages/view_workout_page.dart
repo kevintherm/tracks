@@ -49,6 +49,14 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
         fireImmediately: true,
       ),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text("Something went wrong: ${snapshot.error}"),
+            ),
+          );
+        }
+
         if (snapshot.hasData) {
           _workout = snapshot.data!;
         }
@@ -415,7 +423,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
           _buildStatItem(
             icon: Iconsax.flash_1_bold,
             value:
-                '${_workout.exercises.map((e) => e.caloriesBurned).reduce((value, e) => value + e).toInt()}~',
+                '${_workout.exercises.fold(0.0, (sum, e) => sum + e.caloriesBurned).toInt()}~',
             label: 'Kcal',
             color: Colors.orange,
           ),
@@ -605,6 +613,7 @@ class _ExerciseCard extends StatelessWidget {
 
   String get excerpt {
     final exercises = List.of(exercise.muscles).map((e) => e.name);
+    if (exercises.isEmpty) return '';
 
     return exercises.length > 3
         ? '${exercises.first} and ${exercises.length - 1} other'

@@ -22,57 +22,77 @@ const ScheduleSchema = CollectionSchema(
       name: r'activeSelectedDates',
       type: IsarType.dateTimeList,
     ),
-    r'createdAt': PropertySchema(
+    r'copies': PropertySchema(
       id: 1,
+      name: r'copies',
+      type: IsarType.long,
+    ),
+    r'createdAt': PropertySchema(
+      id: 2,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'dailyWeekday': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'dailyWeekday',
       type: IsarType.byteList,
       enumMap: _ScheduledailyWeekdayEnumValueMap,
     ),
     r'durationAlert': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'durationAlert',
       type: IsarType.bool,
     ),
+    r'fromPocketBaseId': PropertySchema(
+      id: 5,
+      name: r'fromPocketBaseId',
+      type: IsarType.string,
+    ),
     r'needSync': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'plannedDuration': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'plannedDuration',
       type: IsarType.long,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
+    r'public': PropertySchema(
+      id: 9,
+      name: r'public',
+      type: IsarType.bool,
+    ),
     r'recurrenceType': PropertySchema(
-      id: 7,
+      id: 10,
       name: r'recurrenceType',
       type: IsarType.byte,
       enumMap: _SchedulerecurrenceTypeEnumValueMap,
     ),
     r'selectedDates': PropertySchema(
-      id: 8,
+      id: 11,
       name: r'selectedDates',
       type: IsarType.dateTimeList,
     ),
     r'startTime': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'startTime',
       type: IsarType.dateTime,
     ),
     r'updatedAt': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'updatedAt',
       type: IsarType.dateTime,
+    ),
+    r'views': PropertySchema(
+      id: 14,
+      name: r'views',
+      type: IsarType.long,
     )
   },
   estimateSize: _scheduleEstimateSize,
@@ -105,6 +125,12 @@ int _scheduleEstimateSize(
   bytesCount += 3 + object.activeSelectedDates.length * 8;
   bytesCount += 3 + object.dailyWeekday.length;
   {
+    final value = object.fromPocketBaseId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.pocketbaseId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -121,17 +147,21 @@ void _scheduleSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTimeList(offsets[0], object.activeSelectedDates);
-  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeLong(offsets[1], object.copies);
+  writer.writeDateTime(offsets[2], object.createdAt);
   writer.writeByteList(
-      offsets[2], object.dailyWeekday.map((e) => e.index).toList());
-  writer.writeBool(offsets[3], object.durationAlert);
-  writer.writeBool(offsets[4], object.needSync);
-  writer.writeLong(offsets[5], object.plannedDuration);
-  writer.writeString(offsets[6], object.pocketbaseId);
-  writer.writeByte(offsets[7], object.recurrenceType.index);
-  writer.writeDateTimeList(offsets[8], object.selectedDates);
-  writer.writeDateTime(offsets[9], object.startTime);
-  writer.writeDateTime(offsets[10], object.updatedAt);
+      offsets[3], object.dailyWeekday.map((e) => e.index).toList());
+  writer.writeBool(offsets[4], object.durationAlert);
+  writer.writeString(offsets[5], object.fromPocketBaseId);
+  writer.writeBool(offsets[6], object.needSync);
+  writer.writeLong(offsets[7], object.plannedDuration);
+  writer.writeString(offsets[8], object.pocketbaseId);
+  writer.writeBool(offsets[9], object.public);
+  writer.writeByte(offsets[10], object.recurrenceType.index);
+  writer.writeDateTimeList(offsets[11], object.selectedDates);
+  writer.writeDateTime(offsets[12], object.startTime);
+  writer.writeDateTime(offsets[13], object.updatedAt);
+  writer.writeLong(offsets[14], object.views);
 }
 
 Schedule _scheduleDeserialize(
@@ -141,24 +171,28 @@ Schedule _scheduleDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Schedule(
-    durationAlert: reader.readBoolOrNull(offsets[3]) ?? false,
-    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
-    plannedDuration: reader.readLongOrNull(offsets[5]) ?? 30,
+    copies: reader.readLongOrNull(offsets[1]) ?? 0,
+    durationAlert: reader.readBoolOrNull(offsets[4]) ?? false,
+    needSync: reader.readBoolOrNull(offsets[6]) ?? true,
+    plannedDuration: reader.readLongOrNull(offsets[7]) ?? 30,
+    public: reader.readBoolOrNull(offsets[9]) ?? false,
     recurrenceType: _SchedulerecurrenceTypeValueEnumMap[
-            reader.readByteOrNull(offsets[7])] ??
+            reader.readByteOrNull(offsets[10])] ??
         RecurrenceType.once,
-    startTime: reader.readDateTime(offsets[9]),
+    startTime: reader.readDateTime(offsets[12]),
+    views: reader.readLongOrNull(offsets[14]) ?? 0,
   );
-  object.createdAt = reader.readDateTime(offsets[1]);
+  object.createdAt = reader.readDateTime(offsets[2]);
   object.dailyWeekday = reader
-          .readByteList(offsets[2])
+          .readByteList(offsets[3])
           ?.map((e) => _ScheduledailyWeekdayValueEnumMap[e] ?? Weekday.monday)
           .toList() ??
       [];
+  object.fromPocketBaseId = reader.readStringOrNull(offsets[5]);
   object.id = id;
-  object.pocketbaseId = reader.readStringOrNull(offsets[6]);
-  object.selectedDates = reader.readDateTimeList(offsets[8]) ?? [];
-  object.updatedAt = reader.readDateTime(offsets[10]);
+  object.pocketbaseId = reader.readStringOrNull(offsets[8]);
+  object.selectedDates = reader.readDateTimeList(offsets[11]) ?? [];
+  object.updatedAt = reader.readDateTime(offsets[13]);
   return object;
 }
 
@@ -172,32 +206,40 @@ P _scheduleDeserializeProp<P>(
     case 0:
       return (reader.readDateTimeList(offset) ?? []) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 2:
+      return (reader.readDateTime(offset)) as P;
+    case 3:
       return (reader
               .readByteList(offset)
               ?.map(
                   (e) => _ScheduledailyWeekdayValueEnumMap[e] ?? Weekday.monday)
               .toList() ??
           []) as P;
-    case 3:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 4:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 5:
-      return (reader.readLongOrNull(offset) ?? 30) as P;
-    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 7:
+      return (reader.readLongOrNull(offset) ?? 30) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 10:
       return (_SchedulerecurrenceTypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           RecurrenceType.once) as P;
-    case 8:
+    case 11:
       return (reader.readDateTimeList(offset) ?? []) as P;
-    case 9:
+    case 12:
       return (reader.readDateTime(offset)) as P;
-    case 10:
+    case 13:
       return (reader.readDateTime(offset)) as P;
+    case 14:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -467,6 +509,59 @@ extension ScheduleQueryFilter
     });
   }
 
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> copiesEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> copiesGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> copiesLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> copiesBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'copies',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterFilterCondition> createdAtEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -671,6 +766,160 @@ extension ScheduleQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'durationAlert',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fromPocketBaseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'fromPocketBaseId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition>
+      fromPocketBaseIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'fromPocketBaseId',
+        value: '',
       ));
     });
   }
@@ -940,6 +1189,16 @@ extension ScheduleQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'pocketbaseId',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> publicEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'public',
+        value: value,
       ));
     });
   }
@@ -1249,6 +1508,59 @@ extension ScheduleQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> viewsEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> viewsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> viewsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterFilterCondition> viewsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'views',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension ScheduleQueryObject
@@ -1271,6 +1583,18 @@ extension ScheduleQueryLinks
 }
 
 extension ScheduleQuerySortBy on QueryBuilder<Schedule, Schedule, QSortBy> {
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByCopiesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.desc);
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1292,6 +1616,18 @@ extension ScheduleQuerySortBy on QueryBuilder<Schedule, Schedule, QSortBy> {
   QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByDurationAlertDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'durationAlert', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
     });
   }
 
@@ -1331,6 +1667,18 @@ extension ScheduleQuerySortBy on QueryBuilder<Schedule, Schedule, QSortBy> {
     });
   }
 
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByRecurrenceType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recurrenceType', Sort.asc);
@@ -1366,10 +1714,34 @@ extension ScheduleQuerySortBy on QueryBuilder<Schedule, Schedule, QSortBy> {
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> sortByViewsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.desc);
+    });
+  }
 }
 
 extension ScheduleQuerySortThenBy
     on QueryBuilder<Schedule, Schedule, QSortThenBy> {
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByCopiesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.desc);
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1391,6 +1763,18 @@ extension ScheduleQuerySortThenBy
   QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByDurationAlertDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'durationAlert', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
     });
   }
 
@@ -1442,6 +1826,18 @@ extension ScheduleQuerySortThenBy
     });
   }
 
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByPublicDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'public', Sort.desc);
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByRecurrenceType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recurrenceType', Sort.asc);
@@ -1477,6 +1873,18 @@ extension ScheduleQuerySortThenBy
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QAfterSortBy> thenByViewsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.desc);
+    });
+  }
 }
 
 extension ScheduleQueryWhereDistinct
@@ -1484,6 +1892,12 @@ extension ScheduleQueryWhereDistinct
   QueryBuilder<Schedule, Schedule, QDistinct> distinctByActiveSelectedDates() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'activeSelectedDates');
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QDistinct> distinctByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'copies');
     });
   }
 
@@ -1505,6 +1919,14 @@ extension ScheduleQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Schedule, Schedule, QDistinct> distinctByFromPocketBaseId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fromPocketBaseId',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Schedule, Schedule, QDistinct> distinctByNeedSync() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'needSync');
@@ -1521,6 +1943,12 @@ extension ScheduleQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pocketbaseId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Schedule, Schedule, QDistinct> distinctByPublic() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'public');
     });
   }
 
@@ -1547,6 +1975,12 @@ extension ScheduleQueryWhereDistinct
       return query.addDistinctBy(r'updatedAt');
     });
   }
+
+  QueryBuilder<Schedule, Schedule, QDistinct> distinctByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'views');
+    });
+  }
 }
 
 extension ScheduleQueryProperty
@@ -1561,6 +1995,12 @@ extension ScheduleQueryProperty
       activeSelectedDatesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'activeSelectedDates');
+    });
+  }
+
+  QueryBuilder<Schedule, int, QQueryOperations> copiesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'copies');
     });
   }
 
@@ -1583,6 +2023,12 @@ extension ScheduleQueryProperty
     });
   }
 
+  QueryBuilder<Schedule, String?, QQueryOperations> fromPocketBaseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fromPocketBaseId');
+    });
+  }
+
   QueryBuilder<Schedule, bool, QQueryOperations> needSyncProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'needSync');
@@ -1598,6 +2044,12 @@ extension ScheduleQueryProperty
   QueryBuilder<Schedule, String?, QQueryOperations> pocketbaseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pocketbaseId');
+    });
+  }
+
+  QueryBuilder<Schedule, bool, QQueryOperations> publicProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'public');
     });
   }
 
@@ -1624,6 +2076,12 @@ extension ScheduleQueryProperty
   QueryBuilder<Schedule, DateTime, QQueryOperations> updatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'updatedAt');
+    });
+  }
+
+  QueryBuilder<Schedule, int, QQueryOperations> viewsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'views');
     });
   }
 }

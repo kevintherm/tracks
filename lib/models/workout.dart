@@ -11,6 +11,7 @@ class Workout {
   Id id = Isar.autoIncrement;
 
   String? pocketbaseId;
+  String? fromPocketBaseId;
 
   String name;
   String? description;
@@ -19,6 +20,8 @@ class Workout {
 
   bool needSync;
   bool public;
+  int views;
+  int copies;
 
   late DateTime createdAt;
   late DateTime updatedAt;
@@ -31,6 +34,8 @@ class Workout {
     this.pendingThumbnailPath,
     this.needSync = true,
     this.public = false,
+    this.views = 0,
+    this.copies = 0,
   }) : createdAt = DateTime.now(),
        updatedAt = DateTime.now();
 
@@ -76,7 +81,7 @@ class Workout {
   @ignore
   String get thumbnailFallback {
     return thumbnail ??
-        exercises.first.thumbnail ??
+        (exercises.isNotEmpty ? exercises.first.thumbnail : null) ??
         'assets/drawings/not-found.jpg';
   }
 
@@ -89,6 +94,8 @@ class Workout {
             pocketbaseId: record.id,
             needSync: false,
             public: record.data['is_public'] ?? false,
+            views: record.data['views'] ?? 0,
+            copies: record.data['copies'] ?? 0,
           )
           ..createdAt =
               DateTime.tryParse(record.data['created'] ?? '') ?? DateTime.now()
@@ -112,6 +119,8 @@ class Workout {
             name: data['name'] ?? '',
             description: data['description'],
             pocketbaseId: data['id'],
+            views: data['views'] ?? 0,
+            copies: data['copies'] ?? 0,
             needSync: false,
             public: data['is_public'] ?? false,
           )
@@ -128,13 +137,14 @@ class Workout {
     return workout;
   }
 
-  Map<String, dynamic> toPayload() {
-    return {'name': name, 'description': description, 'is_public': public};
-  }
 
   void updateFrom(Workout other) {
     name = other.name;
     description = other.description;
+    thumbnail = other.thumbnail;
+    public = other.public;
+    views = other.views;
+    copies = other.copies;
     thumbnail = other.thumbnail;
     public = other.public;
     pocketbaseId = other.pocketbaseId;

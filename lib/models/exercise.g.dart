@@ -22,50 +22,65 @@ const ExerciseSchema = CollectionSchema(
       name: r'caloriesBurned',
       type: IsarType.double,
     ),
-    r'createdAt': PropertySchema(
+    r'copies': PropertySchema(
       id: 1,
+      name: r'copies',
+      type: IsarType.long,
+    ),
+    r'createdAt': PropertySchema(
+      id: 2,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'description': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'description',
       type: IsarType.string,
     ),
+    r'fromPocketBaseId': PropertySchema(
+      id: 4,
+      name: r'fromPocketBaseId',
+      type: IsarType.string,
+    ),
     r'name': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'needSync': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'needSync',
       type: IsarType.bool,
     ),
     r'pendingThumbnailPath': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'pendingThumbnailPath',
       type: IsarType.string,
     ),
     r'pocketbaseId': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'pocketbaseId',
       type: IsarType.string,
     ),
     r'public': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'public',
       type: IsarType.bool,
     ),
     r'thumbnail': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'thumbnail',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'updatedAt',
       type: IsarType.dateTime,
+    ),
+    r'views': PropertySchema(
+      id: 12,
+      name: r'views',
+      type: IsarType.long,
     )
   },
   estimateSize: _exerciseEstimateSize,
@@ -108,6 +123,12 @@ int _exerciseEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.fromPocketBaseId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   {
     final value = object.pendingThumbnailPath;
@@ -137,15 +158,18 @@ void _exerciseSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.caloriesBurned);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeString(offsets[2], object.description);
-  writer.writeString(offsets[3], object.name);
-  writer.writeBool(offsets[4], object.needSync);
-  writer.writeString(offsets[5], object.pendingThumbnailPath);
-  writer.writeString(offsets[6], object.pocketbaseId);
-  writer.writeBool(offsets[7], object.public);
-  writer.writeString(offsets[8], object.thumbnail);
-  writer.writeDateTime(offsets[9], object.updatedAt);
+  writer.writeLong(offsets[1], object.copies);
+  writer.writeDateTime(offsets[2], object.createdAt);
+  writer.writeString(offsets[3], object.description);
+  writer.writeString(offsets[4], object.fromPocketBaseId);
+  writer.writeString(offsets[5], object.name);
+  writer.writeBool(offsets[6], object.needSync);
+  writer.writeString(offsets[7], object.pendingThumbnailPath);
+  writer.writeString(offsets[8], object.pocketbaseId);
+  writer.writeBool(offsets[9], object.public);
+  writer.writeString(offsets[10], object.thumbnail);
+  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeLong(offsets[12], object.views);
 }
 
 Exercise _exerciseDeserialize(
@@ -156,17 +180,20 @@ Exercise _exerciseDeserialize(
 ) {
   final object = Exercise(
     caloriesBurned: reader.readDouble(offsets[0]),
-    description: reader.readStringOrNull(offsets[2]),
-    name: reader.readString(offsets[3]),
-    needSync: reader.readBoolOrNull(offsets[4]) ?? true,
-    pendingThumbnailPath: reader.readStringOrNull(offsets[5]),
-    pocketbaseId: reader.readStringOrNull(offsets[6]),
-    public: reader.readBoolOrNull(offsets[7]) ?? false,
-    thumbnail: reader.readStringOrNull(offsets[8]),
+    copies: reader.readLongOrNull(offsets[1]) ?? 0,
+    description: reader.readStringOrNull(offsets[3]),
+    name: reader.readString(offsets[5]),
+    needSync: reader.readBoolOrNull(offsets[6]) ?? true,
+    pendingThumbnailPath: reader.readStringOrNull(offsets[7]),
+    pocketbaseId: reader.readStringOrNull(offsets[8]),
+    public: reader.readBoolOrNull(offsets[9]) ?? false,
+    thumbnail: reader.readStringOrNull(offsets[10]),
+    views: reader.readLongOrNull(offsets[12]) ?? 0,
   );
-  object.createdAt = reader.readDateTime(offsets[1]);
+  object.createdAt = reader.readDateTime(offsets[2]);
+  object.fromPocketBaseId = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.updatedAt = reader.readDateTime(offsets[9]);
+  object.updatedAt = reader.readDateTime(offsets[11]);
   return object;
 }
 
@@ -180,23 +207,29 @@ P _exerciseDeserializeProp<P>(
     case 0:
       return (reader.readDouble(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 7:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
       return (reader.readStringOrNull(offset)) as P;
     case 9:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 10:
+      return (reader.readStringOrNull(offset)) as P;
+    case 11:
       return (reader.readDateTime(offset)) as P;
+    case 12:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -399,6 +432,59 @@ extension ExerciseQueryFilter
     });
   }
 
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> copiesEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> copiesGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> copiesLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'copies',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> copiesBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'copies',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> createdAtEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -596,6 +682,160 @@ extension ExerciseQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fromPocketBaseId',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fromPocketBaseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'fromPocketBaseId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'fromPocketBaseId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fromPocketBaseId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      fromPocketBaseIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'fromPocketBaseId',
         value: '',
       ));
     });
@@ -1307,6 +1547,59 @@ extension ExerciseQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> viewsEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> viewsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> viewsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'views',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> viewsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'views',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension ExerciseQueryObject
@@ -1325,6 +1618,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCaloriesBurnedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'caloriesBurned', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByCopiesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.desc);
     });
   }
 
@@ -1349,6 +1654,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
     });
   }
 
@@ -1436,6 +1753,18 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByViewsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.desc);
+    });
+  }
 }
 
 extension ExerciseQuerySortThenBy
@@ -1449,6 +1778,18 @@ extension ExerciseQuerySortThenBy
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCaloriesBurnedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'caloriesBurned', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByCopiesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'copies', Sort.desc);
     });
   }
 
@@ -1473,6 +1814,18 @@ extension ExerciseQuerySortThenBy
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByFromPocketBaseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByFromPocketBaseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fromPocketBaseId', Sort.desc);
     });
   }
 
@@ -1572,6 +1925,18 @@ extension ExerciseQuerySortThenBy
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByViewsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'views', Sort.desc);
+    });
+  }
 }
 
 extension ExerciseQueryWhereDistinct
@@ -1579,6 +1944,12 @@ extension ExerciseQueryWhereDistinct
   QueryBuilder<Exercise, Exercise, QDistinct> distinctByCaloriesBurned() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'caloriesBurned');
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByCopies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'copies');
     });
   }
 
@@ -1592,6 +1963,14 @@ extension ExerciseQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByFromPocketBaseId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fromPocketBaseId',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -1641,6 +2020,12 @@ extension ExerciseQueryWhereDistinct
       return query.addDistinctBy(r'updatedAt');
     });
   }
+
+  QueryBuilder<Exercise, Exercise, QDistinct> distinctByViews() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'views');
+    });
+  }
 }
 
 extension ExerciseQueryProperty
@@ -1657,6 +2042,12 @@ extension ExerciseQueryProperty
     });
   }
 
+  QueryBuilder<Exercise, int, QQueryOperations> copiesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'copies');
+    });
+  }
+
   QueryBuilder<Exercise, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
@@ -1666,6 +2057,12 @@ extension ExerciseQueryProperty
   QueryBuilder<Exercise, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<Exercise, String?, QQueryOperations> fromPocketBaseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fromPocketBaseId');
     });
   }
 
@@ -1709,6 +2106,12 @@ extension ExerciseQueryProperty
   QueryBuilder<Exercise, DateTime, QQueryOperations> updatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'updatedAt');
+    });
+  }
+
+  QueryBuilder<Exercise, int, QQueryOperations> viewsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'views');
     });
   }
 }

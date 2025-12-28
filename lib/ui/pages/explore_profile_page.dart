@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +9,9 @@ import 'package:tracks/models/user.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
+import 'package:tracks/ui/pages/view_remote_exercise_page.dart';
+import 'package:tracks/ui/pages/view_remote_schedule_page.dart';
+import 'package:tracks/ui/pages/view_remote_workout_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/toast.dart';
@@ -69,7 +70,6 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
 
   Future<List<Workout>> _fetchWorkouts() async {
     if (widget.userId == null) return [];
-
     final results = await pb
         .collection(PBCollections.workouts.value)
         .getList(filter: 'user = "${widget.userId}"');
@@ -78,7 +78,6 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
 
   Future<List<Exercise>> _fetchExercises() async {
     if (widget.userId == null) return [];
-
     final results = await pb
         .collection(PBCollections.exercises.value)
         .getList(filter: 'user = "${widget.userId}"');
@@ -87,12 +86,34 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
 
   Future<List<Schedule>> _fetchSchedules() async {
     if (widget.userId == null) return [];
-
-    final results = await pb.collection(PBCollections.schedules.value).getList(
-      filter: 'workout.user = "${widget.userId}"',
-      expand: 'workout',
-    );
+    final results = await pb
+        .collection(PBCollections.schedules.value)
+        .getList(
+          filter: 'workout.user = "${widget.userId}"',
+          expand: 'workout',
+        );
     return results.items.map((e) => Schedule.fromRecord(e)).toList();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _userFuture = _fetchUser();
+      futures[0] = _fetchWorkouts().then((value) {
+        if (mounted) {
+          setState(() {
+            _workoutCount = value.length;
+          });
+        }
+        return value;
+      });
+      futures[1] = _fetchExercises();
+      futures[2] = _fetchSchedules();
+    });
+
+    await _userFuture;
+    await futures[0];
+    await futures[1];
+    await futures[2];
   }
 
   @override
@@ -103,231 +124,188 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
         child: FutureBuilder<User?>(
           future: _userFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              _user = snapshot.data;
+            }
+
+            if (_user == null &&
+                snapshot.connectionState != ConnectionState.done) {
               return _buildShimmer();
             }
 
-            if (!snapshot.hasData || snapshot.data == null) {
+            if (_user == null) {
+              if (snapshot.hasError) return _buildError(snapshot);
               return _buildNotFound(context);
             }
 
-            if (snapshot.hasError) {
-              return _buildError(snapshot);
-            }
-
-            _user = snapshot.data;
-
-            return NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  // App Bar
-                  SliverAppBar(
-                    backgroundColor: Colors.grey[50],
-                    surfaceTintColor: Colors.grey[50],
-                    elevation: 0,
-                    leading: Pressable(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(
-                        Iconsax.arrow_left_2_outline,
-                        color: Colors.black,
-                      ),
-                    ),
-                    title: _user == null
-                        ? const SizedBox.shrink()
-                        : Text(
-                            _user!.username,
-                            style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                    actions: [
-                      Pressable(
-                        onTap: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: const Icon(
-                            Iconsax.more_circle_outline,
-                            color: Colors.black,
-                          ),
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: NestedScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    // Sticky Header requires SliverAppBar
+                    SliverAppBar(
+                      backgroundColor: Colors.grey[50],
+                      surfaceTintColor: Colors.grey[50],
+                      elevation: 0,
+                      leading: Pressable(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Iconsax.arrow_left_2_outline,
+                          color: Colors.black,
                         ),
                       ),
-                    ],
-                    pinned: true,
-                  ),
+                      title: Text(
+                        _user!.username,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      actions: [
+                        Pressable(
+                          onTap: () {},
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: const Icon(
+                              Iconsax.more_circle_outline,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                      pinned: true,
+                    ),
 
-                  // Profile Header
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          // Avatar
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey[300],
-                              image: DecorationImage(
-                                image: _user!.avatar != null
-                                    ? NetworkImage(_user!.avatar!)
-                                    : AssetImage(
-                                        'assets/drawings/not-found.jpg',
-                                      ),
-                                fit: BoxFit.cover,
+                    // Profile Content (Scrolls away)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: [
+                            _buildAvatar(_user),
+                            const SizedBox(height: 16),
+                            Text(
+                              _user!.name,
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
-                              border: Border.all(color: Colors.white, width: 4),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
+                            ),
+                            Text(
+                              "@${_user!.username}",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _user!.bio,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.grey[800],
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildStatItem(
+                                    "Workouts", _workoutCount.toCompact()),
+                                _buildStatItem(
+                                    "Followers", _user!.followers.toCompact()),
+                                _buildStatItem("Following",
+                                    _user!.followings.toCompact()),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Name
-                          Text(
-                            _user!.name,
-                            style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            "@${_user!.username}",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Bio
-                          Text(
-                            _user!.bio,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.grey[800],
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Stats
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildStatItem("Workouts", _workoutCount.toCompact()),
-                              _buildStatItem(
-                                "Followers",
-                                _user!.followers.toCompact(),
-                              ),
-                              _buildStatItem(
-                                "Following",
-                                _user!.followings.toCompact(),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Action Buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Pressable(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      "Follow",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Pressable(
+                                    onTap: () {},
+                                    child: Container(
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        "Follow",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Pressable(
-                                onTap: () => Toast(
-                                  context,
-                                ).neutral(content: Text("Coming soon...")),
-                                child: Container(
-                                  height: 48,
-                                  width: 48,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.grey[200]!,
+                                const SizedBox(width: 12),
+                                Pressable(
+                                  onTap: () => Toast(context).neutral(
+                                      content: Text("Coming soon...")),
+                                  child: Container(
+                                    height: 48,
+                                    width: 48,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border:
+                                          Border.all(color: Colors.grey[200]!),
                                     ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                    Iconsax.message_outline,
-                                    size: 24,
+                                    alignment: Alignment.center,
+                                    child: const Icon(Iconsax.message_outline,
+                                        size: 24),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-                  // Content Tabs Header
-                  SliverPersistentHeader(
-                    delegate: _SliverAppBarDelegate(
-                      minHeight: 60,
-                      maxHeight: 60,
-                      child: Container(
-                        color: Colors.grey[50],
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          children: [
-                            _buildTabButton(0, "Workouts"),
-                            const SizedBox(width: 24),
-                            _buildTabButton(1, "Exercises"),
-                            const SizedBox(width: 24),
-                            _buildTabButton(2, "Schedule"),
-                            const Spacer(),
-                            Icon(
-                              Iconsax.filter_outline,
-                              size: 20,
-                              color: Colors.grey[600],
+                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
-                    pinned: true,
-                  ),
-                ];
-              },
-              body: PageView(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => _selectedTab = index),
-                children: [
-                  _buildTab(0),
-                  _buildTab(1),
-                  _buildTab(2),
-                ],
+                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+                    // Tabs (Sticks)
+                    SliverPersistentHeader(
+                      delegate: _SliverAppBarDelegate(
+                        minHeight: 60,
+                        maxHeight: 60,
+                        child: Container(
+                          color: Colors.grey[50],
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              _buildTabButton(0, "Workouts"),
+                              const SizedBox(width: 24),
+                              _buildTabButton(1, "Exercises"),
+                              const SizedBox(width: 24),
+                              _buildTabButton(2, "Schedule"),
+                              const Spacer(),
+                              Icon(Iconsax.filter_outline,
+                                  size: 20, color: Colors.grey[600]),
+                            ],
+                          ),
+                        ),
+                      ),
+                      pinned: true,
+                    ),
+                  ];
+                },
+                body: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) =>
+                      setState(() => _selectedTab = index),
+                  children: [_buildTab(0), _buildTab(1), _buildTab(2)],
+                ),
               ),
             );
           },
@@ -341,7 +319,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       future: futures[index],
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return _buildError(snapshot);
+          return Center(child: _buildError(snapshot));
         }
 
         if (snapshot.connectionState != ConnectionState.done) {
@@ -362,6 +340,19 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
         }
 
         return _buildTabContent(index, data);
+      },
+    );
+  }
+
+  Widget _buildTabContent(int tabIndex, List<dynamic> items) {
+    // Replaced CustomScrollView/Slivers with standard ListView.builder
+    return ListView.separated(
+      key: PageStorageKey<String>('tab_$tabIndex'),
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        return _buildContentCard(tabIndex, index, items);
       },
     );
   }
@@ -430,31 +421,9 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
+              _shimmerBox(width: 40, height: 40, radius: 12),
               const Spacer(),
-              Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
+              _shimmerBox(width: 40, height: 40, radius: 12),
             ],
           ),
         ),
@@ -480,92 +449,26 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Name Shimmer
-                Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: 150,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                // Text Lines Shimmer
+                _shimmerBox(width: 150, height: 24, radius: 8),
                 const SizedBox(height: 8),
-
-                // Username Shimmer
-                Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: 100,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                _shimmerBox(width: 100, height: 16, radius: 8),
                 const SizedBox(height: 16),
-
-                // Bio Shimmer
-                Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _shimmerBox(width: double.infinity, height: 14, radius: 8),
+                const SizedBox(height: 8),
+                _shimmerBox(width: double.infinity, height: 14, radius: 8),
                 const SizedBox(height: 24),
 
                 // Stats Shimmer
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(3, (index) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 60,
-                            height: 14,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ],
-                      ),
+                    return Column(
+                      children: [
+                        _shimmerBox(width: 40, height: 20, radius: 8),
+                        const SizedBox(height: 8),
+                        _shimmerBox(width: 60, height: 14, radius: 8),
+                      ],
                     );
                   }),
                 ),
@@ -575,54 +478,21 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 Row(
                   children: [
                     Expanded(
-                      child: Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                    ),
+                        child: _shimmerBox(height: 48, width: 0, radius: 16)),
                     const SizedBox(width: 12),
-                    Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
+                    _shimmerBox(height: 48, width: 48, radius: 16),
                   ],
                 ),
                 const SizedBox(height: 32),
 
                 // Tab Bar Shimmer
-                Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Row(
-                    children: List.generate(3, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 24),
-                        child: Container(
-                          width: 80,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
+                Row(
+                  children: List.generate(3, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 24),
+                      child: _shimmerBox(width: 80, height: 40, radius: 8),
+                    );
+                  }),
                 ),
                 const SizedBox(height: 16),
 
@@ -633,6 +503,22 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _shimmerBox(
+      {double width = 0, double height = 0, double radius = 0}) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: width == 0 ? null : width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      ),
     );
   }
 
@@ -653,25 +539,6 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
         ),
       );
     });
-  }
-
-  Widget _buildTabContent(int tabIndex, List<dynamic> items) {
-    return CustomScrollView(
-      key: PageStorageKey<String>('tab_$tabIndex'),
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildContentCard(tabIndex, index, items),
-              );
-            }, childCount: items.length),
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _buildTabButton(int index, String text) {
@@ -730,7 +597,10 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
     return Pressable(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Placeholder()),
+        MaterialPageRoute(
+          builder: (context) =>
+              ViewRemoteExercisePage(exerciseId: exercise.pocketbaseId!),
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -811,12 +681,16 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       ),
     );
   }
+
   Widget _buildScheduleCard(Schedule schedule) {
     final workout = schedule.workout.value;
     return Pressable(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Placeholder()),
+        MaterialPageRoute(
+          builder: (context) =>
+              ViewRemoteSchedulePage(scheduleId: schedule.pocketbaseId!),
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -914,7 +788,10 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
     return Pressable(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Placeholder()),
+        MaterialPageRoute(
+          builder: (context) =>
+              ViewRemoteWorkoutPage(workoutId: workout.pocketbaseId!),
+        ),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -1139,6 +1016,51 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar(User? user) {
+    final hasAvatar = user?.avatar?.isNotEmpty == true;
+
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+        border: Border.all(color: Colors.white, width: 4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: hasAvatar
+            ? CachedNetworkImage(imageUrl: user!.avatar!, fit: BoxFit.cover)
+            : Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.grey, Colors.grey.withValues(alpha: 0.7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    (user?.name.isNotEmpty == true ? user!.name[0] : '?')
+                        .toUpperCase(),
+                    style: GoogleFonts.poppins(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }

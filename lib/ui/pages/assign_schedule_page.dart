@@ -62,7 +62,7 @@ class _CreateSchedulePageState extends State<CreateSchedulePage> {
     if (widget.schedule != null) {
       schedule = widget.schedule!;
       selectedWorkout = widget.schedule?.workout.value;
-      selectedDate = widget.schedule!.selectedDates.first;
+      selectedDate = (widget.schedule!.selectedDates.isNotEmpty ? widget.schedule!.selectedDates : null) as DateTime?;
     }
   }
 

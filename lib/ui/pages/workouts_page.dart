@@ -13,20 +13,21 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_workout_page.dart';
 import 'package:tracks/ui/pages/view_workout_page.dart';
+import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
 
-class WorkoutFragment extends StatefulWidget {
-  const WorkoutFragment({super.key, this.showImport = false});
+class WorkoutsPage extends StatefulWidget {
+  const WorkoutsPage({super.key, this.showImport = false});
 
   final bool showImport;
 
   @override
-  State<WorkoutFragment> createState() => _WorkoutFragmentState();
+  State<WorkoutsPage> createState() => _WorkoutsPageState();
 }
 
-class _WorkoutFragmentState extends State<WorkoutFragment> {
+class _WorkoutsPageState extends State<WorkoutsPage> {
   final searchController = TextEditingController();
   Timer? _debounce;
   String search = "";
@@ -638,7 +639,7 @@ class _PublicBadge extends StatelessWidget {
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.blue[700],
+          color: AppColors.primary,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(8),
             bottomRight: Radius.circular(8),

@@ -4,7 +4,7 @@ import 'package:tracks/ui/components/app_container.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/pages/exercises_page.dart';
 import 'package:tracks/ui/pages/explore_page.dart';
-import 'package:tracks/ui/pages/fragments/workout_fragment.dart';
+import 'package:tracks/ui/pages/workouts_page.dart';
 import 'package:tracks/ui/pages/manage_schedule_page.dart';
 import 'package:tracks/ui/pages/muscles_page.dart';
 import 'package:tracks/ui/pages/search_page.dart';
@@ -60,7 +60,7 @@ class _HomeFragmentState extends State<HomeFragment> {
       'action': (context) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => WorkoutFragment()),
+          MaterialPageRoute(builder: (context) => WorkoutsPage()),
         );
       },
     },
