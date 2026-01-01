@@ -59,7 +59,7 @@ flutter build ios
 - **Flutter** - UI framework
 - **PocketBase** - Backend service
 - **Isar** - Local database
-- **Riverpod** - State management
+- **Provider** - State management
 
 ## License
 
