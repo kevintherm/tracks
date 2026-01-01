@@ -30,7 +30,7 @@
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/kevintherm/tracks.git)
 
 # Navigate to project directory
 cd tracks
