@@ -63,24 +63,24 @@ class _SessionsPageState extends State<SessionsPage> {
 
               _SearchBar(controller: searchController),
 
-              Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    BaseButton(
-                      onTap: () {},
-                      child: Row(
-                        children: [
-                          Text("Filter"),
-                          const SizedBox(width: 8),
-                          Icon(Iconsax.filter_outline, size: 20),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [
+              //       BaseButton(
+              //         onTap: () {},
+              //         child: Row(
+              //           children: [
+              //             Text("Filter"),
+              //             const SizedBox(width: 8),
+              //             Icon(Iconsax.filter_outline, size: 20),
+              //           ],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
               Expanded(
                 child: StreamBuilder<List<Session>>(

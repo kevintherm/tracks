@@ -73,7 +73,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
         SnackBar(
           duration: snackBarLong,
           content: Text(errorClient(error)),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(8.0),
@@ -88,7 +88,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
         SnackBar(
           duration: snackBarLong,
           content: Text(fatalError),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(8.0),
@@ -154,9 +154,12 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black12, width: 1),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(16.0),
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -271,12 +274,12 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                                   const Text('Change Password'),
                                   const SizedBox(width: 8),
                                   if (isLoading)
-                                    const SizedBox(
+                                    SizedBox(
                                       width: 18,
                                       height: 18,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: Colors.white,
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                     ),
                                 ],

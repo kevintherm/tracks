@@ -1,60 +1,568 @@
 [
   {
-    "name": "Full Body Beginner",
-    "description": "A great workout for beginners hitting all major muscle groups.",
+    "name": "Workout 2025-06-30",
+    "description": "Workout logged on 2025-06-30",
     "thumbnail": null,
     "exercises": [
       {
-        "name": "Push Up",
-        "description": "Standard push up",
-        "caloriesBurned": 0.5,
+        "name": "Bench",
+        "description": "Bench",
+        "caloriesBurned": 0,
         "muscles": ["Chest", "Triceps"],
         "sets": 3,
         "reps": 10
       },
       {
-        "name": "Squat",
-        "description": "Bodyweight squat",
-        "caloriesBurned": 0.8,
-        "muscles": ["Quads", "Glutes"],
+        "name": "Incline smith",
+        "description": "Incline smith",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders"],
         "sets": 3,
-        "reps": 15
+        "reps": 10
       },
       {
-        "name": "Plank",
-        "description": "Hold for time",
-        "caloriesBurned": 0.3,
-        "muscles": ["Abs"],
-        "sets": 3,
-        "reps": 60
+        "name": "Machine fly",
+        "description": "Machine fly",
+        "caloriesBurned": 0,
+        "muscles": ["Chest"],
+        "sets": 1,
+        "reps": 10
+      },
+      {
+        "name": "Bench shoulder press",
+        "description": "Bench shoulder press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Triceps", "Shoulders"],
+        "sets": 2,
+        "reps": 10
+      },
+      {
+        "name": "Cable lat raises",
+        "description": "Cable lat raises",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders"],
+        "sets": 1,
+        "reps": 10
+      },
+      {
+        "name": "Cable raises",
+        "description": "Cable raises",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders", "Abs"],
+        "sets": 2,
+        "reps": 10
+      },
+      {
+        "name": "Cable push down",
+        "description": "Cable push down",
+        "caloriesBurned": 0,
+        "muscles": ["Full Body"],
+        "sets": 1,
+        "reps": 10
       }
     ]
   },
   {
-    "name": "Upper Body Power",
-    "description": "Focus on chest and back strength.",
+    "name": "Workout 2025-07-07",
+    "description": "Workout logged on 2025-07-07",
     "thumbnail": null,
     "exercises": [
       {
-        "name": "Bench Press",
-        "caloriesBurned": 0.7,
-        "muscles": ["Chest"],
-        "sets": 4,
-        "reps": 8
+        "name": "Incline smith",
+        "description": "Incline smith",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders"],
+        "sets": 3,
+        "reps": 10
       },
       {
-        "name": "Pull Up",
-        "caloriesBurned": 1.0,
-        "muscles": ["Back"],
-        "sets": 4,
-        "reps": 8
-      },
-      {
-        "name": "Push Up",
-        "caloriesBurned": 0.5,
+        "name": "Cable fly",
+        "description": "Cable fly",
+        "caloriesBurned": 0,
         "muscles": ["Chest"],
         "sets": 3,
-        "reps": 15
+        "reps": 10
+      },
+      {
+        "name": "Weighted dips",
+        "description": "Weighted dips",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Triceps"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "Smith shoulder press",
+        "description": "Smith shoulder press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders", "Triceps"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "Cable lat raises",
+        "description": "Cable lat raises",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders"],
+        "sets": 3,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-08",
+    "description": "Workout logged on 2025-07-08",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Close grip pulldown",
+        "description": "Close grip pulldown",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Wide row",
+        "description": "Wide row",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single machine pulldown",
+        "description": "Single machine pulldown",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable curl",
+        "description": "Cable curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Hammer curl",
+        "description": "Hammer curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single supported curl",
+        "description": "Single supported curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single wrist curl",
+        "description": "Single wrist curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Shrugs",
+        "description": "Shrugs",
+        "caloriesBurned": 0,
+        "muscles": ["Traps"],
+        "sets": 3,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-09",
+    "description": "Workout logged on 2025-07-09",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Leg press",
+        "description": "Leg press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Triceps", "Hamstrings", "Shoulders", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Leg extension",
+        "description": "Leg extension",
+        "caloriesBurned": 0,
+        "muscles": ["Hamstrings", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Leg curl",
+        "description": "Leg curl",
+        "caloriesBurned": 0,
+        "muscles": ["Hamstrings", "Biceps", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Calf raises",
+        "description": "Calf raises",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders", "Calves", "Abs"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Leg raises",
+        "description": "Leg raises",
+        "caloriesBurned": 0,
+        "muscles": ["Hamstrings", "Quads", "Abs"],
+        "sets": 4,
+        "reps": 10
+      },
+      {
+        "name": "Abs curl",
+        "description": "Abs curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps", "Abs"],
+        "sets": 2,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-10",
+    "description": "Workout logged on 2025-07-10",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Flat bench press",
+        "description": "Flat bench press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Triceps", "Shoulders"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "Machine fly",
+        "description": "Machine fly",
+        "caloriesBurned": 0,
+        "muscles": ["Chest"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Machine incline",
+        "description": "Machine incline",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable lat raises",
+        "description": "Cable lat raises",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders"],
+        "sets": 1,
+        "reps": 10
+      },
+      {
+        "name": "Cable row",
+        "description": "Cable row",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 1,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-11",
+    "description": "Workout logged on 2025-07-11",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Close grip pull down",
+        "description": "Close grip pull down",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Close grip rows",
+        "description": "Close grip rows",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single machine pulldown",
+        "description": "Single machine pulldown",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable curl",
+        "description": "Cable curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 3
+      },
+      {
+        "name": "Hammer curl",
+        "description": "Hammer curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single preacher curl",
+        "description": "Single preacher curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 2,
+        "reps": 10
+      },
+      {
+        "name": "Smith shrugs",
+        "description": "Smith shrugs",
+        "caloriesBurned": 0,
+        "muscles": ["Traps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Front cable forearm",
+        "description": "Front cable forearm",
+        "caloriesBurned": 0,
+        "muscles": ["Full Body"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Behind cable forearm",
+        "description": "Behind cable forearm",
+        "caloriesBurned": 0,
+        "muscles": ["Full Body"],
+        "sets": 3,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-14",
+    "description": "Workout logged on 2025-07-14",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Smith Incline",
+        "description": "Smith Incline",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "Machine incline",
+        "description": "Machine incline",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders"],
+        "sets": 2,
+        "reps": 10
+      },
+      {
+        "name": "Machine fly",
+        "description": "Machine fly",
+        "caloriesBurned": 0,
+        "muscles": ["Chest"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Dumbbell press",
+        "description": "Dumbbell press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Shoulders", "Triceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable lateral",
+        "description": "Cable lateral",
+        "caloriesBurned": 0,
+        "muscles": ["Shoulders"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Machine rear dealt",
+        "description": "Machine rear dealt",
+        "caloriesBurned": 0,
+        "muscles": ["Full Body"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable tricep extension",
+        "description": "Cable tricep extension",
+        "caloriesBurned": 0,
+        "muscles": ["Triceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable tricep pushdown",
+        "description": "Cable tricep pushdown",
+        "caloriesBurned": 0,
+        "muscles": ["Triceps"],
+        "sets": 2,
+        "reps": 5
+      },
+      {
+        "name": "Cable single tricep extension",
+        "description": "Cable single tricep extension",
+        "caloriesBurned": 0,
+        "muscles": ["Triceps"],
+        "sets": 3,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-15",
+    "description": "Workout logged on 2025-07-15",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Seated cable row",
+        "description": "Seated cable row",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Weighted pull up",
+        "description": "Weighted pull up",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "T bar row",
+        "description": "T bar row",
+        "caloriesBurned": 0,
+        "muscles": ["Back", "Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Cable curl",
+        "description": "Cable curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Hammer curl",
+        "description": "Hammer curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Single preacher curl",
+        "description": "Single preacher curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 6
+      },
+      {
+        "name": "Smith shrugs",
+        "description": "Smith shrugs",
+        "caloriesBurned": 0,
+        "muscles": ["Traps"],
+        "sets": 2,
+        "reps": 6
+      },
+      {
+        "name": "Cable wrist curl",
+        "description": "Cable wrist curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      }
+    ]
+  },
+  {
+    "name": "Workout 2025-07-16",
+    "description": "Workout logged on 2025-07-16",
+    "thumbnail": null,
+    "exercises": [
+      {
+        "name": "Leg press",
+        "description": "Leg press",
+        "caloriesBurned": 0,
+        "muscles": ["Chest", "Triceps", "Hamstrings", "Shoulders", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Leg extension",
+        "description": "Leg extension",
+        "caloriesBurned": 0,
+        "muscles": ["Hamstrings", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Bulgarian split squat",
+        "description": "Bulgarian split squat",
+        "caloriesBurned": 0,
+        "muscles": ["Glutes", "Quads"],
+        "sets": 2,
+        "reps": 5
+      },
+      {
+        "name": "Calf extension",
+        "description": "Calf extension",
+        "caloriesBurned": 0,
+        "muscles": ["Calves", "Triceps", "Quads"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "Spine curl",
+        "description": "Spine curl",
+        "caloriesBurned": 0,
+        "muscles": ["Biceps"],
+        "sets": 3,
+        "reps": 10
+      },
+      {
+        "name": "L sit",
+        "description": "L sit",
+        "caloriesBurned": 0,
+        "muscles": ["Full Body"],
+        "sets": 2,
+        "reps": 10
       }
     ]
   }

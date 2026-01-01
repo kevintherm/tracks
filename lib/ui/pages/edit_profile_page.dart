@@ -1,3 +1,5 @@
+import 'package:tracks/ui/components/app_container.dart';
+import 'package:tracks/ui/components/buttons/primary_button.dart';
 import 'package:tracks/ui/components/safe_keyboard.dart';
 import 'package:tracks/models/auth_user.dart';
 import 'package:tracks/ui/pages/edit_password_page.dart';
@@ -501,7 +503,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             right: 0,
                             child: CircleAvatar(
                               radius: 15,
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               child: Icon(
                                 Icons.edit,
                                 size: 16,
@@ -516,16 +520,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                   const SizedBox(height: 16.0),
 
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(16.0),
-                      color: Theme.of(context).cardColor,
-                    ),
+                  AppContainer(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -541,16 +536,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             controller: nameController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(99.0),
+                                borderRadius: BorderRadius.circular(16.0),
                               ),
                             ),
                             validator: (value) => value == null || value.isEmpty
                                 ? 'Name cannot be empty'
                                 : null,
                           ),
-
+                    
                           const SizedBox(height: 16.0),
-
+                    
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -563,8 +558,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
                                   color: isEmailVerified
-                                      ? Theme.of(context).colorScheme.primaryContainer
-                                      : Theme.of(context).colorScheme.tertiaryContainer,
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.tertiaryContainer,
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -579,8 +578,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             : Icons.clear,
                                         size: 16.0,
                                         color: isEmailVerified
-                                            ? Theme.of(context).colorScheme.primary
-                                            : Theme.of(context).colorScheme.tertiary,
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.tertiary,
                                       ),
                                       const SizedBox(width: 4.0),
                                       Text(
@@ -589,8 +592,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             : 'UNVERIFIED',
                                         style: TextStyle(
                                           color: isEmailVerified
-                                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                                              : Theme.of(context).colorScheme.onTertiaryContainer,
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimaryContainer
+                                              : Theme.of(context)
+                                                    .colorScheme
+                                                    .onTertiaryContainer,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -606,26 +613,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             controller: emailController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(99.0),
+                                borderRadius: BorderRadius.circular(16.0),
                               ),
                             ),
                             validator: (value) => value == null || value.isEmpty
                                 ? 'Name cannot be empty'
                                 : null,
                           ),
-
+                    
                           const SizedBox(height: 16.0),
-
+                    
                           SizedBox(
                             width: double.infinity,
-                            child: FilledButton(
-                              onPressed: isLoading
+                            child: PrimaryButton(
+                              onTap: isLoading
                                   ? null
                                   : () => handleSaveChange(context),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('Save Changes'),
+                                  const Text(
+                                    'Save Changes',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                   const SizedBox(width: 8),
                                   if (isLoading)
                                     const SizedBox(
