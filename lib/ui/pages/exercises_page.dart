@@ -13,7 +13,6 @@ import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/pick_import_dialog.dart';
 import 'package:tracks/ui/pages/create_exercise_page.dart';
 import 'package:tracks/ui/pages/view_exercise_page.dart';
-import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
 import 'package:tracks/utils/fuzzy_search.dart';
 import 'package:tracks/utils/toast.dart';
@@ -127,8 +126,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
                       return Center(
                         child: Text(
                           'Something went wrong: ${snapshot.error}',
-                          style: const TextStyle(
-                            color: Colors.redAccent,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
                             fontStyle: FontStyle.italic,
                           ),
                           textAlign: TextAlign.center,
@@ -156,7 +155,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         child: Text(
                           "No exercise available.",
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -168,7 +167,7 @@ class _ExercisesPageState extends State<ExercisesPage> {
                         child: Text(
                           "No matching exercise found.",
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -220,7 +219,8 @@ class _BackButton extends StatelessWidget {
           message: "Back",
           child: Pressable(
             onTap: () => Navigator.of(context).pop(),
-            child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+            child: Icon(Iconsax.arrow_left_2_outline,
+                color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         const SizedBox(width: 40),
@@ -319,7 +319,7 @@ class _SearchBar extends StatelessWidget {
               ),
               prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).cardColor,
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,
@@ -352,7 +352,7 @@ class _SearchBar extends StatelessWidget {
                       maxLines: 1,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -366,7 +366,7 @@ class _SearchBar extends StatelessWidget {
                       'Clear',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -444,13 +444,13 @@ class _ExerciseListItem extends StatelessWidget {
       },
       background: _DismissBackground(
         alignment: Alignment.centerLeft,
-        color: Colors.green[200]!,
+        color: Colors.green,
         icon: Icons.edit,
         padding: const EdgeInsets.only(left: 20),
       ),
       secondaryBackground: _DismissBackground(
         alignment: Alignment.centerRight,
-        color: Colors.red[200]!,
+        color: Theme.of(context).colorScheme.error,
         icon: Icons.delete,
         padding: const EdgeInsets.only(right: 20),
       ),
@@ -481,7 +481,8 @@ class _ConfirmDeleteDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
+          Icon(Iconsax.trash_outline,
+              size: 48, color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 16),
           Text(
             'Delete Exercise?',
@@ -491,7 +492,9 @@ class _ConfirmDeleteDialog extends StatelessWidget {
           Text(
             'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+            style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           Row(
@@ -502,7 +505,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -523,7 +526,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.red[400],
+                      color: Theme.of(context).colorScheme.error,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -532,7 +535,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onError,
                       ),
                     ),
                   ),
@@ -624,10 +627,10 @@ class _ExerciseCard extends StatelessWidget {
                             label: "${exercise.caloriesBurned} Kkal",
                           ),
                           const SizedBox(width: 16),
-                          _ExerciseStat(
-                            icon: MingCute.refresh_3_line,
-                            label: "0x",
-                          ),
+                          // _ExerciseStat(
+                          //   icon: MingCute.refresh_3_line,
+                          //   label: "0x",
+                          // ),
                         ],
                       ),
                       if (muscleExcerpt.isNotEmpty)
@@ -669,7 +672,7 @@ class _ExerciseStat extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -692,7 +695,7 @@ class _PublicBadge extends StatelessWidget {
       top: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(8),
             bottomRight: Radius.circular(8),
@@ -702,7 +705,7 @@ class _PublicBadge extends StatelessWidget {
         child: Text(
           "Public",
           style: GoogleFonts.inter(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
             fontSize: 12,
             fontWeight: FontWeight.w400,
           ),

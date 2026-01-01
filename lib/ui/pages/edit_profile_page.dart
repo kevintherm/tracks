@@ -108,7 +108,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       messenger.showSnackBar(
                         SnackBar(
                           content: Text('Password cannot be empty'),
-                          backgroundColor: Colors.red,
+                          backgroundColor: Theme.of(context).colorScheme.error,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(8.0),
@@ -183,7 +183,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(e.toString()),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Theme.of(context).colorScheme.error,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
@@ -196,7 +196,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(e.toString()),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Theme.of(context).colorScheme.error,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
@@ -267,7 +267,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 SnackBar(
                   duration: snackBarShort,
                   content: Text(error.toString()),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(8.0),
@@ -403,7 +403,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(e.toString()),
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
             Navigator.pop(context);
@@ -501,11 +501,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             right: 0,
                             child: CircleAvatar(
                               radius: 15,
-                              backgroundColor: Colors.teal,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               child: Icon(
                                 Icons.edit,
                                 size: 16,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
                           ),
@@ -519,9 +519,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black12, width: 1),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(16.0),
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -560,8 +563,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
                                   color: isEmailVerified
-                                      ? Colors.blue[50]
-                                      : Colors.amber[50],
+                                      ? Theme.of(context).colorScheme.primaryContainer
+                                      : Theme.of(context).colorScheme.tertiaryContainer,
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -576,8 +579,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             : Icons.clear,
                                         size: 16.0,
                                         color: isEmailVerified
-                                            ? Colors.blue
-                                            : Colors.amber,
+                                            ? Theme.of(context).colorScheme.primary
+                                            : Theme.of(context).colorScheme.tertiary,
                                       ),
                                       const SizedBox(width: 4.0),
                                       Text(
@@ -586,8 +589,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                             : 'UNVERIFIED',
                                         style: TextStyle(
                                           color: isEmailVerified
-                                              ? Colors.blue[700]
-                                              : Colors.amber[700],
+                                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                                              : Theme.of(context).colorScheme.onTertiaryContainer,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -630,7 +633,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       height: 18,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: Colors.white,
                                       ),
                                     ),
                                 ],

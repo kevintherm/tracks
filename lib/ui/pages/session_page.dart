@@ -22,6 +22,7 @@ import 'package:tracks/ui/pages/modals/session_finish_set_dialog.dart';
 import 'package:tracks/ui/pages/modals/session_options.dart';
 import 'package:tracks/ui/pages/modals/session_finish_reps_dialog.dart';
 import 'package:tracks/ui/pages/modals/session_finish_weight_dialog.dart';
+import 'package:tracks/ui/pages/modals/session_abandon_dialog.dart';
 import 'package:tracks/ui/pages/session_finish_page.dart';
 import 'package:tracks/utils/app_colors.dart';
 import 'package:tracks/utils/consts.dart';
@@ -209,25 +210,6 @@ class _SessionPageState extends State<SessionPage> {
 
     if (!mounted) return;
 
-    // Finish exercise or another set
-    if (!lastExercise &&
-        (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) {
-      return;
-    }
-
-    if (!mounted) return;
-    final finishExercise = await showModalBottomSheet<bool>(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (BuildContext context) {
-        return PopScope(
-          canPop: false,
-          child: _ModalPadding(child: SessionFinishSetDialog()),
-        );
-      },
-    );
-
     final setDuration = elapsed.inSeconds;
     final setRestDuration = restElapsed.inSeconds;
 
@@ -247,13 +229,12 @@ class _SessionPageState extends State<SessionPage> {
       sessionStarted = false;
     });
 
-    // Stop work timer and reset, start rest timer
+    // Stop work timer and reset
     stopwatch.stop();
     stopwatch.reset();
     elapsed = Duration();
 
     restStopwatch.reset();
-    restStopwatch.start();
     restElapsed = Duration();
 
     final seToSave = SessionExerciseData(
@@ -271,6 +252,25 @@ class _SessionPageState extends State<SessionPage> {
         exercises: [seToSave],
       );
     }
+
+    // Finish exercise or another set
+    if (!lastExercise &&
+        (exercisePlan != null && sessionSets.length < exercisePlan!.sets)) {
+      return;
+    }
+
+    if (!mounted) return;
+    final finishExercise = await showModalBottomSheet<bool>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (BuildContext context) {
+        return PopScope(
+          canPop: false,
+          child: _ModalPadding(child: SessionFinishSetDialog()),
+        );
+      },
+    );
 
     if (finishExercise == true) {
       final pos = exercises.indexOf(
@@ -308,7 +308,6 @@ class _SessionPageState extends State<SessionPage> {
 
       // Reset rest timer for new exercise
       restStopwatch.reset();
-      restStopwatch.start();
       restElapsed = Duration();
     }
   }
@@ -325,15 +324,34 @@ class _SessionPageState extends State<SessionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(child: _buildContent()),
-            _buildBottomControls(),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final shouldPop = await showModalBottomSheet<bool>(
+          context: context,
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (context) => SessionAbandonDialog(),
+        );
+
+        if (shouldPop == true && context.mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(child: _buildContent()),
+              _buildBottomControls(),
+            ],
+          ),
         ),
       ),
     );

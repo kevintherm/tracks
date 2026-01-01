@@ -40,23 +40,6 @@ class AuthService {
     _prefs.setBool(_syncEnabledKey, value);
   }
 
-  /// Initialize sync preferences based on current auth state
-  Future<void> initializeSyncPreferences() async {
-    final isLoggedIn = _pb.authStore.isValid;
-    await _setSyncEnabled(isLoggedIn);
-  }
-
-  /// Update sync status based on backend availability
-  Future<void> updateSyncAvailability(bool isAvailable) async {
-    final isLoggedIn = _pb.authStore.isValid;
-    await _setSyncEnabled(isLoggedIn && isAvailable);
-  }
-
-  /// Private helper to set sync enabled state
-  Future<void> _setSyncEnabled(bool enabled) async {
-    await _prefs.setBool(_syncEnabledKey, enabled);
-  }
-
   Map<String, dynamic>? get currentUser => _pb.authStore.record?.toJson();
 
   set currentUser(dynamic record) {
@@ -100,15 +83,11 @@ class AuthService {
     final result = await _pb
         .collection('users')
         .authWithPassword(email, password);
-    // Enable sync when successfully logged in
-    await _setSyncEnabled(true);
     return result;
   }
 
   Future<void> signOut() async {
     _pb.authStore.clear();
-    // Disable sync when user signs out
-    await _setSyncEnabled(false);
   }
 
   Future<AuthUser?> fetchUserData() async {

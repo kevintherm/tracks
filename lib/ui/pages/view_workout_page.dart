@@ -62,7 +62,6 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
           body: CustomScrollView(
             slivers: [
               _buildAppBar(context),
@@ -110,7 +109,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             ListView.separated(
@@ -160,14 +159,14 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: Tooltip(
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(Iconsax.arrow_left_2_outline, color: Theme.of(context).iconTheme.color),
         ),
       ),
       title: widget.asModal
@@ -195,7 +194,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                   },
                   child: Icon(
                     MingCute.external_link_line,
-                    color: Colors.grey[700],
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ),
@@ -238,7 +237,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
                       ),
                     ),
                   ),
-                  child: Icon(Iconsax.menu_outline, color: Colors.grey[700]),
+                  child: Icon(Iconsax.menu_outline, color: Theme.of(context).iconTheme.color),
                 ),
               ),
             ],
@@ -270,14 +269,14 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Last updated: ${_formatDate(_workout.updatedAt)}',
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -337,7 +336,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
@@ -345,7 +344,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.black45,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -369,7 +368,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
         );
       },
       child: _buildChip(
-        const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+        Icon(MingCute.fitness_fill, size: 16, color: Theme.of(context).colorScheme.primary),
         muscle.name,
       ),
     );
@@ -380,12 +379,12 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -401,7 +400,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -413,9 +412,9 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -425,21 +424,21 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
             value:
                 '${_workout.exercises.fold(0.0, (sum, e) => sum + e.caloriesBurned).toInt()}~',
             label: 'Kcal',
-            color: Colors.orange,
+            color: Theme.of(context).colorScheme.tertiary,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
           _buildStatItem(
             icon: Iconsax.timer_1_bold,
             value: '15',
             label: 'Min',
-            color: Colors.blue,
+            color: Theme.of(context).colorScheme.primary,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
           _buildStatItem(
             icon: Iconsax.activity_bold,
             value: 'Med',
             label: 'Intensity',
-            color: Colors.purple,
+            color: Theme.of(context).colorScheme.secondary,
           ),
         ],
       ),
@@ -468,12 +467,12 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -491,7 +490,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
@@ -499,7 +498,7 @@ class _ViewWorkoutPageState extends State<ViewWorkoutPage> {
           _workout.description!,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             height: 1.6,
           ),
         ),
@@ -541,7 +540,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
+        Icon(Iconsax.trash_outline, size: 48, color: Theme.of(context).colorScheme.error),
         const SizedBox(height: 16),
         Text(
           'Delete Workout?',
@@ -551,7 +550,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
         Text(
           'Are you sure you want to delete "${workout.name}"? This action cannot be undone.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+          style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
         Row(
@@ -562,7 +561,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -571,6 +570,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -583,7 +583,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.red[400],
+                    color: Theme.of(context).colorScheme.error,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -592,7 +592,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onError,
                     ),
                   ),
                 ),
@@ -646,20 +646,20 @@ class _ExerciseCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  _buildStat(icon: MingCute.time_line, label: "32 Minutes"),
+                  // const SizedBox(height: 4),
+                  // _buildStat(icon: MingCute.time_line, label: "32 Minutes"),
                   if (excerpt.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    _buildStat(icon: MingCute.barbell_line, label: excerpt),
+                    _buildStat(context, icon: MingCute.barbell_line, label: excerpt),
                   ],
                 ],
               ),
             ),
             if (!readonly)
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 8),
           ],
         ),
@@ -667,18 +667,18 @@ class _ExerciseCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStat({required IconData icon, required String label}) {
+  Widget _buildStat(context, {required IconData icon, required String label}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 14, color: Colors.grey[500]),
+        Icon(icon, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+            style: GoogleFonts.poppins(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:tracks/ui/components/section_card.dart';
 import 'package:tracks/ui/pages/edit_password_page.dart';
 import 'package:tracks/ui/pages/edit_profile_page.dart';
+import 'package:tracks/providers/theme_provider.dart';
 import 'package:tracks/services/auth_service.dart';
 import 'package:tracks/services/pocketbase_service.dart';
 import 'package:tracks/ui/pages/login_with_email_page.dart';
@@ -89,7 +90,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
           _SectionItem(
             label: 'Dark Mode',
             icon: Icon(Iconsax.moon_outline),
-            action: (context) {},
+            action: (context) => _showThemeToggleSheet(context),
           ),
           _SectionItem(
             label: 'Sync to Cloud',
@@ -125,15 +126,118 @@ class _ProfileFragmentState extends State<ProfileFragment> {
     return AssetImage('assets/drawings/not-found.jpg');
   }
 
-  void _showSyncToggleSheet(BuildContext context) {
-    final authService = context.read<AuthService>();
+  void _showThemeToggleSheet(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
 
     showModalBottomSheet(
       context: context,
       builder: (BuildContext sheetContext) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
-            final isSyncEnabled = authService.isSyncEnabled;
+            final isDark = themeProvider.isDarkMode;
+
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Iconsax.moon_outline,
+                        size: 32,
+                        color: Colors.purple[400],
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Dark Mode',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Reduce eye strain and save battery life by enabling dark mode.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        themeProvider.toggleTheme(!isDark);
+                        setModalState(() {});
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Theme.of(context).dividerColor),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  isDark
+                                      ? Iconsax.moon_bold
+                                      : Iconsax.sun_1_bold,
+                                  color: isDark
+                                      ? Colors.purple[400]
+                                      : Colors.orange[400],
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  isDark ? 'On' : 'Off',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Switch(
+                              value: isDark,
+                              onChanged: (value) {
+                                themeProvider.toggleTheme(value);
+                                setModalState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSyncToggleSheet(BuildContext context) {
+    final auth = context.read<AuthService>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext sheetContext) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            final isSyncEnabled = auth.isSyncEnabled;
 
             return Container(
               padding: const EdgeInsets.all(24),
@@ -163,7 +267,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                     'Enable cloud sync to backup your data and sync across devices. You must be signed in to use this feature.',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -171,10 +275,10 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () {
-                        if (authService.currentUser == null) return;
+                        if (auth.currentUser == null) return;
 
                         setModalState(() {
-                          authService.isSyncEnabled = !isSyncEnabled;
+                          auth.isSyncEnabled = !isSyncEnabled;
                         });
                         setState(() {}); // Update parent state
                       },
@@ -185,7 +289,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
+                          border: Border.all(color: Theme.of(context).dividerColor),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -199,7 +303,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                                       : Iconsax.cloud_cross_outline,
                                   color: isSyncEnabled
                                       ? Colors.green[600]
-                                      : Colors.grey[600],
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
@@ -213,14 +317,14 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                             ),
                             Switch(
                               value: isSyncEnabled,
-                              onChanged: (value) =>
-                                  authService.currentUser ??
-                                  (value) {
-                                    setModalState(() {
-                                      authService.isSyncEnabled = value;
-                                    });
-                                    setState(() {}); // Update parent state
-                                  },
+                              onChanged: auth.currentUser == null
+                                  ? null
+                                  : (value) {
+                                      setModalState(() {
+                                        auth.isSyncEnabled = value;
+                                      });
+                                      setState(() {}); // Update parent state
+                                    },
                             ),
                           ],
                         ),
@@ -257,7 +361,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                       ),
                     ),
 
-                  if (authService.currentUser == null)
+                  if (auth.currentUser == null)
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -313,7 +417,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
             children: [
               CircleAvatar(
                 backgroundImage: _getUserAvatarProvider(user),
-                backgroundColor: Colors.grey[300],
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 radius: 56.0,
               ),
               SizedBox(height: 8.0),
@@ -322,9 +426,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                 style: GoogleFonts.inter(
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -332,7 +434,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.normal,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -369,7 +471,7 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                           trailing: Icon(
                             Iconsax.arrow_right_3_outline,
                             size: 20,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ),

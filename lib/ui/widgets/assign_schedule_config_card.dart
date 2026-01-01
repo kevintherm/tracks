@@ -216,7 +216,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Colors.grey[100],
+        color: Theme.of(context).cardColor,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -267,7 +267,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
                       decoration: BoxDecoration(
                         color: selected
                             ? AppColors.lightPrimary.withValues(alpha: 0.2)
-                            : Colors.white,
+                            : Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -279,7 +279,7 @@ class _AssignScheduleConfigCardState extends State<AssignScheduleConfigCard> {
                               : FontWeight.w400,
                           color: selected
                               ? AppColors.lightPrimary
-                              : Colors.grey[700],
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -455,7 +455,7 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
-                              : Colors.grey[300]!,
+                              : Theme.of(context).dividerColor,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -468,7 +468,7 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
                               : FontWeight.w400,
                           color: isSelected
                               ? AppColors.primary
-                              : Colors.black87,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -581,7 +581,7 @@ class _RecurrenceTypePickerDialogState
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
-                              : Colors.grey[300]!,
+                              : Theme.of(context).dividerColor,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -594,7 +594,7 @@ class _RecurrenceTypePickerDialogState
                               : FontWeight.w400,
                           color: isSelected
                               ? AppColors.primary
-                              : Colors.black87,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.center,
                       ),

@@ -1,7 +1,7 @@
-- add performed_count for cached occurances count (exercises, workouts)
 - deploy V1 !!!!
-- follow feature for explore page
 
+- follow feature for explore page
+- add performed_count for cached occurances count (exercises, workouts)
 - search function on home fragment
 - search function on explore page
 - add estimated time column for exercises
@@ -60,6 +60,9 @@ session page
     - create schedule page
 
 #done
+- add dark mode and fix hardcoded colors
+- Tracks - bug after saving exercises no feedback
+- Tracks - fix bug session page after finish state counter did not reset and set did not get recorded
 - populated home fragment
 - implement browse feature
     - add custom view resources

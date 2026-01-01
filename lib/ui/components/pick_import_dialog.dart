@@ -117,7 +117,7 @@ class _PickAndImportDialogState extends State<PickAndImportDialog> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context).dividerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -142,27 +142,27 @@ class _PickAndImportDialogState extends State<PickAndImportDialog> {
           Text(
             widget.description,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+            style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           if (_errorMessage != null) ...[
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red[200]!),
+                border: Border.all(color: Theme.of(context).colorScheme.error),
               ),
               child: Row(
                 children: [
-                  Icon(Iconsax.danger_outline, color: Colors.red[700], size: 20),
+                  Icon(Iconsax.danger_outline, color: Theme.of(context).colorScheme.onErrorContainer, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.red[700],
+                        color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
                     ),
                   ),
@@ -184,7 +184,7 @@ class _PickAndImportDialogState extends State<PickAndImportDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -193,6 +193,7 @@ class _PickAndImportDialogState extends State<PickAndImportDialog> {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),

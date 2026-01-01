@@ -66,9 +66,9 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary
+              ? Theme.of(context).colorScheme.primary
               : isToday
-              ? AppColors.lightPrimary.withValues(alpha: 0.3)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -79,10 +79,10 @@ class _TableCalendarCompactState extends State<TableCalendarCompact> {
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
-                  ? Colors.white
+                  ? Theme.of(context).colorScheme.onPrimary
                   : isToday
-                  ? AppColors.primary
-                  : Colors.black87,
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

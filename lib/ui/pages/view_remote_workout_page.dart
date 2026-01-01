@@ -207,20 +207,17 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: Colors.white,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_workout == null) {
       return const Scaffold(
-        backgroundColor: Colors.white,
         body: Center(child: Text("Failed to load workout")),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _fetchDetails,
         child: CustomScrollView(
@@ -242,7 +239,7 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
                         _workout!.description!,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           height: 1.5,
                         ),
                       ),
@@ -270,14 +267,14 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
                         width: 24,
                         height: 24,
                         child: _isCopying
-                            ? CircularProgressIndicator(color: Colors.white)
-                            : Icon(Iconsax.copy_outline, color: Colors.white),
+                            ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
+                            : Icon(Iconsax.copy_outline, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "Copy to Library",
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -293,14 +290,14 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: Tooltip(
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(Iconsax.arrow_left_2_outline, color: Theme.of(context).iconTheme.color),
         ),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -322,7 +319,7 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -331,14 +328,14 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 "Remote",
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: Colors.grey[700],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -352,9 +349,9 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
   Widget _buildStatsRow() {
     return Row(
       children: [
-        _buildStatItem(Iconsax.clock_outline, "15 min"), // Placeholder
-        const SizedBox(width: 24),
-        _buildStatItem(Iconsax.flash_outline, "Intermediate"), // Placeholder
+        // _buildStatItem(Iconsax.clock_outline, "15 min"), // Placeholder
+        // const SizedBox(width: 24),
+        // _buildStatItem(Iconsax.flash_outline, "Intermediate"), // Placeholder
         const SizedBox(width: 24),
         _buildStatItem(MingCute.fire_line, "320 cal"), // Placeholder
       ],
@@ -364,13 +361,13 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
   Widget _buildStatItem(IconData icon, String label) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.grey[500]),
+        Icon(icon, size: 18, color: Theme.of(context).iconTheme.color),
         const SizedBox(width: 8),
         Text(
           label,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -386,7 +383,7 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
     if (_workoutExercises.isEmpty) {
       return Text(
         "No exercises found",
-        style: GoogleFonts.inter(color: Colors.grey),
+        style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurfaceVariant),
       );
     }
 
@@ -398,7 +395,7 @@ class _ViewRemoteWorkoutPageState extends State<ViewRemoteWorkoutPage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -454,7 +451,7 @@ class _RemoteExerciseCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -462,7 +459,7 @@ class _RemoteExerciseCard extends StatelessWidget {
                     "$sets Sets • $reps Reps",
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

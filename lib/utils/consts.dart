@@ -20,7 +20,7 @@ const Duration snackBarShort = Duration(seconds: 1, milliseconds: 500);
 const Duration snackBarMedium = Duration(seconds: 3);
 const Duration snackBarLong = Duration(seconds: 5);
 const int scheduleIncludedSessionRange = 120; // 2 Hours after scheduled time
-const String tracksAccountID = "1do4ojehzkmjgaj";
+const String tracksAccountID = "j8yk3zta2rozik1";
 
 String errorClient(ClientException e) {
   log(e.toString());
@@ -53,7 +53,7 @@ Future<bool> showConfirmDialog(
             ),
             PrimaryButton(
               onTap: () => Navigator.of(context).pop(true),
-              child: Text('OK', style: TextStyle(color: Colors.white)),
+              child: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             ),
           ],
         ),
@@ -68,10 +68,12 @@ Widget getImage(
   double height = 100,
 }) {
   // Shimmer placeholder
-  Widget shimmerPlaceholder = Shimmer.fromColors(
-    baseColor: Colors.grey[300]!,
-    highlightColor: Colors.grey[100]!,
-    child: Container(width: width, height: height, color: Colors.white),
+  Widget shimmerPlaceholder = Builder(
+    builder: (context) => Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      highlightColor: Theme.of(context).colorScheme.surface,
+      child: Container(width: width, height: height, color: Theme.of(context).cardColor),
+    ),
   );
 
   // Error/fallback placeholder
@@ -125,10 +127,12 @@ Widget getSafeImage(
   double height = 100,
 }) {
   // Shimmer placeholder
-  Widget shimmerPlaceholder = Shimmer.fromColors(
-    baseColor: Colors.grey[300]!,
-    highlightColor: Colors.grey[100]!,
-    child: Container(width: width, height: height, color: Colors.white),
+  Widget shimmerPlaceholder = Builder(
+    builder: (context) => Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      highlightColor: Theme.of(context).colorScheme.surface,
+      child: Container(width: width, height: height, color: Theme.of(context).cardColor),
+    ),
   );
 
   // Error/fallback placeholder
@@ -158,7 +162,7 @@ Widget getSafeImage(
     );
   }
 
-  log('$imagePath');
+  log(imagePath);
 
   // Priority 2: Check for network image from thumbnail (backend URL only)
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {

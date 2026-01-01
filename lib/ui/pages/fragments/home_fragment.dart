@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tracks/models/post.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/models/workout.dart';
@@ -58,11 +61,11 @@ class _HomeFragmentState extends State<HomeFragment> {
   ];
 
   final quickChips = [
-    {
-      'icon': Iconsax.scan_outline,
-      'title': 'Scan Calories',
-      'action': (context) async {},
-    },
+    // {
+    //   'icon': Iconsax.scan_outline,
+    //   'title': 'Scan Calories',
+    //   'action': (context) async {},
+    // },
     {
       'icon': Iconsax.weight_1_outline,
       'title': 'Manage Workouts',
@@ -114,15 +117,16 @@ class _HomeFragmentState extends State<HomeFragment> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Pressable(
-                  onTap: () {},
-                  child: Icon(Iconsax.notification_1_outline, size: 32),
-                ),
-              ],
-            ),
+            // child: Row(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     Pressable(
+            //       onTap: () {},
+            //       child: Icon(Iconsax.notification_1_outline, size: 32),
+            //     ),
+            //   ],
+            // ),
+            child: SizedBox.shrink(),
           ),
 
           Padding(
@@ -135,7 +139,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w300,
-                    color: Colors.grey[700],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
 
@@ -145,6 +149,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     height: 1.2,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
@@ -160,7 +165,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
@@ -217,19 +222,19 @@ class _HomeFragmentState extends State<HomeFragment> {
                                   ? AppColors.lightPrimary
                                   : Theme.of(context).cardColor,
                               index == 0
-                                  ? Colors.white
+                                  ? Theme.of(context).cardColor
                                   : Theme.of(context).cardColor,
                             ],
-                            stops: [0, 0.5],
+                            stops: [0, 0.3],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey[300]!,
+                              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                               offset: const Offset(0, 1),
                               blurRadius: 2,
                             ),
                             BoxShadow(
-                              color: Colors.grey[200]!,
+                              color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
                               offset: const Offset(0, -2),
                               blurRadius: 10,
                             ),
@@ -246,18 +251,16 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 size: 32,
                                 color: index == 0
                                     ? Colors.white
-                                    : Colors.grey[800],
+                                    : Theme.of(context).colorScheme.onSurface,
                               ),
                               const SizedBox(height: 32),
                               Text(
                                 item['subtitle'] as String,
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  color:
-                                      Theme.of(context).brightness ==
-                                          Brightness.light
+                                  color: index == 0
                                       ? Colors.grey[600]
-                                      : Colors.grey[300],
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),
                               ),
                               Text(
@@ -303,12 +306,12 @@ class _HomeFragmentState extends State<HomeFragment> {
                               color: Theme.of(context).cardColor,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey[300]!,
+                                  color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                                   offset: const Offset(0, 1),
                                   blurRadius: 2,
                                 ),
                                 BoxShadow(
-                                  color: Colors.grey[200]!,
+                                  color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
                                   offset: const Offset(0, -2),
                                   blurRadius: 10,
                                 ),
@@ -454,14 +457,87 @@ class _HomeFragmentState extends State<HomeFragment> {
                   future: context.read<PostRepository>().getPosts(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Shimmer.fromColors(
+                        baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        highlightColor: Theme.of(context).colorScheme.surfaceContainer,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    height: 14,
+                                    color: Theme.of(context).cardColor,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    width: 60,
+                                    height: 12,
+                                    color: Theme.of(context).cardColor,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 12,
+                                        color: Theme.of(context).cardColor,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Container(
+                                        width: 40,
+                                        height: 12,
+                                        color: Theme.of(context).cardColor,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                     if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
+                      log('Failed to load posts: ${snapshot.error}');
+                      return AppContainer(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text(
+                              "Cannot load posts.",
+                              style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                            ),
+                          ),
+                        ),
+                      );
                     }
                     final posts = snapshot.data ?? [];
                     if (posts.isEmpty) {
-                      return const Text('No posts yet.');
+                      return AppContainer(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text(
+                              "No posts available.",
+                              style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                            ),
+                          ),
+                        ),
+                      );
                     }
                     return ListView.separated(
                       shrinkWrap: true,
@@ -508,7 +584,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                         post.created.toString().split(' ')[0],
                                         style: GoogleFonts.inter(
                                           fontSize: 12,
-                                          color: Colors.grey,
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                         ),
                                       ),
                                     ],

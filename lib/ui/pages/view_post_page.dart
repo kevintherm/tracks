@@ -65,7 +65,7 @@ class ViewPostPage extends StatelessWidget {
                     radius: 16,
                     backgroundColor: AppColors.primary,
                     foregroundImage: post.userAvatar != null ? CachedNetworkImageProvider(_userAvatar) : null,
-                    child: post.userAvatar != null ? null : Text("T", style: TextStyle(color: Colors.white)),
+                    child: post.userAvatar != null ? null : Text("T", style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
                   ),
                   const SizedBox(width: 8),
                   Column(
@@ -79,7 +79,7 @@ class ViewPostPage extends StatelessWidget {
                         post.created.toString().split(' ')[0],
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

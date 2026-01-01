@@ -195,20 +195,17 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: Colors.white,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_exercise == null) {
       return const Scaffold(
-        backgroundColor: Colors.white,
         body: Center(child: Text("Failed to load exercise")),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _fetchDetails,
         child: CustomScrollView(
@@ -226,7 +223,7 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
                       style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -235,7 +232,7 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
                         _exercise!.description!,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           height: 1.5,
                         ),
                       ),
@@ -262,14 +259,14 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
                         width: 24,
                         height: 24,
                         child: _isCopying
-                            ? CircularProgressIndicator(color: Colors.white)
-                            : Icon(Iconsax.copy_outline, color: Colors.white),
+                            ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
+                            : Icon(Iconsax.copy_outline, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "Copy to Library",
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -285,14 +282,14 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: Tooltip(
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(Iconsax.arrow_left_2_outline, color: Theme.of(context).iconTheme.color),
         ),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -322,7 +319,7 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -333,7 +330,7 @@ class _ViewRemoteExercisePageState extends State<ViewRemoteExercisePage> {
               .map(
                 (m) => Chip(
                   label: Text(m.muscle.name),
-                  backgroundColor: Colors.grey[100],
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   side: BorderSide.none,
                 ),
               )

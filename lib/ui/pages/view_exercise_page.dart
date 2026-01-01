@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -63,7 +62,6 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
           body: CustomScrollView(
             slivers: [
               _buildAppBar(context),
@@ -113,7 +111,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             ListView.separated(
@@ -183,7 +181,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 ListView.separated(
@@ -272,7 +270,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       title: widget.asModal
@@ -288,7 +286,10 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(
+            Iconsax.arrow_left_2_outline,
+            color: Theme.of(context).iconTheme.color,
+          ),
         ),
       ),
       actions: widget.asModal
@@ -307,7 +308,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
                   },
                   child: Icon(
                     MingCute.external_link_line,
-                    color: Colors.grey[700],
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ),
@@ -356,7 +357,10 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
                       ),
                     );
                   },
-                  child: Icon(Iconsax.menu_outline, color: Colors.grey[700]),
+                  child: Icon(
+                    Iconsax.menu_outline,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
                 ),
               ),
             ],
@@ -388,14 +392,17 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Last updated: ${_formatDate(_exercise.updatedAt)}',
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -443,9 +450,9 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -454,21 +461,29 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
             icon: Iconsax.flash_1_bold,
             value: '${_exercise.caloriesBurned.toInt()}',
             label: 'Kcal',
-            color: Colors.orange,
+            color: Theme.of(context).colorScheme.tertiary,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(
+            width: 1,
+            height: 40,
+            color: Theme.of(context).dividerColor,
+          ),
           _buildStatItem(
             icon: Iconsax.timer_1_bold,
             value: '15', // Placeholder or derived
             label: 'Min',
-            color: Colors.blue,
+            color: Theme.of(context).colorScheme.primary,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(
+            width: 1,
+            height: 40,
+            color: Theme.of(context).dividerColor,
+          ),
           _buildStatItem(
             icon: Iconsax.activity_bold,
             value: 'Med', // Placeholder
             label: 'Intensity',
-            color: Colors.purple,
+            color: Theme.of(context).colorScheme.secondary,
           ),
         ],
       ),
@@ -497,12 +512,15 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
@@ -520,7 +538,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
@@ -528,7 +546,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           _exercise.description!,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             height: 1.6,
           ),
         ),
@@ -548,7 +566,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -570,7 +588,11 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
         );
       },
       child: _buildChip(
-        const Icon(MingCute.fitness_fill, size: 16, color: Colors.redAccent),
+        Icon(
+          MingCute.fitness_fill,
+          size: 16,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         muscle.name,
       ),
     );
@@ -581,12 +603,12 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -602,7 +624,7 @@ class _ViewExercisePageState extends State<ViewExercisePage> {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -644,7 +666,11 @@ class _ConfirmDeleteDialog extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Iconsax.trash_outline, size: 48, color: Colors.red[400]),
+        Icon(
+          Iconsax.trash_outline,
+          size: 48,
+          color: Theme.of(context).colorScheme.error,
+        ),
         const SizedBox(height: 16),
         Text(
           'Delete Exercise?',
@@ -654,7 +680,10 @@ class _ConfirmDeleteDialog extends StatelessWidget {
         Text(
           'Are you sure you want to delete "${exercise.name}"? This action cannot be undone.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         Row(
@@ -665,7 +694,9 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -674,6 +705,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -686,7 +718,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.red[400],
+                    color: Theme.of(context).colorScheme.error,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -695,7 +727,7 @@ class _ConfirmDeleteDialog extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onError,
                     ),
                   ),
                 ),
@@ -726,12 +758,12 @@ class _RelatedWorkoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -760,14 +792,15 @@ class _RelatedWorkoutCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  _buildStat(icon: MingCute.time_line, label: "32 Minutes"),
+                  // const SizedBox(height: 4),
+                  // _buildStat(icon: MingCute.time_line, label: "32 Minutes"),
                   if (exercisesExcerpt.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     _buildStat(
+                      context,
                       icon: MingCute.barbell_line,
                       label: exercisesExcerpt,
                     ),
@@ -776,7 +809,11 @@ class _RelatedWorkoutCard extends StatelessWidget {
               ),
             ),
             if (!readOnly)
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Theme.of(context).iconTheme.color,
+              ),
             const SizedBox(width: 8),
           ],
         ),
@@ -784,18 +821,25 @@ class _RelatedWorkoutCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStat({required IconData icon, required String label}) {
+  Widget _buildStat(context, {required IconData icon, required String label}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 14, color: Colors.grey[500]),
+        Icon(
+          icon,
+          size: 14,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],
@@ -835,12 +879,12 @@ class _SessionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -857,7 +901,7 @@ class _SessionCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Column(
@@ -867,7 +911,7 @@ class _SessionCard extends StatelessWidget {
                     DateFormat('HH:mm').format(session.start),
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (session.end != null)
@@ -875,7 +919,7 @@ class _SessionCard extends StatelessWidget {
                       _formatDuration(session.end!.difference(session.start)),
                       style: GoogleFonts.poppins(
                         fontSize: 10,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     )
@@ -884,7 +928,7 @@ class _SessionCard extends StatelessWidget {
                       'Incomplete',
                       style: GoogleFonts.poppins(
                         fontSize: 10,
-                        color: Colors.orange[300],
+                        color: Theme.of(context).colorScheme.tertiary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -893,7 +937,7 @@ class _SessionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _buildTypeBadge(),
+          _buildTypeBadge(context),
           const SizedBox(height: 12),
           FutureBuilder<List<SessionSet>>(
             future: isar.sessionSets
@@ -909,7 +953,7 @@ class _SessionCard extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Divider(color: Colors.grey[100]),
+                  Divider(color: Theme.of(context).dividerColor),
                   const SizedBox(height: 8),
                   ...sets.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -924,7 +968,9 @@ class _SessionCard extends StatelessWidget {
                               '${index + 1}',
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
-                                color: Colors.grey[400],
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -934,7 +980,7 @@ class _SessionCard extends StatelessWidget {
                               '${set.weight}kg x ${set.reps}',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -947,6 +993,7 @@ class _SessionCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: _getRpeColor(
+                                  context,
                                   set.effortRate,
                                 ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
@@ -955,7 +1002,7 @@ class _SessionCard extends StatelessWidget {
                                 'RPE ${set.effortRate}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 10,
-                                  color: _getRpeColor(set.effortRate),
+                                  color: _getRpeColor(context, set.effortRate),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -973,18 +1020,22 @@ class _SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTypeBadge() {
+  Widget _buildTypeBadge(context) {
     if (schedule != null) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Iconsax.calendar_1_bold, size: 14, color: Colors.blue),
+            Icon(
+              Iconsax.calendar_1_bold,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -992,7 +1043,7 @@ class _SessionCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: Colors.blue[700],
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
@@ -1003,13 +1054,17 @@ class _SessionCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.purple.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(MingCute.barbell_fill, size: 14, color: Colors.purple),
+            Icon(
+              MingCute.barbell_fill,
+              size: 14,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -1017,7 +1072,7 @@ class _SessionCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: Colors.purple[700],
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
                 ),
               ),
             ),
@@ -1028,20 +1083,24 @@ class _SessionCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.orange.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Iconsax.flash_1_bold, size: 14, color: Colors.orange),
+            Icon(
+              Iconsax.flash_1_bold,
+              size: 14,
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
             const SizedBox(width: 6),
             Text(
               'Single Exercise',
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.orange[700],
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
               ),
             ),
           ],
@@ -1066,10 +1125,10 @@ class _SessionCard extends StatelessWidget {
     }
   }
 
-  Color _getRpeColor(int rpe) {
+  Color _getRpeColor(context, int rpe) {
     if (rpe < 7) return Colors.green;
     if (rpe < 9) return Colors.orange;
-    return Colors.red;
+    return Theme.of(context).colorScheme.error;
   }
 
   String _formatDuration(Duration duration) {

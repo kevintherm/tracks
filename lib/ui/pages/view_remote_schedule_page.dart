@@ -188,16 +188,16 @@ class _ViewRemoteSchedulePageState extends State<ViewRemoteSchedulePage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_schedule == null) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: Text("Failed to load schedule")),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: Text("Failed to load schedule")),
       );
     }
 

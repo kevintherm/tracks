@@ -36,4 +36,5 @@ class PocketBaseService {
   void close() {
     _pb.close();
   }
+
 }

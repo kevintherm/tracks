@@ -12,6 +12,7 @@ import 'package:tracks/models/session_set.dart';
 import 'package:tracks/models/workout.dart';
 import 'package:tracks/models/workout_exercises.dart';
 import 'package:tracks/providers/navigation_provider.dart';
+import 'package:tracks/providers/theme_provider.dart';
 import 'package:tracks/repositories/exercise_repository.dart';
 import 'package:tracks/repositories/muscle_repository.dart';
 import 'package:tracks/repositories/post_repository.dart';
@@ -55,6 +56,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
 
         Provider<AuthService>.value(value: authService),
         Provider<Isar>.value(value: isar),
@@ -110,10 +112,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Tracks',
-      themeMode: ThemeMode.light,
+      themeMode: themeProvider.themeMode,
       theme: _buildLightTheme(context),
       darkTheme: _buildDarkTheme(context),
       home: const AuthGate(),
@@ -121,9 +125,10 @@ class MyApp extends StatelessWidget {
   }
 
   ThemeData _buildLightTheme(BuildContext context) {
-    return ThemeData(
+    final base = ThemeData.light();
+    return base.copyWith(
       colorScheme: ColorScheme.fromSeed(seedColor: AppColors.lightPrimary),
-      textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+      textTheme: GoogleFonts.interTextTheme(base.textTheme),
       scaffoldBackgroundColor: Colors.grey[50],
       cardColor: Colors.white,
       cardTheme: const CardThemeData(color: Colors.white),
@@ -131,14 +136,16 @@ class MyApp extends StatelessWidget {
   }
 
   ThemeData _buildDarkTheme(BuildContext context) {
-    return ThemeData(
+    final base = ThemeData.dark();
+    return base.copyWith(
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.dark,
       ),
-      textTheme: GoogleFonts.interTextTheme(
-        ThemeData(brightness: Brightness.dark).textTheme,
-      ),
+      textTheme: GoogleFonts.interTextTheme(base.textTheme),
+      scaffoldBackgroundColor: const Color(0xFF121212),
+      cardColor: const Color(0xFF1E1E1E),
+      cardTheme: const CardThemeData(color: Color(0xFF1E1E1E)),
     );
   }
 }

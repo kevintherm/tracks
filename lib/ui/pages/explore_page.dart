@@ -104,7 +104,7 @@ class _ExplorePageState extends State<ExplorePage> {
                             style: GoogleFonts.poppins(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(width: 2),
@@ -116,7 +116,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         "Discover workouts from the community",
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -140,11 +140,11 @@ class _ExplorePageState extends State<ExplorePage> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -282,7 +282,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       // Pressable(
@@ -380,7 +380,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       // Pressable(
@@ -688,11 +688,11 @@ class _CreatorCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -738,7 +738,7 @@ class _CreatorCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -746,7 +746,7 @@ class _CreatorCard extends StatelessWidget {
                     username,
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -760,14 +760,14 @@ class _CreatorCard extends StatelessWidget {
                     Icon(
                       Iconsax.weight_1_outline,
                       size: 14,
-                      color: Colors.grey[400],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       "$workouts",
                       style: GoogleFonts.inter(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -779,14 +779,14 @@ class _CreatorCard extends StatelessWidget {
                     Icon(
                       Iconsax.people_outline,
                       size: 14,
-                      color: Colors.grey[400],
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       followers,
                       style: GoogleFonts.inter(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -795,7 +795,7 @@ class _CreatorCard extends StatelessWidget {
               ],
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[300]),
+            Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
           ],
         ),
       ),
@@ -812,19 +812,19 @@ class _TrendingWorkoutSkeleton extends StatelessWidget {
       width: 170,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        highlightColor: Theme.of(context).colorScheme.surfaceContainer,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               height: 100,
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
             ),
@@ -833,15 +833,15 @@ class _TrendingWorkoutSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(width: 100, height: 14, color: Colors.white),
+                  Container(width: 100, height: 14, color: Theme.of(context).cardColor),
                   const SizedBox(height: 8),
-                  Container(width: 60, height: 12, color: Colors.white),
+                  Container(width: 60, height: 12, color: Theme.of(context).cardColor),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Container(width: 40, height: 12, color: Colors.white),
+                      Container(width: 40, height: 12, color: Theme.of(context).cardColor),
                       const SizedBox(width: 12),
-                      Container(width: 40, height: 12, color: Colors.white),
+                      Container(width: 40, height: 12, color: Theme.of(context).cardColor),
                     ],
                   ),
                 ],
@@ -864,26 +864,26 @@ class _CreatorSkeleton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+          baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          highlightColor: Theme.of(context).colorScheme.surfaceContainer,
           child: Row(
             children: [
               Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
@@ -892,18 +892,18 @@ class _CreatorSkeleton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: 120, height: 16, color: Colors.white),
+                    Container(width: 120, height: 16, color: Theme.of(context).cardColor),
                     const SizedBox(height: 6),
-                    Container(width: 80, height: 12, color: Colors.white),
+                    Container(width: 80, height: 12, color: Theme.of(context).cardColor),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(width: 40, height: 12, color: Colors.white),
+                  Container(width: 40, height: 12, color: Theme.of(context).cardColor),
                   const SizedBox(height: 6),
-                  Container(width: 40, height: 12, color: Colors.white),
+                  Container(width: 40, height: 12, color: Theme.of(context).cardColor),
                 ],
               ),
             ],

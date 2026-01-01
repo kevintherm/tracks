@@ -112,12 +112,12 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 ListTile(
                   leading: Icon(Icons.photo_library),
                   title: Text('Choose from Gallery'),
-                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
                 ListTile(
                   leading: Icon(Icons.camera_alt),
                   title: Text('Take a Photo'),
-                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
               ],
             ),
@@ -240,7 +240,10 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           exercise: updatedExercise,
           muscles: muscleActivations,
         );
+
         toast.success(content: const Text("Exercise updated!"));
+        nav.pop(true);
+
       } else {
         final newExercise = Exercise(
           name: name,
@@ -267,9 +270,9 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
           muscles: muscleActivations,
         );
         toast.success(content: const Text("Exercise created!"));
+        nav.pop(true);
       }
 
-      nav.pop(true);
     } catch (e) {
       toast.error(content: Text("Failed to save exercise: $e"));
     }

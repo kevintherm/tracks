@@ -41,7 +41,6 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
     final sessionRepo = context.read<SessionRepository>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: StreamBuilder<List<Session>>(
         stream: sessionRepo.collection
             .where()
@@ -82,14 +81,14 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: Tooltip(
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(Iconsax.arrow_left_2_outline, color: Theme.of(context).iconTheme.color),
         ),
       ),
       actions: [
@@ -97,7 +96,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
           message: "Edit Session",
           child: Pressable(
             onTap: () => _showEditSessionDialog(context),
-            child: Icon(Iconsax.edit_2_outline, color: Colors.grey[700]),
+            child: Icon(Iconsax.edit_2_outline, color: Theme.of(context).iconTheme.color),
           ),
         ),
         const SizedBox(width: 16),
@@ -146,14 +145,14 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           date,
-          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -201,9 +200,9 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -222,7 +221,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -238,9 +237,9 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -251,14 +250,14 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
             label: 'Duration',
             color: Colors.blue,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
           _buildStatItem(
             icon: Iconsax.clock_bold,
             value: DateFormat('HH:mm').format(_session.start),
             label: 'Start',
             color: Colors.green,
           ),
-          Container(width: 1, height: 40, color: Colors.grey[300]),
+          Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
           _buildStatItem(
             icon: Iconsax.clock_bold,
             value: _session.end != null
@@ -294,12 +293,12 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+          style: GoogleFonts.poppins(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -321,7 +320,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
             "No exercises recorded.",
             style: GoogleFonts.poppins(
               fontStyle: FontStyle.italic,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           );
         }
@@ -334,7 +333,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 16),
@@ -403,7 +402,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: SecondaryButton(
@@ -448,7 +447,7 @@ class _ViewSessionPageState extends State<ViewSessionPage> {
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white70,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -792,7 +791,7 @@ class _SessionExerciseCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -801,7 +800,7 @@ class _SessionExerciseCard extends StatelessWidget {
                   icon: Icon(
                     Iconsax.edit_2_outline,
                     size: 20,
-                    color: Colors.grey[500],
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ],
@@ -835,7 +834,7 @@ class _SessionExerciseCard extends StatelessWidget {
                                 '${index + 1}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -845,7 +844,7 @@ class _SessionExerciseCard extends StatelessWidget {
                                 '${set.weight}kg x ${set.reps}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -875,7 +874,7 @@ class _SessionExerciseCard extends StatelessWidget {
                             Icon(
                               Iconsax.edit_2_outline,
                               size: 16,
-                              color: Colors.grey[400],
+                              color: Theme.of(context).iconTheme.color,
                             ),
                           ],
                         ),

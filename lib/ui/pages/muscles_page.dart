@@ -114,8 +114,8 @@ class _MusclesPageState extends State<MusclesPage> {
                       return Center(
                         child: Text(
                           'Something went wrong: ${snapshot.error}',
-                          style: const TextStyle(
-                            color: Colors.redAccent,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
                             fontStyle: FontStyle.italic,
                           ),
                           textAlign: TextAlign.center,
@@ -143,7 +143,7 @@ class _MusclesPageState extends State<MusclesPage> {
                         child: Text(
                           "No muscles available.",
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -155,7 +155,7 @@ class _MusclesPageState extends State<MusclesPage> {
                         child: Text(
                           "No matching muscles found.",
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -190,7 +190,7 @@ class _AppBar extends StatelessWidget {
               onTap: () => Navigator.of(context).pop(),
               child: Icon(
                 Iconsax.arrow_left_2_outline,
-                color: Colors.grey[700],
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -259,7 +259,7 @@ class _SearchBar extends StatelessWidget {
               ),
               prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).cardColor,
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,
@@ -292,7 +292,7 @@ class _SearchBar extends StatelessWidget {
                       maxLines: 1,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -306,7 +306,7 @@ class _SearchBar extends StatelessWidget {
                       'Clear',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -404,13 +404,14 @@ class _MuscleCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios,
+                size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ],
         ),
       ),

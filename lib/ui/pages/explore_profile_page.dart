@@ -119,7 +119,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: FutureBuilder<User?>(
           future: _userFuture,
@@ -147,14 +147,14 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                   return [
                     // Sticky Header requires SliverAppBar
                     SliverAppBar(
-                      backgroundColor: Colors.grey[50],
-                      surfaceTintColor: Colors.grey[50],
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
                       elevation: 0,
                       leading: Pressable(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(
+                        child: Icon(
                           Iconsax.arrow_left_2_outline,
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       title: Text(
@@ -169,9 +169,9 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                           onTap: () {},
                           child: Padding(
                             padding: const EdgeInsets.only(right: 16),
-                            child: const Icon(
+                            child: Icon(
                               Iconsax.more_circle_outline,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -192,14 +192,14 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             Text(
                               "@${_user!.username}",
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -208,7 +208,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: Colors.grey[800],
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 height: 1.5,
                               ),
                             ),
@@ -242,7 +242,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                                         style: GoogleFonts.inter(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                          color: Theme.of(context).colorScheme.onPrimary,
                                         ),
                                       ),
                                     ),
@@ -256,10 +256,10 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                                     height: 48,
                                     width: 48,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: Theme.of(context).cardColor,
                                       borderRadius: BorderRadius.circular(16),
                                       border:
-                                          Border.all(color: Colors.grey[200]!),
+                                          Border.all(color: Theme.of(context).dividerColor),
                                     ),
                                     alignment: Alignment.center,
                                     child: const Icon(Iconsax.message_outline,
@@ -280,7 +280,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                         minHeight: 60,
                         maxHeight: 60,
                         child: Container(
-                          color: Colors.grey[50],
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
@@ -291,7 +291,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                               _buildTabButton(2, "Schedule"),
                               const Spacer(),
                               Icon(Iconsax.filter_outline,
-                                  size: 20, color: Colors.grey[600]),
+                                  size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ],
                           ),
                         ),
@@ -334,7 +334,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
           return Center(
             child: Text(
               "No items found",
-              style: GoogleFonts.inter(color: Colors.grey),
+              style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           );
         }
@@ -362,20 +362,20 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Iconsax.user_remove_outline, size: 64, color: Colors.grey[400]),
+          Icon(Iconsax.user_remove_outline, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(
             'User not found',
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'This user may have been deleted or does not exist',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500]),
+            style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -393,7 +393,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                   Icon(
                     Iconsax.arrow_left_2_outline,
                     size: 18,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -401,7 +401,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -435,15 +435,17 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
               children: [
                 const SizedBox(height: 20),
                 // Avatar Shimmer
-                Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
+                Builder(
+                  builder: (context) => Shimmer.fromColors(
+                    baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    highlightColor: Theme.of(context).colorScheme.surface,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
                 ),
@@ -508,15 +510,17 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
 
   Widget _shimmerBox(
       {double width = 0, double height = 0, double radius = 0}) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        width: width == 0 ? null : width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(radius),
+    return Builder(
+      builder: (context) => Shimmer.fromColors(
+        baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        highlightColor: Theme.of(context).colorScheme.surface,
+        child: Container(
+          width: width == 0 ? null : width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(radius),
+          ),
         ),
       ),
     );
@@ -526,14 +530,16 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
     return List.generate(count, (index) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Container(
-            height: 240,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+        child: Builder(
+          builder: (context) => Shimmer.fromColors(
+            baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            highlightColor: Theme.of(context).colorScheme.surface,
+            child: Container(
+              height: 240,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
         ),
@@ -559,7 +565,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color: isSelected ? Colors.black87 : Colors.grey[500],
+              color: isSelected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 4),
@@ -605,11 +611,11 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -621,7 +627,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ClipRRect(
@@ -631,22 +637,22 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                         imageUrl: exercise.thumbnail!,
                         fit: BoxFit.cover,
                         placeholder: (context, url) =>
-                            Container(color: Colors.grey[200]),
+                            Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                         errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[200],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           child: Icon(
                             Iconsax.diagram_outline,
                             size: 28,
-                            color: Colors.grey[400],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       )
                     : Container(
-                        color: Colors.grey[200],
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         child: Icon(
                           Iconsax.diagram_outline,
                           size: 28,
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
               ),
@@ -661,7 +667,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -669,13 +675,13 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     "${exercise.caloriesBurned} cal",
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ],
         ),
       ),
@@ -695,11 +701,11 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -733,7 +739,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                   "${schedule.plannedDuration} min",
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -744,7 +750,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -755,7 +761,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.4,
                 ),
               ),
@@ -773,12 +779,12 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+          style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -795,11 +801,11 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -812,7 +818,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             Container(
               height: 160,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
@@ -830,13 +836,13 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                           imageUrl: workout.thumbnail!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) =>
-                              Container(color: Colors.grey[200]),
+                              Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                           errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             child: Icon(
                               Iconsax.weight_1_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -846,13 +852,13 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
                           Iconsax.weight_1_outline,
                           size: 48,
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -902,7 +908,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -919,28 +925,28 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                       Icon(
                         Iconsax.heart_outline,
                         size: 18,
-                        color: Colors.grey[500],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         "324",
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Icon(
                         Iconsax.play_circle_outline,
                         size: 18,
-                        color: Colors.grey[500],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         "1.2k plays",
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -958,14 +964,14 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
         style: GoogleFonts.inter(
           fontSize: 11,
-          color: Colors.grey[700],
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -977,14 +983,14 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Iconsax.danger_outline, size: 64, color: Colors.red[400]),
+          Icon(Iconsax.danger_outline, size: 64, color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 16),
           Text(
             'Something went wrong',
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -992,7 +998,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               snapshot.error.toString(),
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500]),
+              style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ),
@@ -1010,7 +1016,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),
@@ -1028,11 +1034,11 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.grey[300],
-        border: Border.all(color: Colors.white, width: 4),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        border: Border.all(color: Theme.of(context).cardColor, width: 4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1044,7 +1050,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
             : Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.grey, Colors.grey.withValues(alpha: 0.7)],
+                    colors: [Theme.of(context).colorScheme.surfaceContainerHighest, Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -1056,7 +1062,7 @@ class _ExploreProfilePageState extends State<ExploreProfilePage> {
                     style: GoogleFonts.poppins(
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

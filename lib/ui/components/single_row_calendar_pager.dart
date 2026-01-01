@@ -131,7 +131,7 @@ class _SingleRowCalendarPagerState extends State<SingleRowCalendarPager> {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.grey.withValues(alpha: 0.15),
+                          color: Theme.of(context).dividerColor,
                         ),
                         color: isSelected
                             ? Theme.of(
@@ -149,7 +149,7 @@ class _SingleRowCalendarPagerState extends State<SingleRowCalendarPager> {
                               fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey[700],
+                                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -162,7 +162,7 @@ class _SingleRowCalendarPagerState extends State<SingleRowCalendarPager> {
                               color: isToday
                                   ? Theme.of(
                                       context,
-                                    ).colorScheme.secondary.withOpacity(0.16)
+                                    ).colorScheme.secondary.withValues(alpha: 0.16)
                                   : null,
                             ),
                             child: Text(
@@ -172,7 +172,7 @@ class _SingleRowCalendarPagerState extends State<SingleRowCalendarPager> {
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.primary
-                                    : Colors.black87,
+                                    : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),

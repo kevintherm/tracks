@@ -120,26 +120,26 @@ class _ManageSchedulePageState extends State<ManageSchedulePage> {
 
             _SearchBar(controller: searchController),
 
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  BaseButton(
-                    onTap: () {},
-                    child: Row(
-                      children: [
-                        Text("Filter"),
-                        const SizedBox(width: 8),
-                        Icon(Iconsax.filter_outline, size: 20),
-                      ],
-                    ),
-                  ),
-                  if (activeFilters.isNotEmpty)
-                    BaseButton(onTap: () {}, child: Text("Clear")),
-                ],
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       BaseButton(
+            //         onTap: () {},
+            //         child: Row(
+            //           children: [
+            //             Text("Filter"),
+            //             const SizedBox(width: 8),
+            //             Icon(Iconsax.filter_outline, size: 20),
+            //           ],
+            //         ),
+            //       ),
+            //       if (activeFilters.isNotEmpty)
+            //         BaseButton(onTap: () {}, child: Text("Clear")),
+            //     ],
+            //   ),
+            // ),
 
             Expanded(
               child: Padding(
@@ -284,7 +284,7 @@ class _SearchBar extends StatelessWidget {
               ),
               prefixIcon: const Icon(Iconsax.search_normal_1_outline, size: 20),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).cardColor,
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,
@@ -317,7 +317,7 @@ class _SearchBar extends StatelessWidget {
                       maxLines: 1,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -331,7 +331,7 @@ class _SearchBar extends StatelessWidget {
                       'Clear',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),

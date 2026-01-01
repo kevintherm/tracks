@@ -63,7 +63,6 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
           body: CustomScrollView(
             slivers: [
               _buildAppBar(context),
@@ -152,7 +151,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       title: widget.asModal
@@ -168,7 +167,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
         message: "Back",
         child: Pressable(
           onTap: () => Navigator.pop(context),
-          child: Icon(Iconsax.arrow_left_2_outline, color: Colors.grey[700]),
+          child: Icon(Iconsax.arrow_left_2_outline, color: Theme.of(context).iconTheme.color),
         ),
       ),
       actions: widget.asModal
@@ -187,7 +186,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                   },
                   child: Icon(
                     MingCute.external_link_line,
-                    color: Colors.grey[700],
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ),
@@ -235,7 +234,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
                       ),
                     );
                   },
-                  child: Icon(Iconsax.menu_outline, color: Colors.grey[700]),
+                  child: Icon(Iconsax.menu_outline, color: Theme.of(context).iconTheme.color),
                 ),
               ),
             ],
@@ -278,7 +277,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           style: GoogleFonts.poppins(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.2,
           ),
         ),
@@ -295,7 +294,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
@@ -304,7 +303,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
             _muscle.description!,
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.6,
             ),
           )
@@ -313,7 +312,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
             'No Description',
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.6,
               fontStyle: FontStyle.italic,
             ),
@@ -347,7 +346,7 @@ class _ViewMusclePageState extends State<ViewMusclePage> {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             ListView.separated(
@@ -407,9 +406,9 @@ class _ExerciseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -436,7 +435,7 @@ class _ExerciseCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -467,7 +466,7 @@ class _ExerciseCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).iconTheme.color),
             const SizedBox(width: 8),
           ],
         ),

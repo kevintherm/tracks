@@ -78,7 +78,7 @@ class Schedule {
             copies: copies ?? this.copies,
           )
           ..id = id
-          ..pocketbaseId = pocketbaseId ?? this.pocketbaseId
+          ..pocketbaseId = pocketbaseId ?? pocketbaseId
           ..dailyWeekday = weeklyDays ?? dailyWeekday
           ..selectedDates = selectedDates ?? this.selectedDates
           ..createdAt = createdAt

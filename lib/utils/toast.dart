@@ -29,7 +29,7 @@ class Toast {
       SnackBar(
         duration: duration,
         content: content,
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).colorScheme.error,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(8.0),

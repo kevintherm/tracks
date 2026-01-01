@@ -12,7 +12,7 @@ class AiRecommendation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16.00),
       ),
       child: Padding(
@@ -25,8 +25,8 @@ class AiRecommendation extends StatelessWidget {
                 SvgPicture.asset(
                   'assets/icons/ai-weight.svg',
                   width: 20,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.black87,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onSurface,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -43,7 +43,7 @@ class AiRecommendation extends StatelessWidget {
             ),
             PrimaryButton(
               onTap: onUse,
-              child: Text("Use", style: GoogleFonts.inter(color: Colors.white)),
+              child: Text("Use", style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onPrimary)),
             ),
           ],
         ),

@@ -26,7 +26,7 @@ class ExerciseListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor,
       ),
       child: CheckboxListTile(
         value: isSelected,
@@ -61,7 +61,7 @@ class ExerciseListItem extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
