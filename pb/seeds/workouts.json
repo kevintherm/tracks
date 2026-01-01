@@ -48,13 +48,6 @@
         "muscles": ["Back"],
         "sets": 4,
         "reps": 8
-      },
-      {
-        "name": "Push Up",
-        "caloriesBurned": 0.5,
-        "muscles": ["Chest"],
-        "sets": 3,
-        "reps": 15
       }
     ]
   }

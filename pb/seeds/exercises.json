@@ -1,0 +1,683 @@
+[
+  {
+    "name": "Push Up",
+    "description": "A calisthenics exercise pushing the body up from the floor, primarily targeting the chest, shoulders, and triceps.",
+    "caloriesBurned": 1.2,
+    "muscles": [
+      { "id": 11, "activation": 100 },
+      { "id": 10, "activation": 80 },
+      { "id": 7, "activation": 90 },
+      { "id": 8, "activation": 90 },
+      { "id": 9, "activation": 90 },
+      { "id": 4, "activation": 70 },
+      { "id": 54, "activation": 60 },
+      { "id": 32, "activation": 30 },
+      { "id": 33, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Barbell Squat",
+    "description": "A compound movement involving squatting down with a barbell on the upper back, targeting the quadriceps, glutes, and hamstrings.",
+    "caloriesBurned": 2.5,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 },
+      { "id": 27, "activation": 100 },
+      { "id": 24, "activation": 50 },
+      { "id": 25, "activation": 50 },
+      { "id": 26, "activation": 50 },
+      { "id": 39, "activation": 40 },
+      { "id": 18, "activation": 50 },
+      { "id": 32, "activation": 40 },
+      { "id": 33, "activation": 40 },
+      { "id": 28, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Pull Up",
+    "description": "An upper-body exercise involving pulling the body up using an overhand grip, primarily targeting the latissimus dorsi and biceps.",
+    "caloriesBurned": 1.8,
+    "muscles": [
+      { "id": 13, "activation": 100 },
+      { "id": 1, "activation": 70 },
+      { "id": 2, "activation": 70 },
+      { "id": 3, "activation": 60 },
+      { "id": 36, "activation": 80 },
+      { "id": 15, "activation": 60 },
+      { "id": 16, "activation": 60 },
+      { "id": 17, "activation": 60 },
+      { "id": 19, "activation": 70 },
+      { "id": 6, "activation": 40 },
+      { "id": 34, "activation": 50 },
+      { "id": 32, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Barbell Bench Press",
+    "description": "An upper-body exercise pressing a barbell upward while lying on a bench, targeting the pectorals, anterior deltoids, and triceps.",
+    "caloriesBurned": 1.6,
+    "muscles": [
+      { "id": 11, "activation": 100 },
+      { "id": 10, "activation": 70 },
+      { "id": 4, "activation": 80 },
+      { "id": 7, "activation": 90 },
+      { "id": 8, "activation": 90 },
+      { "id": 9, "activation": 90 },
+      { "id": 54, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Conventional Deadlift",
+    "description": "A compound lift involving lifting a barbell from the ground to a standing position, targeting the posterior chain (glutes, hamstrings, back).",
+    "caloriesBurned": 3.0,
+    "muscles": [
+      { "id": 27, "activation": 100 },
+      { "id": 24, "activation": 100 },
+      { "id": 25, "activation": 100 },
+      { "id": 26, "activation": 100 },
+      { "id": 18, "activation": 100 },
+      { "id": 14, "activation": 80 },
+      { "id": 15, "activation": 80 },
+      { "id": 13, "activation": 60 },
+      { "id": 34, "activation": 90 },
+      { "id": 33, "activation": 70 },
+      { "id": 32, "activation": 60 },
+      { "id": 20, "activation": 40 },
+      { "id": 21, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Overhead Press",
+    "description": "A shoulder exercise pressing a weight overhead, primarily targeting the deltoids and triceps.",
+    "caloriesBurned": 1.4,
+    "muscles": [
+      { "id": 4, "activation": 100 },
+      { "id": 5, "activation": 80 },
+      { "id": 7, "activation": 90 },
+      { "id": 8, "activation": 90 },
+      { "id": 9, "activation": 90 },
+      { "id": 10, "activation": 50 },
+      { "id": 14, "activation": 60 },
+      { "id": 54, "activation": 50 },
+      { "id": 32, "activation": 50 },
+      { "id": 33, "activation": 50 },
+      { "id": 37, "activation": 40 },
+      { "id": 38, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Bent-Over Row",
+    "description": "A back exercise pulling a weight towards the torso while hinged at the hips, targeting the lats, rhomboids, and traps.",
+    "caloriesBurned": 1.7,
+    "muscles": [
+      { "id": 13, "activation": 100 },
+      { "id": 15, "activation": 90 },
+      { "id": 17, "activation": 90 },
+      { "id": 6, "activation": 70 },
+      { "id": 19, "activation": 70 },
+      { "id": 18, "activation": 60 },
+      { "id": 1, "activation": 50 },
+      { "id": 2, "activation": 50 },
+      { "id": 3, "activation": 50 },
+      { "id": 34, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Dumbbell Lunge",
+    "description": "A unilateral leg exercise stepping forward and lowering the hips, targeting the quads and glutes.",
+    "caloriesBurned": 1.5,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 },
+      { "id": 27, "activation": 90 },
+      { "id": 28, "activation": 60 },
+      { "id": 29, "activation": 60 },
+      { "id": 24, "activation": 50 },
+      { "id": 25, "activation": 50 },
+      { "id": 26, "activation": 50 },
+      { "id": 39, "activation": 40 },
+      { "id": 32, "activation": 40 },
+      { "id": 33, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Dumbbell Bicep Curl",
+    "description": "An isolation exercise bending the elbow to lift a weight, targeting the biceps brachii and brachialis.",
+    "caloriesBurned": 0.5,
+    "muscles": [
+      { "id": 1, "activation": 100 },
+      { "id": 2, "activation": 100 },
+      { "id": 3, "activation": 90 },
+      { "id": 36, "activation": 70 },
+      { "id": 34, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Tricep Pushdown",
+    "description": "An isolation exercise straightening the elbow against resistance, targeting the triceps.",
+    "caloriesBurned": 0.4,
+    "muscles": [
+      { "id": 7, "activation": 90 },
+      { "id": 8, "activation": 100 },
+      { "id": 9, "activation": 100 }
+    ]
+  },
+  {
+    "name": "Plank",
+    "description": "An isometric core exercise holding a rigid, straight line from head to heels, targeting the entire abdominal wall.",
+    "caloriesBurned": 0.3,
+    "muscles": [
+      { "id": 32, "activation": 100 },
+      { "id": 33, "activation": 100 },
+      { "id": 37, "activation": 80 },
+      { "id": 38, "activation": 80 },
+      { "id": 18, "activation": 50 },
+      { "id": 27, "activation": 40 },
+      { "id": 4, "activation": 30 },
+      { "id": 20, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Leg Press",
+    "description": "A machine-based exercise pushing a weight away with the legs, targeting the quadriceps, glutes, and hamstrings.",
+    "caloriesBurned": 2.0,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 },
+      { "id": 27, "activation": 80 },
+      { "id": 24, "activation": 40 },
+      { "id": 25, "activation": 40 },
+      { "id": 26, "activation": 40 },
+      { "id": 39, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Lateral Raise",
+    "description": "An isolation exercise lifting weights out to the sides, targeting the lateral deltoids.",
+    "caloriesBurned": 0.3,
+    "muscles": [
+      { "id": 5, "activation": 100 },
+      { "id": 4, "activation": 30 },
+      { "id": 6, "activation": 20 },
+      { "id": 14, "activation": 30 },
+      { "id": 47, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Standing Calf Raise",
+    "description": "An exercise rising up onto the toes to work the calf muscles, primarily the gastrocnemius.",
+    "caloriesBurned": 0.4,
+    "muscles": [
+      { "id": 30, "activation": 100 },
+      { "id": 31, "activation": 70 }
+    ]
+  },
+  {
+    "name": "Romanian Deadlift",
+    "description": "A hinge movement targeting the posterior chain, emphasizing the hamstrings and glutes with a stiff-legged motion.",
+    "caloriesBurned": 2.2,
+    "muscles": [
+      { "id": 24, "activation": 100 },
+      { "id": 25, "activation": 100 },
+      { "id": 26, "activation": 100 },
+      { "id": 27, "activation": 90 },
+      { "id": 18, "activation": 80 },
+      { "id": 34, "activation": 60 },
+      { "id": 33, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Lat Pulldown",
+    "description": "A machine exercise involving pulling a wide bar down, simulating a pull-up to target the latissimus dorsi.",
+    "caloriesBurned": 1.3,
+    "muscles": [
+      { "id": 13, "activation": 100 },
+      { "id": 15, "activation": 50 },
+      { "id": 17, "activation": 50 },
+      { "id": 19, "activation": 60 },
+      { "id": 1, "activation": 40 },
+      { "id": 2, "activation": 40 },
+      { "id": 36, "activation": 40 },
+      { "id": 6, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Seated Cable Row",
+    "description": "A horizontal pulling exercise using a cable machine, targeting the mid-back muscles like rhomboids, traps, and lats.",
+    "caloriesBurned": 1.2,
+    "muscles": [
+      { "id": 13, "activation": 90 },
+      { "id": 15, "activation": 100 },
+      { "id": 17, "activation": 100 },
+      { "id": 6, "activation": 60 },
+      { "id": 1, "activation": 50 },
+      { "id": 2, "activation": 50 },
+      { "id": 36, "activation": 50 },
+      { "id": 18, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Dips",
+    "description": "An upper-body calisthenics exercise lowering the body between parallel bars, targeting the triceps and chest.",
+    "caloriesBurned": 1.5,
+    "muscles": [
+      { "id": 7, "activation": 100 },
+      { "id": 8, "activation": 100 },
+      { "id": 9, "activation": 100 },
+      { "id": 11, "activation": 80 },
+      { "id": 4, "activation": 70 },
+      { "id": 54, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Leg Extension",
+    "description": "An isolation machine exercise straightening the knee against resistance, targeting the quadriceps.",
+    "caloriesBurned": 0.8,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 }
+    ]
+  },
+  {
+    "name": "Leg Curl",
+    "description": "An isolation machine exercise bending the knee against resistance, targeting the hamstrings.",
+    "caloriesBurned": 0.7,
+    "muscles": [
+      { "id": 24, "activation": 100 },
+      { "id": 25, "activation": 100 },
+      { "id": 26, "activation": 100 },
+      { "id": 30, "activation": 20 }
+    ]
+  },
+  {
+    "name": "Incline Barbell Press",
+    "description": "A bench press variation on an incline, emphasizing the upper (clavicular) head of the pectorals.",
+    "caloriesBurned": 1.5,
+    "muscles": [
+      { "id": 10, "activation": 100 },
+      { "id": 11, "activation": 70 },
+      { "id": 4, "activation": 90 },
+      { "id": 7, "activation": 80 },
+      { "id": 8, "activation": 80 },
+      { "id": 9, "activation": 80 }
+    ]
+  },
+  {
+    "name": "Chin Up",
+    "description": "An upper-body exercise pulling the body up using a supinated (underhand) grip, emphasizing the biceps and lats.",
+    "caloriesBurned": 1.7,
+    "muscles": [
+      { "id": 1, "activation": 100 },
+      { "id": 2, "activation": 100 },
+      { "id": 3, "activation": 90 },
+      { "id": 36, "activation": 90 },
+      { "id": 13, "activation": 90 },
+      { "id": 15, "activation": 50 },
+      { "id": 17, "activation": 50 },
+      { "id": 34, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Cable Crossover",
+    "description": "A chest isolation exercise bringing cable handles together, targeting the sternal (mid/lower) head of the pectorals.",
+    "caloriesBurned": 0.9,
+    "muscles": [
+      { "id": 11, "activation": 100 },
+      { "id": 10, "activation": 60 },
+      { "id": 4, "activation": 50 },
+      { "id": 54, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Dumbbell Flye",
+    "description": "A chest isolation exercise opening and closing the arms with dumbbells, emphasizing chest adduction.",
+    "caloriesBurned": 0.8,
+    "muscles": [
+      { "id": 11, "activation": 100 },
+      { "id": 10, "activation": 70 },
+      { "id": 4, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Hip Thrust",
+    "description": "A glute exercise involving thrusting the hips up against resistance, primarily targeting the gluteus maximus.",
+    "caloriesBurned": 2.0,
+    "muscles": [
+      { "id": 27, "activation": 100 },
+      { "id": 24, "activation": 60 },
+      { "id": 25, "activation": 60 },
+      { "id": 26, "activation": 60 },
+      { "id": 39, "activation": 40 },
+      { "id": 18, "activation": 30 },
+      { "id": 20, "activation": 20 }
+    ]
+  },
+  {
+    "name": "Front Squat",
+    "description": "A squat variation with the barbell held on the front of the shoulders, emphasizing the quadriceps and upper back.",
+    "caloriesBurned": 2.4,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 },
+      { "id": 27, "activation": 80 },
+      { "id": 18, "activation": 70 },
+      { "id": 14, "activation": 60 },
+      { "id": 15, "activation": 60 },
+      { "id": 32, "activation": 60 },
+      { "id": 33, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Seated Dumbbell Press",
+    "description": "A seated shoulder press with dumbbells, targeting all three heads of the deltoid, especially the anterior.",
+    "caloriesBurned": 1.3,
+    "muscles": [
+      { "id": 4, "activation": 100 },
+      { "id": 5, "activation": 80 },
+      { "id": 7, "activation": 90 },
+      { "id": 8, "activation": 90 },
+      { "id": 9, "activation": 90 },
+      { "id": 14, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Barbell Shrug",
+    "description": "An isolation exercise lifting the shoulders (elevation) with a barbell, targeting the upper trapezius.",
+    "caloriesBurned": 0.6,
+    "muscles": [
+      { "id": 14, "activation": 100 },
+      { "id": 52, "activation": 70 },
+      { "id": 15, "activation": 40 },
+      { "id": 34, "activation": 30 }
+    ]
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "description": "A core exercise lifting the legs while hanging from a bar, targeting the lower rectus abdominis and hip flexors.",
+    "caloriesBurned": 1.1,
+    "muscles": [
+      { "id": 32, "activation": 100 },
+      { "id": 45, "activation": 90 },
+      { "id": 37, "activation": 60 },
+      { "id": 38, "activation": 60 },
+      { "id": 34, "activation": 50 },
+      { "id": 20, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Crunch",
+    "description": "A classic abdominal exercise involving flexing the spine, targeting the rectus abdominis.",
+    "caloriesBurned": 0.4,
+    "muscles": [
+      { "id": 32, "activation": 100 },
+      { "id": 37, "activation": 50 },
+      { "id": 38, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Kettlebell Swing",
+    "description": "An explosive hip-hinge movement, targeting the glutes, hamstrings, and erector spinae.",
+    "caloriesBurned": 3.5,
+    "muscles": [
+      { "id": 27, "activation": 100 },
+      { "id": 24, "activation": 90 },
+      { "id": 25, "activation": 90 },
+      { "id": 26, "activation": 90 },
+      { "id": 18, "activation": 80 },
+      { "id": 33, "activation": 70 },
+      { "id": 4, "activation": 50 },
+      { "id": 34, "activation": 60 },
+      { "id": 13, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Russian Twist",
+    "description": "A core exercise involving twisting the torso side-to-side, targeting the obliques.",
+    "caloriesBurned": 0.7,
+    "muscles": [
+      { "id": 37, "activation": 100 },
+      { "id": 38, "activation": 100 },
+      { "id": 32, "activation": 70 },
+      { "id": 33, "activation": 60 },
+      { "id": 45, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Mountain Climbers",
+    "description": "A dynamic, full-body exercise that mimics running in a plank position, targeting the core, shoulders, and quads.",
+    "caloriesBurned": 2.0,
+    "muscles": [
+      { "id": 32, "activation": 90 },
+      { "id": 33, "activation": 90 },
+      { "id": 45, "activation": 80 },
+      { "id": 4, "activation": 70 },
+      { "id": 20, "activation": 70 },
+      { "id": 7, "activation": 50 },
+      { "id": 8, "activation": 50 },
+      { "id": 9, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Burpee",
+    "description": "A full-body calisthenic movement combining a squat, push-up, and jump.",
+    "caloriesBurned": 4.0,
+    "muscles": [
+      { "id": 20, "activation": 100 },
+      { "id": 27, "activation": 100 },
+      { "id": 11, "activation": 90 },
+      { "id": 7, "activation": 90 },
+      { "id": 4, "activation": 90 },
+      { "id": 32, "activation": 80 },
+      { "id": 30, "activation": 70 },
+      { "id": 24, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Close-Grip Bench Press",
+    "description": "A bench press variation with a narrow grip, placing more emphasis on the triceps.",
+    "caloriesBurned": 1.4,
+    "muscles": [
+      { "id": 7, "activation": 100 },
+      { "id": 8, "activation": 100 },
+      { "id": 9, "activation": 100 },
+      { "id": 11, "activation": 70 },
+      { "id": 4, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Skullcrusher (Lying Tricep Extension)",
+    "description": "An isolation exercise lying down and extending the elbows, targeting the long head of the triceps.",
+    "caloriesBurned": 0.6,
+    "muscles": [
+      { "id": 7, "activation": 100 },
+      { "id": 8, "activation": 90 },
+      { "id": 9, "activation": 90 }
+    ]
+  },
+  {
+    "name": "Preacher Curl",
+    "description": "An isolation curl with the upper arm supported, focusing on the brachialis and biceps short head.",
+    "caloriesBurned": 0.4,
+    "muscles": [
+      { "id": 3, "activation": 100 },
+      { "id": 1, "activation": 90 },
+      { "id": 2, "activation": 70 },
+      { "id": 36, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Dumbbell Front Raise",
+    "description": "An isolation exercise lifting dumbbells straight forward, targeting the anterior deltoid.",
+    "caloriesBurned": 0.3,
+    "muscles": [
+      { "id": 4, "activation": 100 },
+      { "id": 5, "activation": 30 },
+      { "id": 10, "activation": 30 },
+      { "id": 14, "activation": 20 }
+    ]
+  },
+  {
+    "name": "Face Pull",
+    "description": "A cable exercise pulling a rope towards the face, targeting the posterior deltoids and upper back.",
+    "caloriesBurned": 0.7,
+    "muscles": [
+      { "id": 6, "activation": 100 },
+      { "id": 15, "activation": 80 },
+      { "id": 17, "activation": 80 },
+      { "id": 48, "activation": 70 },
+      { "id": 49, "activation": 70 }
+    ]
+  },
+  {
+    "name": "Dumbbell Pullover",
+    "description": "An exercise lying on a bench and moving a dumbbell in an arc over the head, stretching the lats and serratus.",
+    "caloriesBurned": 1.0,
+    "muscles": [
+      { "id": 13, "activation": 100 },
+      { "id": 54, "activation": 90 },
+      { "id": 11, "activation": 70 },
+      { "id": 7, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Seated Calf Raise",
+    "description": "A calf exercise with bent knees, isolating the soleus muscle.",
+    "caloriesBurned": 0.3,
+    "muscles": [
+      { "id": 31, "activation": 100 }
+    ]
+  },
+  {
+    "name": "Side Lunge",
+    "description": "A lunge variation stepping to the side, targeting the adductors (inner thigh) and gluteus medius.",
+    "caloriesBurned": 1.4,
+    "muscles": [
+      { "id": 39, "activation": 100 },
+      { "id": 40, "activation": 100 },
+      { "id": 41, "activation": 100 },
+      { "id": 43, "activation": 100 },
+      { "id": 28, "activation": 90 },
+      { "id": 27, "activation": 70 },
+      { "id": 20, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Decline Bench Press",
+    "description": "A bench press variation on a decline, emphasizing the lower (sternal) head of the pectorals.",
+    "caloriesBurned": 1.5,
+    "muscles": [
+      { "id": 11, "activation": 100 },
+      { "id": 10, "activation": 50 },
+      { "id": 7, "activation": 80 },
+      { "id": 8, "activation": 80 },
+      { "id": 9, "activation": 80 },
+      { "id": 4, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Renegade Row",
+    "description": "A plank variation involving rowing a dumbbell one arm at a time, challenging core stability and the back.",
+    "caloriesBurned": 1.8,
+    "muscles": [
+      { "id": 33, "activation": 100 },
+      { "id": 37, "activation": 100 },
+      { "id": 38, "activation": 100 },
+      { "id": 13, "activation": 80 },
+      { "id": 15, "activation": 70 },
+      { "id": 17, "activation": 70 },
+      { "id": 4, "activation": 60 },
+      { "id": 7, "activation": 60 }
+    ]
+  },
+  {
+    "name": "Box Jump",
+    "description": "A plyometric exercise involving jumping onto an elevated platform, building explosive power.",
+    "caloriesBurned": 2.5,
+    "muscles": [
+      { "id": 27, "activation": 100 },
+      { "id": 20, "activation": 100 },
+      { "id": 21, "activation": 100 },
+      { "id": 22, "activation": 100 },
+      { "id": 23, "activation": 100 },
+      { "id": 24, "activation": 80 },
+      { "id": 25, "activation": 80 },
+      { "id": 26, "activation": 80 },
+      { "id": 30, "activation": 90 },
+      { "id": 31, "activation": 90 }
+    ]
+  },
+  {
+    "name": "Barbell Curl",
+    "description": "A classic biceps isolation exercise using a barbell and an underhand grip.",
+    "caloriesBurned": 0.6,
+    "muscles": [
+      { "id": 1, "activation": 100 },
+      { "id": 2, "activation": 100 },
+      { "id": 3, "activation": 90 },
+      { "id": 36, "activation": 70 },
+      { "id": 34, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Good Morning",
+    "description": "A hip-hinge exercise with a barbell on the back, targeting the erector spinae and hamstrings.",
+    "caloriesBurned": 1.6,
+    "muscles": [
+      { "id": 18, "activation": 100 },
+      { "id": 24, "activation": 90 },
+      { "id": 25, "activation": 90 },
+      { "id": 26, "activation": 90 },
+      { "id": 27, "activation": 80 },
+      { "id": 33, "activation": 50 }
+    ]
+  },
+  {
+    "name": "Straight Arm Pulldown",
+    "description": "A cable isolation exercise for the lats, keeping the arms straight throughout the movement.",
+    "caloriesBurned": 0.8,
+    "muscles": [
+      { "id": 13, "activation": 100 },
+      { "id": 19, "activation": 70 },
+      { "id": 54, "activation": 60 },
+      { "id": 7, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Wrist Curl",
+    "description": "An isolation exercise flexing the wrist against resistance, targeting the forearm flexors.",
+    "caloriesBurned": 0.2,
+    "muscles": [
+      { "id": 34, "activation": 100 }
+    ]
+  },
+  {
+    "name": "Reverse Wrist Curl",
+    "description": "An isolation exercise extending the wrist against resistance, targeting the forearm extensors.",
+    "caloriesBurned": 0.2,
+    "muscles": [
+      { "id": 35, "activation": 100 },
+      { "id": 36, "activation": 40 }
+    ]
+  },
+  {
+    "name": "Hammer Curl",
+    "description": "A biceps curl variation with a neutral grip, emphasizing the brachialis and brachioradialis.",
+    "caloriesBurned": 0.5,
+    "muscles": [
+      { "id": 36, "activation": 100 },
+      { "id": 3, "activation": 90 },
+      { "id": 1, "activation": 70 },
+      { "id": 2, "activation": 70 }
+    ]
+  }
+]

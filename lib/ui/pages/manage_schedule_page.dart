@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:tracks/models/schedule.dart';
 import 'package:tracks/repositories/schedule_repository.dart';
 import 'package:tracks/ui/components/app_container.dart';
-import 'package:tracks/ui/components/buttons/base_button.dart';
 import 'package:tracks/ui/components/buttons/pressable.dart';
 import 'package:tracks/ui/components/filter.dart';
 import 'package:tracks/ui/pages/assign_schedule_page.dart';

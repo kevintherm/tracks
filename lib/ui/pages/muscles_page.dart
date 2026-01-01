@@ -204,7 +204,7 @@ class _AppBar extends StatelessWidget {
     );
   }
 
-  _buildActionButtons(BuildContext context) {
+  Row _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Tooltip(
